@@ -1,0 +1,260 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/oyun.gd" id="1_s2ab4"]
+[ext_resource type="PackedScene" path="res://scenes/oyuncu.tscn" id="2_226e3"]
+[ext_resource type="Script" path="res://scripts/oyuncu.gd" id="3_ba2j8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ju7jk"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.24705882, 0.24705882, 0.45490196, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.79607844, 0.85882354, 0.9882353, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6boux"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.24705882, 0.24705882, 0.45490196, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.79607844, 0.85882354, 0.9882353, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="Oyun" type="Node2D" unique_id=538426816]
+process_mode = 3
+script = ExtResource("1_s2ab4")
+
+[node name="Arkaplan" type="CanvasLayer" parent="." unique_id=887305990]
+layer = -10
+
+[node name="Gok" type="ColorRect" parent="Arkaplan" unique_id=859573519]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+
+[node name="Ufuk" type="ColorRect" parent="Arkaplan" unique_id=650315394]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -170.0
+mouse_filter = 2
+color = Color(0.24705882, 0.24705882, 0.45490196, 1)
+
+[node name="Dunya" type="Node2D" parent="." unique_id=927920709]
+process_mode = 1
+
+[node name="Oyuncu" type="CharacterBody2D" parent="." unique_id=158910607 instance=ExtResource("2_226e3")]
+process_mode = 1
+script = ExtResource("3_ba2j8")
+
+[node name="Kamera" type="Camera2D" parent="." unique_id=1870528035]
+
+[node name="Arayuz" type="CanvasLayer" parent="." unique_id=467102425]
+process_mode = 3
+
+[node name="Ust" type="HBoxContainer" parent="Arayuz" unique_id=1226511622]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = 48.0
+mouse_filter = 2
+theme_override_constants/separation = 16
+
+[node name="Mesafe" type="Label" parent="Arayuz/Ust" unique_id=973652619]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "0 m"
+
+[node name="AltinSayisi" type="Label" parent="Arayuz/Ust" unique_id=798888785]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.9843137, 0.9490196, 0.21176471, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "0"
+
+[node name="Bosluk" type="Control" parent="Arayuz/Ust" unique_id=837317906]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="Rekor" type="Label" parent="Arayuz/Ust" unique_id=1720491324]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.79607844, 0.85882354, 0.9882353, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Rekor: 0 m"
+
+[node name="DuraklatDugme" type="Button" parent="Arayuz/Ust" unique_id=973291912]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(44, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "II"
+
+[node name="Ipucu" type="Label" parent="Arayuz" unique_id=1294458756]
+unique_name_in_owner = true
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 70.0
+offset_right = 220.0
+offset_bottom = 120.0
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Zıplamak için dokun / Boşluk
+Basılı tut: daha yüksek • Havada bir kez daha zıpla"
+horizontal_alignment = 1
+
+[node name="DuraklatPaneli" type="PanelContainer" parent="Arayuz" unique_id=1958492536]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 0)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ju7jk")
+
+[node name="Kutu" type="VBoxContainer" parent="Arayuz/DuraklatPaneli" unique_id=85905849]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="DuraklatBaslik" type="Label" parent="Arayuz/DuraklatPaneli/Kutu" unique_id=320076845]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Duraklatıldı"
+horizontal_alignment = 1
+
+[node name="DevamDugme" type="Button" parent="Arayuz/DuraklatPaneli/Kutu" unique_id=1716454212]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Devam"
+
+[node name="MenuDugme" type="Button" parent="Arayuz/DuraklatPaneli/Kutu" unique_id=201489082]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Menüye Dön"
+
+[node name="SonPaneli" type="PanelContainer" parent="Arayuz" unique_id=1315415880]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 0)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_6boux")
+
+[node name="Kutu" type="VBoxContainer" parent="Arayuz/SonPaneli" unique_id=678499389]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="SonBaslik" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=590506153]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Koşu bitti"
+horizontal_alignment = 1
+
+[node name="SonSkor" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=1446339655]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Mesafe: 0 m"
+horizontal_alignment = 1
+
+[node name="SonRekor" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=1019772695]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.9843137, 0.9490196, 0.21176471, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Rekor: 0 m"
+horizontal_alignment = 1
+
+[node name="SonAltin" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=656977074]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Altın: 0"
+horizontal_alignment = 1
+
+[node name="TekrarDugme" type="Button" parent="Arayuz/SonPaneli/Kutu" unique_id=1466783610]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Tekrar"
+
+[node name="SonMenuDugme" type="Button" parent="Arayuz/SonPaneli/Kutu" unique_id=1064609029]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Menü"
+
+[node name="SonIpucu" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=1507290495]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.79607844, 0.85882354, 0.9882353, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Tekrar için dokun ya da Boşluk"
+horizontal_alignment = 1

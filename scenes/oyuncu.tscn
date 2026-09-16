@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/oyuncu.gd" id="1_5h506"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_txe1j"]
+radius = 7.0
+height = 22.0
+
+[node name="Oyuncu" type="CharacterBody2D" unique_id=158910607]
+script = ExtResource("1_5h506")
+
+[node name="Sekil" type="CollisionShape2D" parent="." unique_id=289752730]
+position = Vector2(0, -11)
+shape = SubResource("CapsuleShape2D_txe1j")
