@@ -78,16 +78,55 @@ static func cal(ad: String, perde := 1.0) -> void:
 	o.play()
 
 
-static func muzik(ad: String) -> void:
+## bastan: çalıyor olsa da baştan başlat (ritim koşusu vuruş ızgarasını müziğin başına hizalar).
+static func muzik(ad: String, bastan := false) -> void:
 	if not _hazirla():
 		return
 	var akis := _akis(ad)
 	if akis == null:
 		return
 	if not _muzik.is_inside_tree():
-		(func() -> void: muzik(ad)).call_deferred()
+		(func() -> void: muzik(ad, bastan)).call_deferred()
 		return
-	if _muzik.stream == akis and _muzik.playing:
+	_dongu_yap(akis)
+	_muzik.stream_paused = false
+	if _muzik.stream == akis and _muzik.playing and not bastan:
 		return
 	_muzik.stream = akis
 	_muzik.play()
+
+
+## Müziği duraklat / sürdür (ritim koşusunda duraklatınca vuruş kaymasın diye).
+static func muzik_duraklat(dur: bool) -> void:
+	if is_instance_valid(_muzik):
+		_muzik.stream_paused = dur
+
+
+## Çalan müziğin şu an karıştırılan konumu (sn); çalmıyorsa -1. Döngü başa sarınca küçülür.
+static func muzik_konumu() -> float:
+	if not is_instance_valid(_muzik) or not _muzik.playing or _muzik.stream_paused or _muzik.stream == null:
+		return -1.0
+	return _muzik.get_playback_position() + AudioServer.get_time_since_last_mix()
+
+
+static func muzik_uzunlugu() -> float:
+	if not is_instance_valid(_muzik) or _muzik.stream == null:
+		return 0.0
+	return _muzik.stream.get_length()
+
+
+## Müziği verilen konuma sar (ritim koşusunda oyun zamanıyla yeniden hizalamak için).
+static func muzik_sar(saniye: float) -> void:
+	if is_instance_valid(_muzik) and _muzik.playing:
+		_muzik.seek(maxf(saniye, 0.0))
+
+
+## WAV'ı örnek düzeyinde kesintisiz döngüye al ("finished → play" her turda bir kare kaydırıyordu).
+static func _dongu_yap(akis: AudioStream) -> void:
+	var w := akis as AudioStreamWAV
+	if w == null or w.loop_mode != AudioStreamWAV.LOOP_DISABLED:
+		return
+	# İçe aktarılan müzik QOA sıkıştırmalı: veri boyutu örnek sayısı değil, uzunluktan hesapla.
+	w.loop_begin = 0
+	w.loop_end = int(floor(w.get_length() * w.mix_rate))
+	w.loop_mode = AudioStreamWAV.LOOP_FORWARD

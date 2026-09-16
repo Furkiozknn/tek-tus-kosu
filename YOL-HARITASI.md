@@ -57,9 +57,19 @@
 - [x] 35_cift_piston_cukur: çukur pistondan uzağa alındı (uzun streste bot ölümü)
 - [x] `sahne_uret` derlenmeyen betikte durur (yeni class_name + import sırası tuzağı)
 
-## Sonraki tur (v0.6)
+## Bitti — geliştirme turu 5 (v0.6, 2026-09-16)
 
-- [ ] Çatı ritmi: müzik vuruşuna hizalı parça dizileri (isteğe bağlı mod)
+- [x] Ritim koşusu: 150 BPM / 300 px/sn vuruş ızgarası, koddan üretilen ölçü desenleri (10 desen, 2 zorluk)
+- [x] Vuruş lambaları, "Tam vuruş ×N" / "Erken-Geç N ms" geri bildirimi, ayrı rekor ve ölümler
+- [x] Müzik döngüsü örnek düzeyinde kesintisiz; duraklatınca müzik durur; kayınca müzik yeniden hizalanır
+- [x] 13. başarım (Vuruşu yakala); menüde Ritim düğmesi, Çıkış sol üste taşındı
+- [x] `bot_stres --ritim --vurus <ms>`: zamanlama penceresi ölçümü (−175…+150 ms yaşanır)
+
+## Sonraki tur (v0.7)
+
+- [ ] Ritim: ikinci bir müzik/tempo (ör. 128 BPM "neşeli"), şarkıya göre desen seti
+- [ ] Ritim: günlük ritim koşusu (tarih tohumu) — isteğe bağlı
+- [ ] Ritim: ses gecikmesi ayarı (kalibrasyon ekranı; bluetooth kulaklık)
 - [ ] Paylaşım metnine itch adresi (yayından sonra)
 - [ ] Gerçek telefonda dokunma, tam ekran ve paylaşım menüsü denemesi
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)

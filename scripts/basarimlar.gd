@@ -13,6 +13,7 @@ const LISTE := [
 	{"id": "tavan10", "ad": "Eğil ve geç", "metin": "Tek koşuda 10 alçak tavan", "tek": true},
 	{"id": "piston10", "ad": "Piston dansı", "metin": "Tek koşuda 10 piston", "tek": true},
 	{"id": "iskele8", "ad": "Hafif adımlar", "metin": "Tek koşuda 8 çürük iskele", "tek": true},
+	{"id": "ritim20", "ad": "Vuruşu yakala", "metin": "Ritim koşusunda 20 tam vuruş", "tek": true},
 	{"id": "gunluk300", "ad": "Günün koşucusu", "metin": "Günlük koşuda 300 m", "tek": true},
 	{"id": "toplam10k", "ad": "Maratoncu", "metin": "Toplam 10.000 m koş", "tek": false},
 	{"id": "dolap", "ad": "Gardırop", "metin": "Bütün kostümleri aç", "tek": false},
@@ -47,6 +48,8 @@ static func saglandi_mi(id: String, d: Dictionary, ist: Dictionary, gunluk: bool
 			return int(ist.get("piston", 0)) >= 10
 		"iskele8":
 			return int(ist.get("iskele", 0)) >= 8
+		"ritim20":
+			return int(ist.get("ritim", 0)) >= 20
 		"gunluk300":
 			return gunluk and int(ist.get("mesafe", 0)) >= 300
 		"toplam10k":

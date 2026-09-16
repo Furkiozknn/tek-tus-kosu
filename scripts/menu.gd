@@ -20,6 +20,7 @@ func _ready() -> void:
 
 	%BaslaDugme.pressed.connect(basla)
 	%GunlukDugme.pressed.connect(basla.bind(true))
+	%RitimDugme.pressed.connect(basla.bind(false, true))
 	%KarakterDugme.pressed.connect(func() -> void: _panel_ac(%KarakterPaneli))
 	%BasarimDugme.pressed.connect(func() -> void: _panel_ac(%BasarimPaneli))
 	%AyarlarDugme.pressed.connect(func() -> void: _panel_ac(%AyarlarPaneli))
@@ -93,6 +94,9 @@ func _yenile() -> void:
 	%AltinEtiketi.text = "Altın: %d" % int(d["toplam_altin"])
 	%KarakterAltin.text = "Altın: %d" % int(d["toplam_altin"])
 	var gun := Gunluk.durum(d)
+	var rr := int(d.get("rekor_ritim", 0))
+	%RitimDugme.text = "Ritim" if rr <= 0 else "Ritim · %d m" % rr
+	%RitimDugme.tooltip_text = "Engeller müziğin vuruşlarına hizalı; vuruşta zıpla."
 	var seri := Gunluk.seri(d)
 	%GunlukDugme.text = "Günlük koşu" if int(gun["deneme"]) == 0 else "Günlük · %d m" % int(gun["rekor"])
 	if seri >= 2:
@@ -195,7 +199,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _dugme_ustunde(konum: Vector2) -> bool:
-	for b in [%BaslaDugme, %GunlukDugme, %KarakterDugme, %BasarimDugme, %AyarlarDugme, %CikisDugme]:
+	for b in [%BaslaDugme, %GunlukDugme, %KarakterDugme, %BasarimDugme, %RitimDugme, %AyarlarDugme, %CikisDugme]:
 		if b.visible and b.get_global_rect().has_point(konum):
 			return true
 	return false
@@ -212,11 +216,12 @@ func _telefonda_tam_ekran() -> void:
 	JavaScriptBridge.eval(js, true)
 
 
-func basla(gunluk := false) -> void:
+func basla(gunluk := false, ritim := false) -> void:
 	if _basliyor:
 		return
 	_basliyor = true
-	Gunluk.secili = gunluk
+	Gunluk.secili = gunluk and not ritim
+	Ritim.secili = ritim
 	set_process_unhandled_input(false)
 	_telefonda_tam_ekran()
 	var tw := create_tween()

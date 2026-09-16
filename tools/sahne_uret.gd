@@ -663,7 +663,7 @@ func _menu() -> Node:
 	var gd := _dugme("GunlukDugme", "Günlük koşu", Vector2(190, 30))
 	gd.add_theme_font_size_override("font_size", 15)
 	sol.add_child(gd)
-	for cift in [["KarakterDugme", "Karakter", "BasarimDugme", "Başarımlar"], ["AyarlarDugme", "Ayarlar", "CikisDugme", "Çıkış"]]:
+	for cift in [["KarakterDugme", "Karakter", "BasarimDugme", "Başarımlar"], ["RitimDugme", "Ritim", "AyarlarDugme", "Ayarlar"]]:
 		var satir := HBoxContainer.new()
 		satir.name = cift[0] + "Satir"
 		satir.add_theme_constant_override("separation", 6)
@@ -686,6 +686,12 @@ func _menu() -> Node:
 	var gl := _etiket("GorevListesi", "GÖREVLER", 12, Color("ead4aa"))
 	gl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	gorev.get_child(0).add_child(gl)
+
+	# Çıkış: yalnız masaüstünde, sol üst köşede küçük düğme
+	var cikis := _dugme("CikisDugme", "Çıkış", Vector2(64, 26))
+	cikis.add_theme_font_size_override("font_size", 12)
+	cikis.position = Vector2(8, 8)
+	kok.add_child(cikis)
 
 	var ip := _etiket("Ipucu", "Başlamak için boş bir yere dokun ya da Boşluk", 12, Color("c0cbdc"))
 	ip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

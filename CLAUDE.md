@@ -75,6 +75,13 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 - Dikey telefon: `DikeyUyari` (CanvasLayer) menü ve oyuna eklenir; dikeyde perde açılır, oyunda koşu
   duraklar. Web'de dokunmatik cihazda Başla'ya basınca tam ekran + yatay kilit denenir (`menu._telefonda_tam_ekran`).
   Testler `DikeyUyari.zorla` ile yönü sabitler.
+- Ritim koşusu (`Ritim`, `Ritim.secili` → `oyun.ritim`): hız `Ritim.HIZ` sabit; `parca_sirasi` boşsa
+  parçalar `Ritim.parca_uret()` ile koddan kurulur (sahne yok, `set_meta("desenler")`). Vuruş ızgarası
+  `oyun._izgara0` (başlangıç + ses gecikmesi). Olay vuruşları `_ritim_olaylar`; zıplamada
+  `_ritim_degerlendir()`. Müzik `Ses.muzik(..., true)` ile baştan; `_ritim_ses_hizala()` kaymada müziği
+  sarar (oyun zamanı yetkili). Headless'ta müzik çalmaz (`Ses.muzik_konumu() == -1`), hizalama atlanır.
+  Desen eklerken: olaylar yalnız 0/2. vuruşta (tam zıplama 1,86 vuruş sürer), sonra
+  `bot_stres --ritim` ve `--vurus -175 / 150` ile pencereyi yeniden ölç.
 - Günlük seri kayıtta `gunluk_seri`; paylaşım metni `Gunluk.paylasim_metni()`. Web'de dokunmatik
   cihazda `navigator.share`, diğerlerinde panoya kopyalama (`oyun._paylas`).
 
@@ -99,6 +106,9 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
+- v0.6 (bulut): 740 test geçti. Ritim: bot 12 tohum × 3 dk 0 ölüm (10 desenin hepsi); vuruşa göre
+  kaydırarak zıplayan oyuncu 8 tohum × 3 dk: −175…+150 ms 0 ölüm, −200 ms ve +175 ms'de alçak tavan
+  dikeninde ölüm (pencerenin sınırı). Çukur 140 → 120 px daraltılarak erken sınır −125'ten −175 ms'ye genişledi.
 - v0.1 (bulut + Windows): 171 test geçti; Windows ve Web dışa aktarma çalıştı.
 - v0.2 (bulut, Linux headless): 388 test geçti, 0 hata. Web sürümü Playwright/Chromium ile:
   menü, karakter paneli, ayarlar paneli, fareyle başlatma, oyun, ölüm tekrarı, sonuç paneli.
@@ -106,6 +116,7 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 - v0.2 (Windows 11): aynı akış + `tools/ekran_goruntusu.gd`; 388 test geçti, dışa aktarmalar tamam.
 - v0.5 (bulut): 714 test geçti; bot stresi 32 tohum × 3 dk, 0 ölüm, 43 parçanın hepsi görüldü. Web'de
   (Chromium, telefon emülasyonu) dikey → perde + duraklama, yatay → Devam; dokunuşla tam ekran açıldı.
+- v0.5 (Windows 11): 714 test geçti; bot stresi 8 tohum, 0 ölüm; dışa aktarmalar tamam (pck 560 KB).
 - v0.4 (Windows 11): 660 test geçti; bot stresi 8 tohum, 0 ölüm; dışa aktarmalar tamam (pck 546 KB).
 - v0.4 (bulut): 660 test geçti; bot stresi 24 tohum × 3 dk, 0 ölüm, 40 parçanın hepsi görüldü
   (`bot_stres` artık parça kullanımını yazar). Web'de (Chromium) günlük sonuç → Paylaş → pano

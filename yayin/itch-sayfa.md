@@ -5,7 +5,7 @@
 **Önerilen ayarlar:** Kind: HTML (tarayıcıda oyna) + Windows indirme · Viewport 1280×720,
 "Mobile friendly" açık, "Fullscreen button" açık · Genre: Action / Platformer ·
 Tags: endless-runner, one-button, pixel-art, casual, mobile, godot · Fiyat: ücretsiz ·
-Kapak: `kapak.png` (630×500) · Ekran görüntüleri: `ekran-1..6*.png` (+ isteğe bağlı `ekran-4a-tekrar.png`; hepsi `tools/ekran_goruntusu.gd` ile üretildi).
+Kapak: `kapak.png` (630×500) · Ekran görüntüleri: `ekran-1..7*.png` (+ isteğe bağlı `ekran-4a-tekrar.png`; hepsi `tools/ekran_goruntusu.gd` ile üretildi).
 
 ---
 
@@ -22,11 +22,14 @@ jump, tap again in mid-air for a second jump. The city speeds up; how far can yo
 - "Breather" rooftops every few sections so the pace has rhythm, not just pressure.
 
 **What's inside**
+- **Rhythm run:** a separate mode where every rooftop is built to the beat of the music. Glowing
+  lamps pulse with the track and mark where to jump; land jumps on the beat to build a "Tam vuruş ×N" (perfect beat)
+  streak. Off by a little? You still make it — timing is a reward, not a wall.
 - **Daily run:** everyone gets the same rooftops today. Beat your best attempt — it runs beside you
   as a ghost. Keep a daily streak and share your result with one tap.
 - Flags mark your record and your last fall; the end-of-run city strip shows how far you got and
   where you fell before.
-- 12 achievements.
+- 13 achievements.
 - 43 hand-designed rooftop sections: gaps, spikes, low ceilings you can only pass with a short
   hop, pistons, moving platforms, rotten scaffolds that give way under your feet, gusts of wind that
   stretch or shorten your jumps, and risky coin routes.
@@ -57,11 +60,14 @@ Havada tekrar dokun: ikinci zıplama. Şehir hızlandıkça ne kadar uzağa gide
 - Birkaç bölümde bir "nefes" çatısı: tempo yalnızca baskı değil, ritim de taşıyor.
 
 **İçerik**
+- **Ritim koşusu:** her çatının müziğin vuruşuna göre kurulduğu ayrı kip. Lambalar müzikle nabız
+  atar ve nerede zıplanacağını gösterir; vuruşta zıplayıp "Tam vuruş ×N" serisi yap. Biraz kaçırsan
+  da geçersin — zamanlama ödüldür, duvar değil.
 - **Günlük koşu:** bugün herkes aynı çatılarda. En iyi denemen hayalet olarak yanında koşar.
   Günlük seriyi sürdür, sonucunu tek dokunuşla paylaş.
 - Rekorunun ve son düştüğün yerin üstünde bayrak; koşu sonunda nereye kadar gittiğini ve daha önce
   nerede düştüğünü gösteren şehir şeridi.
-- 12 başarım.
+- 13 başarım.
 - 43 çatı bölümü: boşluklar, dikenler, yalnızca kısa sıçramayla geçilen alçak tavanlar,
   pistonlar, hareketli platformlar, basınca çöken çürük iskeleler, zıplamayı uzatan ya da kısaltan
   rüzgâr ve riskli altın rotaları.

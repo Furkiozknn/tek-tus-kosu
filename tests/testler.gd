@@ -32,6 +32,7 @@ func _calistir() -> void:
 	await _test_kostum_izi()
 	await _test_ruzgar()
 	await _test_dikey_uyari()
+	await _test_ritim()
 	print("\n=== SONUÇ: %d geçti, %d hata ===" % [gecen, hatalar])
 	quit(1 if hatalar > 0 else 0)
 
@@ -1059,6 +1060,179 @@ func _test_dikey_uyari() -> void:
 	menu.queue_free()
 	await process_frame
 	DikeyUyari.zorla = -1
+	_kayit_temizle()
+
+
+# ------------------------------------------------------------------ v0.6
+func _test_ritim() -> void:
+	print("[ritim koşusu]")
+	dogrula(is_equal_approx(Ritim.ADIM, 120.0) and is_equal_approx(Ritim.VURUS_SN, 0.4), "150 BPM × 300 px/sn → vuruş 120 px, 0,4 sn")
+	var vk := Ritim.vurus_konumu(100.0 + 3.0 * Ritim.ADIM + 6.0, 100.0)
+	dogrula(int(vk[0]) == 3 and absf(float(vk[1]) - 20.0) < 0.01, "6 px geç = 3. vuruş +20 ms (%s)" % str(vk))
+	vk = Ritim.vurus_konumu(100.0 + 5.0 * Ritim.ADIM - 12.0, 100.0)
+	dogrula(int(vk[0]) == 5 and absf(float(vk[1]) + 40.0) < 0.01, "12 px erken = 5. vuruş −40 ms (%s)" % str(vk))
+	# Desen seçimi kuralları
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 7
+	var kural := true
+	var zor2_erken := false
+	var zor2_gec := false
+	for i in 400:
+		var olcu := i % 30
+		var onceki: int = [-1, 0, 2][i % 3]
+		var d := Ritim.desen_sec(rng, olcu, onceki)
+		var olaylar: Array = d["olaylar"]
+		if olcu < Ritim.ISINMA_OLCU and not olaylar.is_empty():
+			kural = false
+		if onceki == 2 and not olaylar.is_empty() and olaylar[0][1] == "kisa":
+			kural = false
+		if int(d["zorluk"]) == 2:
+			if olcu < 10:
+				zor2_erken = true
+			else:
+				zor2_gec = true
+		for o in olaylar:
+			if int(o[0]) != 0 and int(o[0]) != 2:
+				kural = false
+	dogrula(kural, "ısınma ölçüleri boş, olaylar yalnız 0/2. vuruşta, 2. vuruştan sonra alçak tavan yok")
+	dogrula(not zor2_erken and zor2_gec, "zor desenler ancak 10. ölçüden sonra")
+	# Parça üretimi belirlenimci ve vuruşa hizalı
+	var imzalar: Array = []
+	for tekrar in 2:
+		var r := RandomNumberGenerator.new()
+		r.seed = 99
+		var sonuc := Ritim.parca_uret(1234.0, 100.0, r, 12, -1)
+		var p: Parca = sonuc[0]
+		var imza := "%.1f|" % p.uzunluk
+		for c in p.get_children():
+			imza += "%s@%.1f," % [c.get_class(), c.position.x]
+		imzalar.append(imza)
+		var giris := p.uzunluk - Ritim.PARCA_OLCU * Ritim.OLCU * Ritim.ADIM
+		dogrula(giris >= 0.0 and giris < Ritim.ADIM + 0.01, "parça girişi bir vuruştan kısa (%.1f)" % giris)
+		dogrula(is_zero_approx(fposmod(1234.0 + giris - 100.0, Ritim.ADIM)) or is_equal_approx(fposmod(1234.0 + giris - 100.0, Ritim.ADIM), Ritim.ADIM),
+			"parçanın ilk vuruşu ızgarada")
+		var isaret: RitimIsaret = p.get_node("RitimIsaret")
+		var zipla_sayisi := 0
+		for z in isaret.zipla:
+			zipla_sayisi += z
+		dogrula(isaret.vuruslar.size() == 16 and zipla_sayisi == (sonuc[2] as Array).size() and zipla_sayisi > 0,
+			"vuruş lambaları olay sayısıyla uyumlu (%d)" % zipla_sayisi)
+		p.free()
+	dogrula(imzalar[0] == imzalar[1], "aynı tohum aynı ritim parçasını üretmeli")
+	var bist := Gorevler.bos_istatistik()
+	var bkd := Kayit.yukle()
+	bist["ritim"] = 19
+	dogrula(not Basarimlar.saglandi_mi("ritim20", bkd, bist, false), "19 tam vuruş başarım için az")
+	bist["ritim"] = 20
+	dogrula(Basarimlar.saglandi_mi("ritim20", bkd, bist, false), "20 tam vuruş başarımı açmalı")
+
+	# Kusursuz oyuncu: her olay vuruşunda zıplar (alçak tavanda dokunur) → yaşar, hepsi tam vuruş.
+	_kayit_temizle()
+	var sonuclar := {}
+	for gecikme in [0.0, 25.0]:
+		var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+		oyun.ritim = true
+		oyun.kayit_yap = false
+		oyun.olum_tekrari_acik = false
+		oyun.tohum = 5
+		root.add_child(oyun)
+		await process_frame
+		dogrula(oyun.ritim and not oyun.gunluk and not oyun.rahat and is_equal_approx(oyun.oyuncu.hiz, Ritim.HIZ), "ritim koşusu sabit 300 px/sn")
+		var o: Oyuncu = oyun.oyuncu
+		var yapilan := {}
+		var olay_sayisi := 0
+		var birak := -1
+		for kare in 60 * 75:
+			await physics_frame
+			if not o.canli:
+				break
+			if birak == 0:
+				o.zipla_birak()
+			birak -= 1
+			var x := o.global_position.x
+			var k := int(round((x - gecikme - oyun._izgara0) / Ritim.ADIM))
+			var kx: float = oyun._izgara0 + k * Ritim.ADIM + gecikme
+			if x + 2.5 >= kx and not yapilan.has(k) and oyun._ritim_olaylar.has(k):
+				yapilan[k] = true
+				olay_sayisi += 1
+				var tavan := false
+				for t in oyun.dunya_tavan_araliklari():
+					if kx - gecikme >= float(t[0]) - 1.0 and kx - gecikme <= float(t[1]):
+						tavan = true
+				o.zipla_bas()
+				birak = 1 if tavan else 24
+		sonuclar[gecikme] = [o.canli, olay_sayisi, int(oyun.istatistik["ritim"]), oyun.mesafe()]
+		oyun.queue_free()
+		await process_frame
+	var s0: Array = sonuclar[0.0]
+	var s1: Array = sonuclar[25.0]
+	print("  kusursuz: %s  geç: %s" % [str(sonuclar[0.0]), str(sonuclar[25.0])])
+	dogrula(s0[0] and s0[1] >= 30, "vuruşta zıplayan oyuncu 75 sn yaşamalı (%s)" % str(s0))
+	dogrula(s0[2] == s0[1], "vuruşta zıplamalar tam vuruş sayılmalı (%s)" % str(s0))
+	dogrula(s1[0] and s1[1] >= 30, "83 ms geç zıplayan da yaşamalı (pencere geniş) (%s)" % str(s1))
+	dogrula(s1[2] == 0, "83 ms geç zıplama tam vuruş sayılmamalı (%s)" % str(s1))
+
+	# Bot ritim koşusunda yaşar
+	var bo: Node2D = (load(OYUN) as PackedScene).instantiate()
+	bo.ritim = true
+	bo.bot_modu = true
+	bo.kayit_yap = false
+	bo.olum_tekrari_acik = false
+	bo.tohum = 8
+	root.add_child(bo)
+	await _kareler(60 * 60)
+	dogrula(bo.oyuncu.canli, "bot ritim koşusunda 60 sn yaşamalı (%d m)" % bo.mesafe())
+	var ritim_parca := 0
+	for p in bo.parcalar:
+		if p.name.begins_with("RitimParca"):
+			ritim_parca += 1
+	dogrula(ritim_parca >= 1, "ritim koşusu ritim parçaları üretmeli")
+	bo.queue_free()
+	await process_frame
+
+	# Ayrı rekor + menü düğmesi
+	_kayit_temizle()
+	var kd := Kayit.yukle()
+	kd["rekor"] = 500
+	Kayit.kaydet(kd)
+	var ro: Node2D = (load(OYUN) as PackedScene).instantiate()
+	ro.ritim = true
+	ro.kayit_yap = true
+	ro.olum_tekrari_acik = false
+	ro.tohum = 3
+	root.add_child(ro)
+	await _kareler(90)
+	ro.oyuncu.ol()
+	await _kareler(2)
+	kd = Kayit.yukle()
+	dogrula(int(kd["rekor"]) == 500 and int(kd["rekor_ritim"]) == ro.son_sonuc["mesafe"] and int(kd["rekor_ritim"]) > 0,
+		"ritim rekoru ayrı tutulmalı (%d / %d)" % [kd["rekor"], kd["rekor_ritim"]])
+	dogrula((kd["olumler_ritim"] as Array).size() == 1 and (kd["olumler"] as Array).is_empty(), "ritim ölümleri ayrı listede")
+	dogrula(ro.son_altin.text.contains("Tam vuruş"), "sonuç panelinde tam vuruş sayısı (%s)" % ro.son_altin.text)
+	ro.duraklat()
+	ro.queue_free()
+	await process_frame
+	paused = false
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _kareler(3)
+	var rd: Button = menu.get_node("%RitimDugme")
+	dogrula(rd.visible and rd.text.begins_with("Ritim") and rd.text.contains("%d m" % int(kd["rekor_ritim"])), "menüde Ritim düğmesi rekoru göstermeli (%s)" % rd.text)
+	var cikis: Control = menu.get_node("%CikisDugme")
+	var ekran: Rect2 = menu.get_viewport().get_visible_rect()
+	dogrula(ekran.encloses(cikis.get_global_rect()) and cikis.get_global_rect().position.y < 40.0, "Çıkış düğmesi sol üstte")
+	var dugmeler: Array = []
+	for ad in ["%BaslaDugme", "%GunlukDugme", "%KarakterDugme", "%BasarimDugme", "%RitimDugme", "%AyarlarDugme", "%CikisDugme"]:
+		dugmeler.append(menu.get_node(ad))
+	var cakisma := false
+	for i in dugmeler.size():
+		for j in range(i + 1, dugmeler.size()):
+			if dugmeler[i].visible and dugmeler[j].visible and dugmeler[i].get_global_rect().intersects(dugmeler[j].get_global_rect()):
+				cakisma = true
+	dogrula(not cakisma, "menü düğmeleri üst üste binmemeli")
+	menu.queue_free()
+	await process_frame
+	Ritim.secili = false
 	_kayit_temizle()
 
 

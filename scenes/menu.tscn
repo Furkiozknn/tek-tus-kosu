@@ -226,26 +226,26 @@ size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 14
 text = "Başarımlar"
 
-[node name="AyarlarDugmeSatir" type="HBoxContainer" parent="AnaPanel/Sol" unique_id=768754696]
+[node name="RitimDugmeSatir" type="HBoxContainer" parent="AnaPanel/Sol" unique_id=1539001537]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 6
 
-[node name="AyarlarDugme" type="Button" parent="AnaPanel/Sol/AyarlarDugmeSatir" unique_id=111190613]
+[node name="RitimDugme" type="Button" parent="AnaPanel/Sol/RitimDugmeSatir" unique_id=1646295687]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(92, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "Ritim"
+
+[node name="AyarlarDugme" type="Button" parent="AnaPanel/Sol/RitimDugmeSatir" unique_id=720359342]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(92, 30)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 14
 text = "Ayarlar"
-
-[node name="CikisDugme" type="Button" parent="AnaPanel/Sol/AyarlarDugmeSatir" unique_id=1969526364]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(92, 30)
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 14
-text = "Çıkış"
 
 [node name="RekorEtiketi" type="Label" parent="AnaPanel/Sol" unique_id=442464985]
 unique_name_in_owner = true
@@ -287,6 +287,17 @@ theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.203921
 theme_override_constants/outline_size = 4
 text = "GÖREVLER"
 autowrap_mode = 3
+
+[node name="CikisDugme" type="Button" parent="." unique_id=391742013]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 26)
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 8.0
+offset_bottom = 8.0
+theme_override_font_sizes/font_size = 12
+text = "Çıkış"
 
 [node name="Ipucu" type="Label" parent="." unique_id=1531484222]
 unique_name_in_owner = true

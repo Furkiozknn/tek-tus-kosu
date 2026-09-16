@@ -33,6 +33,7 @@ func _calistir() -> void:
 	await _gunluk_hayalet()
 	await _iskele()
 	await _ruzgar()
+	await _ritim()
 	await _menu_paneller()
 	await _kapak()
 	Gunluk.tarih_ezme = ""
@@ -239,6 +240,39 @@ func _ruzgar() -> void:
 	await _kaydet("dikey-uyari.png", KONTROL)
 	DikeyUyari.zorla = -1
 	get_root_paused_sifirla()
+	oyun.queue_free()
+	await _bekle(2)
+
+
+## v0.6: ritim koşusu — vuruş lambaları, tam vuruş yazısı.
+func _ritim() -> void:
+	var d := Kayit.yukle()
+	d["rekor_ritim"] = 820
+	Kayit.kaydet(d)
+	var oyun: Node2D = (load("res://scenes/oyun.tscn") as PackedScene).instantiate()
+	oyun.ritim = true
+	oyun.tohum = 5
+	oyun.kayit_yap = false
+	oyun.olum_tekrari_acik = false
+	oyun.bot_modu = true
+	root.add_child(oyun)
+	await _bekle(2)
+	oyun.ipucu.hide()
+	await _bekle(60 * 26)
+	var sinir := 60 * 30
+	var onceki: int = oyun.istatistik["ritim"]
+	while sinir > 0:
+		sinir -= 1
+		await process_frame
+		if int(oyun.istatistik["ritim"]) > onceki:
+			onceki = int(oyun.istatistik["ritim"])
+			# İkili desende art arda iki tam vuruş: ikincisinin tepesinde çek
+			if onceki >= 2 and oyun._ritim_seri >= 2:
+				break
+	if sinir <= 0:
+		push_error("ritim görüntüsü için uygun an bulunamadı")
+	await _bekle(16)
+	await _kaydet("ekran-7-ritim.png")
 	oyun.queue_free()
 	await _bekle(2)
 

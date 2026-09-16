@@ -3,8 +3,8 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v0.5 — geliştirme turu 4 (2026-09-16). Rüzgâr (yeni öğe, 3 parça → 43), telefonda dikey
-uyarısı + tam ekran. (v0.4: çürük iskele, günlük seri ve paylaşım, kostüm izleri, web simge düzeltmesi.
+**Durum:** v0.6 — geliştirme turu 5 (2026-09-16). **Ritim koşusu:** engelleri müziğin vuruşlarına
+hizalı, koddan üretilen ayrı kip. (v0.5: rüzgâr, telefonda dikey uyarısı + tam ekran. v0.4: çürük iskele, günlük seri ve paylaşım, kostüm izleri, web simge düzeltmesi.
 v0.3: günlük koşu + hayalet, işaretler, şehir haritası. v0.2: pixel art, ses/müzik, görevler,
 kostümler, ölüm tekrarı, ayarlar.)
 
@@ -21,6 +21,14 @@ kostümler, ölüm tekrarı, ayarlar.)
 
 ## Oyun içeriği
 
+- **Ritim koşusu (v0.6):** menüde **Ritim**. Hız sabit 300 px/sn, oyun müziği 150 BPM → her vuruş
+  120 px. Engeller ölçü ölçü koddan üretilir; her engelin ideal zıplama anı bir vuruşa denk gelir.
+  Çatı kenarındaki lambalar müzikle nabız atar, zıplanacak vuruşlar sarı ve oklu. Vuruşun ±70 ms
+  içinde zıplamak "Tam vuruş ×N" serisi; dışında "Erken/Geç N ms". Engeller dikenler, çukurlar ve
+  alçak tavan (kısa sıçrama); ilk 2 ölçü boş, 10. ölçüden sonra iki olaylı ölçüler. Ayrı rekor
+  ve ölüm listesi; sonuç panelinde tam vuruş sayısı; 13. başarım "Vuruşu yakala" (tek koşuda 20 tam vuruş).
+  Duraklatınca müzik de durur; müzik oyun zamanından 60 ms'den fazla kayarsa (sekme gizlendi,
+  uzun takılma) müzik oyuna göre yeniden sarılır.
 - **Günlük koşu (v0.3):** tarihten türeyen tohumla o gün herkes aynı çatı dizisini koşar. Günün
   rekoru ve deneme sayısı ayrı tutulur; günün en iyi denemesi **hayalet rakip** olarak sonraki
   denemelerde yanında koşar, bittiği yere "HAYALET" işareti konur. Günlük koşuda rahat mod kapalıdır.
@@ -40,7 +48,7 @@ kostümler, ölüm tekrarı, ayarlar.)
 - **Telefonda (v0.5):** dikey tutulunca "Telefonu yan çevir" perdesi ve koşu duraklar; web'de dokunmatik
   cihazda Başla'ya basınca tam ekran + yatay kilit denenir.
 - **Kostüm izleri (v0.4):** zıplama/iniş tozu kostüm renginde; Neon ve Altın Taç koşarken iz bırakır.
-- **Başarımlar (v0.3):** 12 başarım (her biri +25 altın), menüde liste, koşu sırasında duyuru.
+- **Başarımlar (v0.3):** 13 başarım (her biri +25 altın), menüde liste, koşu sırasında duyuru.
 - **43 parça:** zorluk 0 "nefes" parçaları (3–8 tehlikeli parçada bir), zorluk 1–3 parçalar;
   öğeler: çukur, diken, blok, alçak tavan (yalnız kısa sıçramayla geçilir), piston (yükselip inen
   diken), hareketli platform, çürük iskele, rüzgâr, riskli altın rotaları.
@@ -86,6 +94,8 @@ scripts/mini_harita.gd   koşu sonu şehir ışıkları şeridi
 scripts/coken.gd         çürük iskele (basınca çöken tahta köprü)
 scripts/ruzgar.gd        rüzgâr bölgesi (havadayken yatay hıza eklenir)
 scripts/dikey_uyari.gd   telefon dikeyken "yan çevir" perdesi
+scripts/ritim.gd         ritim koşusu: vuruş ızgarası, ölçü desenleri, parçayı koddan üretme
+scripts/ritim_isaret.gd  ritim parçasındaki vuruş lambaları
 scripts/simgeler.gd      web'de eksik simgeler (★ ✓ ←…) için yedek yazı tipini bağlar
 scripts/bot.gd           test/demodaki otomatik oyuncu (kısa sıçrama dahil)
 scenes/parcalar/*.tscn   43 hazır parça (koddan üretilir)
@@ -96,7 +106,8 @@ tools/muzik_uret.gd      menü ve oyun müziğini (WAV döngü) üretir
 tools/sahne_uret.gd      parça, oyun ve menü sahnelerini koddan üretir
 tools/proje_ayarla.gd    project.godot ayarlarını + girdi haritasını yazar
 tools/ekran_goruntusu.gd itch ekran görüntüleri + kapak (pencere açar)
-tools/bot_stres.gd       farklı tohumlarla uzun bot koşuları (ölümleri parça adıyla, parça kullanımını yazar)
+tools/bot_stres.gd       farklı tohumlarla uzun bot koşuları (ölümleri parça adıyla, parça kullanımını yazar);
+                         --ritim: ritim koşusu, --vurus <ms>: vuruştan kaydırarak zıplayan oyuncu (zamanlama penceresi)
 tools/simge_fontu.py     simge yazı tipini üretir (Python + fonttools; yalnız simge seti değişince)
 tests/testler.gd         otomatik testler
 yayin/                   itch.io sayfa metni, ekran görüntüleri, kapak, butler komutları
@@ -137,6 +148,13 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
   zamanlamayla veriyor (sallanma + çatırtı uyarısı).
 - **Dikeyde oynatmak yerine uyarı:** 640×360 yatay tasarımı dikeye sığdırmak ya oyun alanını
   küçültüyor ya da önünü görme mesafesini 0,4 sn'nin altına indiriyor. Koşu oyunu yatay kalıyor.
+- **Ritim parçaları elle değil koddan:** bir parçanın vuruşa hizalı olması için başlangıcının ızgaraya
+  oturması gerekir; hazır sahne yerine ölçü desenlerinden parça üretmek bunu kendiliğinden sağlıyor.
+  Hız sabit, çünkü değişen hızda vuruş aralığı (px) da değişir ve engeller müzikten kopar.
+  Zamanlama penceresi ölçüldü: vuruştan 175 ms erken ile 150 ms geç arasındaki zıplamalar tüm
+  desenlerde yaşatıyor (dar bir "ya tam ya ölüm" yerine: tam vuruş ödül, ceza değil).
+- **Oyun zamanı yetkili, müzik ona uyar:** fizik ve dünya belirlenimci kalsın diye kayma olunca oyun
+  değil müzik sarılır.
 - **Paylaşımda bağlantı yok:** oyun henüz yayında değil; itch adresi belli olunca metne eklenir.
 - **Hayalet yalnız günlük koşuda:** rastgele koşuda çatılar farklı olduğundan hayalet yanıltıcı olurdu.
 - **Tek girdinin derinliği:** kısa dokunuş / basılı tutma / havada ikinci zıplama; alçak tavan
@@ -147,14 +165,15 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 
 ## Doğrulama
 
-Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.5, bulut, Godot 4.7.2 Linux headless):
-otomatik testler **714 geçti, 0 hata**; bot stres testi 32 tohum × 3 dk, 0 ölüm, 43 parçanın hepsi
-koşuldu; web sürümünde telefon emülasyonuyla dikey perde ve tam ekran denendi. (v0.4: 660, v0.3: 558 test.) v0.2: web sürümü Chromium'da menü, karakter, ayarlar, oyun, ölüm tekrarı
+Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.6, bulut, Godot 4.7.2 Linux headless):
+otomatik testler **740 geçti, 0 hata**; ritim koşusunda bot 12 tohum × 3 dk, 0 ölüm, 10 desenin hepsi
+görüldü; vuruşta zıplayan oyuncu −175…+150 ms kaydırmayla 8 tohum × 3 dk, 0 ölüm. (v0.5: 714 test,
+32 tohum bot stresi, telefon emülasyonu; v0.4: 660, v0.3: 558 test.) v0.2: web sürümü Chromium'da menü, karakter, ayarlar, oyun, ölüm tekrarı
 ve sonuç paneliyle denendi.
 
 Windows 11 (Godot 4.7.2, 2026-09-16): varlık/ses/müzik/sahne üretimi, içe aktarma, testler
-(v0.3: **558 geçti, 0 hata**; v0.2: 388), bot stresi (8 tohum, 0 ölüm), ekran görüntüsü aracı ve iki
-dışa aktarma çalıştı (`tek-tus-kosu.exe` 105 MB, web pck 523 KB). Üretilen PNG ve WAV dosyaları bulutta üretilenlerle
+(v0.5: **714 geçti, 0 hata**; v0.4: 660; v0.3: 558; v0.2: 388), bot stresi (8 tohum, 0 ölüm), ekran görüntüsü aracı ve iki
+dışa aktarma çalıştı (`tek-tus-kosu.exe` 105 MB, web pck 560 KB). Üretilen PNG ve WAV dosyaları bulutta üretilenlerle
 bayt bayt aynı.
 
 `build/.gdignore` var: Godot'un dışa aktarma çıktısındaki PNG'leri proje kaynağı sanıp
