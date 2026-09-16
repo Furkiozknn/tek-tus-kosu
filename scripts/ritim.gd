@@ -27,6 +27,40 @@ const SES_KAYMA_SN := 0.06       ## müzik oyundan bu kadar kayarsa yeniden sar�
 ## Menüden seçilen kip ve şarkı.
 static var secili := false
 static var sarki := 0
+static var gunluk_secili := false
+
+
+# ------------------------------------------------------------------ v0.8: günün ritmi
+## Günün ritmi: tarihten tohum ve şarkı; kayıtta "gunluk_ritim" (günlük koşudan ayrı).
+static func gunun_tohumu(tarih: String) -> int:
+	return absi(("tek-tus-kosu/ritim/" + tarih).hash())
+
+
+static func gunun_sarkisi(tarih: String) -> int:
+	return gunun_tohumu(tarih) % SARKILAR.size()
+
+
+static func gunluk_durum(d: Dictionary) -> Dictionary:
+	var g: Dictionary = d.get("gunluk_ritim", {})
+	if str(g.get("tarih", "")) != Gunluk.bugun():
+		g = {"tarih": Gunluk.bugun(), "rekor": 0, "deneme": 0, "olumler": []}
+		d["gunluk_ritim"] = g
+	return g
+
+
+## Günün ritmi koşusunu işler. Dönüş: günün yeni rekoru mu?
+static func gunluk_isle(d: Dictionary, mesafe: int) -> bool:
+	var g := gunluk_durum(d)
+	g["deneme"] = int(g["deneme"]) + 1
+	var olumler: Array = g.get("olumler", [])
+	olumler.append(mesafe)
+	while olumler.size() > Ayarlar.OLUM_ISARETI_SAYISI:
+		olumler.pop_front()
+	g["olumler"] = olumler
+	var yeni := mesafe > int(g["rekor"])
+	if yeni:
+		g["rekor"] = mesafe
+	return yeni
 
 
 static func adim(sarki_no: int) -> float:

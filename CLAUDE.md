@@ -86,6 +86,9 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   (tam zıplama boyu) bırakmalı: 300 px/sn'de en fazla ~160 BPM. BPM'i WAV'ın gerçek temposundan yaz
   (`22050·15 / round(22050·15/bpm)`). Ses gecikmesi ayarı `ayarlar.ritim_gecikme` (ms) ızgarayı kaydırır;
   `_ritim_sapmalar` → `Ritim.gecikme_onerisi()` → sonuçta `%GecikmeDugme`.
+  Günün ritmi: `Ritim.gunluk_secili` → `oyun.ritim_gunluk`; şarkı `Ritim.gunun_sarkisi(tarih)`, tohum
+  `Ritim.gunun_tohumu(tarih)` (günlük koşudan ayrı), kayıt `gunluk_ritim` (`Ritim.gunluk_durum/gunluk_isle`).
+  `oyun.gunluk` bu kipte false kalır (hayalet, günlük seri ve `gunluk300` başarımı çalışmaz).
   Desen eklerken: olaylar yalnız 0/2. vuruşta (tam zıplama 1,86 vuruş sürer), sonra
   `bot_stres --ritim` ve `--vurus -175 / 150` ile pencereyi yeniden ölç.
 - Günlük seri kayıtta `gunluk_seri`; paylaşım metni `Gunluk.paylasim_metni()`. Web'de dokunmatik
@@ -112,6 +115,9 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
+- v0.8 (bulut): 782 test geçti; web'de (Chromium) ritim paneli → Günün ritmi → koşu → sonuç → Paylaş
+  (pano: "Tek Tuş Koşu · Günün ritmi (Gece Koşusu) 16.09.2026 …"); dört düğmeli sonuç paneli testte sığıyor.
+- v0.7 (Windows 11): 765 test; bot stresi 8 tohum, iki şarkıda ritim stresi 4'er tohum, 0 ölüm; web pck 707 KB.
 - v0.7 (bulut): 765 test geçti. 128 BPM: bot 12 tohum × 3 dk 0 ölüm (10 desen); kaydırmalı oyuncu
   −175 / 0 / +150 ms 0 ölüm, −200 ve +175 ms'de ölüm (150 BPM ile aynı pencere).
 - v0.6 (bulut): 740 test geçti. Ritim: bot 12 tohum × 3 dk 0 ölüm (10 desenin hepsi); vuruşa göre

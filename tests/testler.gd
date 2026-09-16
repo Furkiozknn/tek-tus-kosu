@@ -33,6 +33,7 @@ func _calistir() -> void:
 	await _test_ruzgar()
 	await _test_dikey_uyari()
 	await _test_ritim()
+	await _test_gunun_ritmi()
 	print("\n=== SONUÇ: %d geçti, %d hata ===" % [gecen, hatalar])
 	quit(1 if hatalar > 0 else 0)
 
@@ -1132,6 +1133,7 @@ func _test_ritim() -> void:
 	for gecikme in [0.0, 25.0]:
 		var oyun := await _ritim_oyunu(0, 5, false)
 		dogrula(oyun.ritim and not oyun.gunluk and not oyun.rahat and is_equal_approx(oyun.oyuncu.hiz, Ritim.HIZ), "ritim koşusu sabit 300 px/sn")
+		dogrula(oyun.ipucu.visible and oyun.ipucu.text.contains("lamba"), "ritim koşusunda ipucu lambaları anlatmalı")
 		sonuclar[gecikme] = await _ritim_oyna(oyun, gecikme, 60 * 75)
 		oyun.queue_free()
 		await process_frame
@@ -1266,6 +1268,80 @@ func _test_ritim() -> void:
 	await process_frame
 	Ritim.secili = false
 	Ritim.sarki = 0
+	_kayit_temizle()
+
+
+func _test_gunun_ritmi() -> void:
+	print("[günün ritmi]")
+	_kayit_temizle()
+	Gunluk.tarih_ezme = "2026-09-16"
+	var beklenen_sarki := Ritim.gunun_sarkisi("2026-09-16")
+	dogrula(Ritim.gunun_tohumu("2026-09-16") == Ritim.gunun_tohumu("2026-09-16") and Ritim.gunun_tohumu("2026-09-16") != Ritim.gunun_tohumu("2026-09-17"),
+		"günün ritmi tohumu tarihe bağlı ve belirlenimci")
+	dogrula(Ritim.gunun_tohumu("2026-09-16") != Gunluk.tohum("2026-09-16"), "günün ritmi günlük koşudan ayrı tohum kullanmalı")
+	var desenler: Array = []
+	for t in [3, 11]:
+		var o: Node2D = (load(OYUN) as PackedScene).instantiate()
+		o.ritim = true
+		o.ritim_gunluk = true
+		o.ritim_sarki = 1 - beklenen_sarki
+		o.kayit_yap = false
+		o.olum_tekrari_acik = false
+		o.tohum = t
+		root.add_child(o)
+		await _kareler(60 * 6)
+		dogrula(o.ritim_sarki == beklenen_sarki and is_equal_approx(o._adim, Ritim.adim(beklenen_sarki)), "günün şarkısı tarihten seçilmeli")
+		var d0: Array = []
+		for p in o.parcalar:
+			if p.has_meta("desenler"):
+				d0.append(p.get_meta("desenler"))
+		desenler.append(str(d0))
+		o.queue_free()
+		await process_frame
+	dogrula(desenler[0] == desenler[1] and desenler[0] != "[]", "günün ritmi herkes için aynı dizi (%s)" % desenler[0])
+	# Kayıt, rekor yazısı, paylaşım
+	var go: Node2D = (load(OYUN) as PackedScene).instantiate()
+	go.ritim = true
+	go.ritim_gunluk = true
+	go.kayit_yap = true
+	go.olum_tekrari_acik = false
+	root.add_child(go)
+	await _kareler(60)
+	dogrula(go.rekor_etiketi.text.begins_with("Günün ritmi rekoru"), "HUD günün ritmi rekorunu göstermeli (%s)" % go.rekor_etiketi.text)
+	for i in 8:
+		go._ritim_sapmalar.append(70.0)
+	go.oyuncu.ol()
+	await _kareler(2)
+	var kd := Kayit.yukle()
+	var gr: Dictionary = kd["gunluk_ritim"]
+	dogrula(gr["tarih"] == "2026-09-16" and int(gr["deneme"]) == 1 and int(gr["rekor"]) == go.son_sonuc["mesafe"], "günün ritmi kaydı (%s)" % str(gr))
+	dogrula(int(kd["gunluk"]["deneme"]) == 0, "günlük koşu kaydına dokunulmamalı")
+	dogrula(go.get_node("%PaylasDugme").visible and go.get_node("%GecikmeDugme").visible, "günün ritminde Paylaş ve gecikme önerisi")
+	var ekr: Rect2 = go.get_viewport().get_visible_rect()
+	dogrula(ekr.encloses(go.get_node("%SonPaneli").get_global_rect()), "dört düğmeli sonuç paneli ekrana sığmalı (%s)" % go.get_node("%SonPaneli").get_global_rect())
+	var metin: String = go.paylasim_metni()
+	dogrula(metin.begins_with("Tek Tuş Koşu · Günün ritmi (%s) 16.09.2026" % Ritim.SARKILAR[beklenen_sarki]["ad"]) and metin.contains("1. deneme"),
+		"günün ritmi paylaşım metni (%s)" % metin)
+	dogrula(Gunluk.paylasim_metni("2026-09-16", 10, 1, 10, true, 0).begins_with("Tek Tuş Koşu · Günlük 16.09.2026"), "günlük paylaşım metni değişmemeli")
+	go.queue_free()
+	await process_frame
+	# Menü düğmesi
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _kareler(3)
+	var gd: Button = menu.get_node("%GunlukRitimDugme")
+	dogrula(gd.text == "Günün ritmi · %s · %d m" % [Ritim.SARKILAR[beklenen_sarki]["ad"], int(gr["rekor"])], "günün ritmi düğmesi (%s)" % gd.text)
+	(menu.get_node("%RitimDugme") as Button).pressed.emit()
+	await _kareler(3)
+	dogrula(menu.get_viewport().get_visible_rect().encloses(menu.get_node("%RitimPaneli").get_global_rect()), "üç düğmeli ritim paneli ekrana sığmalı")
+	menu.basla(false, true, beklenen_sarki, true)
+	dogrula(Ritim.secili and Ritim.gunluk_secili and not Gunluk.secili, "günün ritmi düğmesi kipi seçmeli")
+	menu.queue_free()
+	await process_frame
+	Ritim.secili = false
+	Ritim.gunluk_secili = false
+	Ritim.sarki = 0
+	Gunluk.tarih_ezme = ""
 	_kayit_temizle()
 
 

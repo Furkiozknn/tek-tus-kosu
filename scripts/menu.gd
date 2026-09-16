@@ -24,6 +24,7 @@ func _ready() -> void:
 	for i in Ritim.SARKILAR.size():
 		get_node("%%SarkiDugme%d" % i).pressed.connect(basla.bind(false, true, i))
 	%RitimGeri.pressed.connect(func() -> void: _panel_ac(%AnaPanel))
+	%GunlukRitimDugme.pressed.connect(func() -> void: basla(false, true, Ritim.gunun_sarkisi(Gunluk.bugun()), true))
 	%GecikmeKaydirici.value = float(d["ayarlar"].get("ritim_gecikme", 0))
 	%GecikmeKaydirici.value_changed.connect(func(v: float) -> void: _ayar("ritim_gecikme", int(v)); _yenile())
 	%KarakterDugme.pressed.connect(func() -> void: _panel_ac(%KarakterPaneli))
@@ -108,6 +109,10 @@ func _yenile() -> void:
 		rr = maxi(rr, r)
 		var b: Button = get_node("%%SarkiDugme%d" % i)
 		b.text = "%s · %d BPM" % [sk["ad"], int(round(float(sk["bpm"])))] + ("" if r <= 0 else " · %d m" % r)
+	var gr := Ritim.gunluk_durum(d)
+	var gs: Dictionary = Ritim.SARKILAR[Ritim.gunun_sarkisi(Gunluk.bugun())]
+	%GunlukRitimDugme.text = "Günün ritmi · %s" % gs["ad"] + ("" if int(gr["deneme"]) == 0 else " · %d m" % int(gr["rekor"]))
+	%GunlukRitimDugme.tooltip_text = "Bugün herkes aynı şarkıda aynı çatılarda koşar. Deneme: %d" % int(gr["deneme"])
 	%RitimDugme.text = "Ritim" if rr <= 0 else "Ritim · %d m" % rr
 	%RitimDugme.tooltip_text = "Engeller müziğin vuruşlarına hizalı; vuruşta zıpla."
 	var gc := int(d["ayarlar"].get("ritim_gecikme", 0))
@@ -231,13 +236,14 @@ func _telefonda_tam_ekran() -> void:
 	JavaScriptBridge.eval(js, true)
 
 
-func basla(gunluk := false, ritim := false, sarki := 0) -> void:
+func basla(gunluk := false, ritim := false, sarki := 0, ritim_gunluk := false) -> void:
 	if _basliyor:
 		return
 	_basliyor = true
 	Gunluk.secili = gunluk and not ritim
 	Ritim.secili = ritim
 	Ritim.sarki = sarki
+	Ritim.gunluk_secili = ritim and ritim_gunluk
 	set_process_unhandled_input(false)
 	_telefonda_tam_ekran()
 	var tw := create_tween()

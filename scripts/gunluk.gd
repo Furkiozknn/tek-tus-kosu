@@ -80,7 +80,7 @@ static func seri(d: Dictionary) -> int:
 
 
 ## Panoya/paylaşıma gidecek kısa sonuç metni. Şerit: bu koşunun günün rekoruna oranı.
-static func paylasim_metni(tarih: String, mesafe: int, deneme: int, rekor: int, yeni_rekor: bool, seri_: int) -> String:
+static func paylasim_metni(tarih: String, mesafe: int, deneme: int, rekor: int, yeni_rekor: bool, seri_: int, kip := "Günlük") -> String:
 	var p := tarih.split("-")
 	var gun := "%s.%s.%s" % [p[2], p[1], p[0]] if p.size() == 3 else tarih
 	var en := maxi(rekor, mesafe)
@@ -88,7 +88,7 @@ static func paylasim_metni(tarih: String, mesafe: int, deneme: int, rekor: int, 
 	var dolu := hucre
 	if en > 0:
 		dolu = clampi(int(round(float(hucre) * mesafe / en)), 0, hucre)
-	var satirlar: Array[String] = ["Tek Tuş Koşu · Günlük %s" % gun]
+	var satirlar: Array[String] = ["Tek Tuş Koşu · %s %s" % [kip, gun]]
 	satirlar.append("%d m · %d. deneme%s" % [mesafe, deneme, "  · günün rekoru!" if yeni_rekor else ""])
 	satirlar.append("■".repeat(dolu) + "□".repeat(hucre - dolu) + ("" if yeni_rekor else "  rekor %d m" % en))
 	if seri_ >= 2:

@@ -3,8 +3,9 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v0.7 — geliştirme turu 6 (2026-09-16). Ritim koşusuna ikinci şarkı (128 BPM), şarkı başına
-rekor ve ses gecikmesi ayarı (oyunun ölçtüğü sapmadan tek dokunuşla öneri). (v0.6: **ritim koşusu** —
+**Durum:** v0.8 — geliştirme turu 7 (2026-09-16). **Günün ritmi:** her gün tarihten seçilen şarkı ve
+çatı dizisi, ayrı günlük rekor ve paylaşım; ritim koşusunda başlangıç ipucu. (v0.7: ikinci şarkı
+(128 BPM), şarkı başına rekor, ses gecikmesi ayarı ve öneri. v0.6: **ritim koşusu** —
 engelleri müziğin vuruşlarına hizalı, koddan üretilen ayrı kip. v0.5: rüzgâr, telefonda dikey uyarısı + tam ekran. v0.4: çürük iskele, günlük seri ve paylaşım, kostüm izleri, web simge düzeltmesi.
 v0.3: günlük koşu + hayalet, işaretler, şehir haritası. v0.2: pixel art, ses/müzik, görevler,
 kostümler, ölüm tekrarı, ayarlar.)
@@ -30,6 +31,10 @@ kostümler, ölüm tekrarı, ayarlar.)
   ve ölüm listesi; sonuç panelinde tam vuruş sayısı; 13. başarım "Vuruşu yakala" (tek koşuda 20 tam vuruş).
   Duraklatınca müzik de durur; müzik oyun zamanından 60 ms'den fazla kayarsa (sekme gizlendi,
   uzun takılma) müzik oyuna göre yeniden sarılır.
+- **Günün ritmi (v0.8):** ritim panelinde üçüncü düğme. Şarkı ve çatı dizisi tarihten gelir (günlük koşudan
+  ayrı tohum); herkes o gün aynı ritimde koşar. Günün rekoru, deneme sayısı ve ölüm işaretleri ayrı
+  (`gunluk_ritim`); sonuçta Paylaş ("Tek Tuş Koşu · Günün ritmi (şarkı) tarih"). Ritim koşularında ilk
+  saniyelerde lambaları anlatan ipucu.
 - **Ritim şarkıları ve gecikme (v0.7):** Ritim düğmesi şarkı panelini açar: "Gece Koşusu · 150 BPM"
   ve "Çatı Neşesi · 128 BPM" (vuruş 140,6 px — aynı engeller, daha geniş aralık). Her şarkının rekoru ve
   ölüm işaretleri ayrı. Panelde **Ses gecikmesi** kaydırıcısı (−150…+300 ms): vuruş ızgarasını (engelleri)
@@ -167,6 +172,9 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 - **Oyun zamanı yetkili, müzik ona uyar:** fizik ve dünya belirlenimci kalsın diye kayma olunca oyun
   değil müzik sarılır.
 - **Paylaşımda bağlantı yok:** oyun henüz yayında değil; itch adresi belli olunca metne eklenir.
+- **Günün ritmi ayrı tohum ve ayrı kayıt:** günlük koşuyla aynı tohumu paylaşsaydı iki kip aynı günü
+  "tüketirdi"; ayrı tutunca iki günlük meydan okuma birbirini bozmadan yan yana duruyor. Hayalet henüz yok
+  (yol haritasında).
 - **Hayalet yalnız günlük koşuda:** rastgele koşuda çatılar farklı olduğundan hayalet yanıltıcı olurdu.
 - **Tek girdinin derinliği:** kısa dokunuş / basılı tutma / havada ikinci zıplama; alçak tavan
   kısa sıçramayı zorunlu kılar.
@@ -176,15 +184,15 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 
 ## Doğrulama
 
-Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.7, bulut, Godot 4.7.2 Linux headless):
-otomatik testler **765 geçti, 0 hata**; 128 BPM şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere yine
+Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.8, bulut, Godot 4.7.2 Linux headless):
+otomatik testler **782 geçti, 0 hata**; web'de günün ritmi → sonuç → Paylaş pano metni doğrulandı. (v0.7: 765 test; 128 BPM şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere yine
 −175…+150 ms. (v0.6: 740 test; ritim koşusunda bot 12 tohum × 3 dk, 0 ölüm, 10 desenin hepsi
 görüldü; vuruşta zıplayan oyuncu −175…+150 ms kaydırmayla 8 tohum × 3 dk, 0 ölüm. (v0.5: 714 test,
 32 tohum bot stresi, telefon emülasyonu; v0.4: 660, v0.3: 558 test.) v0.2: web sürümü Chromium'da menü, karakter, ayarlar, oyun, ölüm tekrarı
 ve sonuç paneliyle denendi.
 
 Windows 11 (Godot 4.7.2, 2026-09-16): varlık/ses/müzik/sahne üretimi, içe aktarma, testler
-(v0.6: **742 geçti, 0 hata**, ritim stresi 4 tohum 0 ölüm; v0.5: 714; v0.4: 660; v0.3: 558; v0.2: 388), bot stresi (8 tohum, 0 ölüm), ekran görüntüsü aracı ve iki
+(v0.7: **765 geçti, 0 hata**, iki şarkıda ritim stresi 0 ölüm; v0.6: 742; v0.5: 714; v0.4: 660; v0.3: 558; v0.2: 388), bot stresi (8 tohum, 0 ölüm), ekran görüntüsü aracı ve iki
 dışa aktarma çalıştı (`tek-tus-kosu.exe` 105 MB, web pck 570 KB). Üretilen PNG ve WAV dosyaları bulutta üretilenlerle
 bayt bayt aynı.
 

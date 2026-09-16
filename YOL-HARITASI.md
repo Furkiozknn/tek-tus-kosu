@@ -72,9 +72,15 @@
       (ayrı kalibrasyon ekranı yerine)
 - [x] `bot_stres --sarki`
 
-## Sonraki tur (v0.8)
+## Bitti — geliştirme turu 7 (v0.8, 2026-09-16)
 
-- [ ] Ritim: günlük ritim koşusu (tarih tohumu) — isteğe bağlı
+- [x] Günün ritmi: tarihten şarkı + tohum, ayrı günlük rekor/deneme/ölümler, paylaşım metni
+- [x] Ritim koşusunda başlangıç ipucu (lambalar, kısa dokunuş)
+- [x] Sonuç paneli dört düğmeye kadar (Tekrar | Paylaş | Gecikme | Menü)
+
+## Sonraki tur (v0.9)
+
+- [ ] Günün ritmi hayaleti (günlük koşudaki gibi)
 - [ ] Ritim: şarkıya özel desen (ör. 128 BPM'de senkoplu çift diken) — yeni desen yalnız ölçülmüş pencereyle
 - [ ] Paylaşım metnine itch adresi (yayından sonra)
 - [ ] Gerçek telefonda dokunma, tam ekran ve paylaşım menüsü denemesi

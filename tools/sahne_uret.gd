@@ -763,9 +763,12 @@ func _menu() -> Node:
 	rv.add_child(_etiket("RitimBaslik", "Ritim koşusu", 22))
 	rv.add_child(_etiket("RitimAciklama", "Engeller müziğin vuruşuna hizalı. Sarı oklu lambada zıpla.", 12, Color("c0cbdc")))
 	for i in 2:
-		var sd := _dugme("SarkiDugme%d" % i, "Şarkı %d" % (i + 1), Vector2(300, 36))
+		var sd := _dugme("SarkiDugme%d" % i, "Şarkı %d" % (i + 1), Vector2(300, 34))
 		sd.add_theme_font_size_override("font_size", 16)
 		rv.add_child(sd)
+	var grd := _dugme("GunlukRitimDugme", "Günün ritmi", Vector2(300, 30))
+	grd.add_theme_font_size_override("font_size", 14)
+	rv.add_child(grd)
 	var gs := HBoxContainer.new()
 	gs.name = "GecikmeSatir"
 	gs.add_theme_constant_override("separation", 8)

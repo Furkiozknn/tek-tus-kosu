@@ -15,6 +15,7 @@ var olum_tekrari_acik := true         ## Testlerde kapatılabilir
 var gunluk := false                   ## Günlük koşu (menüden Gunluk.secili ile gelir)
 var ritim := false                    ## Ritim koşusu (menüden Ritim.secili ile gelir)
 var ritim_sarki := -1                 ## Ritim şarkısı (-1: menüden Ritim.sarki)
+var ritim_gunluk := false             ## Günün ritmi (tarihten tohum + şarkı; menüden Ritim.gunluk_secili)
 
 const TEMALAR := [
 	{"ad": "Akşam", "ust": Color("68386c"), "alt": Color("f77622"), "uzak": Color(1, 0.85, 0.8), "yakin": Color(1, 0.9, 0.9), "yildiz": 0.3, "yagis": false},
@@ -109,7 +110,10 @@ func _ready() -> void:
 	add_child(du)
 	du.dikey_oldu.connect(_dikey_oldu)
 	ritim = ritim or Ritim.secili
-	if ritim_sarki < 0:
+	ritim_gunluk = ritim and (ritim_gunluk or Ritim.gunluk_secili)
+	if ritim_gunluk:
+		ritim_sarki = Ritim.gunun_sarkisi(Gunluk.bugun())
+	elif ritim_sarki < 0:
 		ritim_sarki = Ritim.sarki
 	ritim_sarki = clampi(ritim_sarki, 0, Ritim.SARKILAR.size() - 1)
 	_adim = Ritim.adim(ritim_sarki)
@@ -154,6 +158,8 @@ func yeniden_baslat() -> void:
 		parca_rng.randomize()
 	if gunluk:
 		parca_rng.seed = Gunluk.tohum(Gunluk.bugun())
+	elif ritim_gunluk:
+		parca_rng.seed = Ritim.gunun_tohumu(Gunluk.bugun())
 	Gorevler.hazirla(d, rng)
 	if kayit_yap:
 		Kayit.kaydet(d)
@@ -212,6 +218,8 @@ func yeniden_baslat() -> void:
 	tekrar_etiketi.hide()
 	gorev_bildirimi.hide()
 	ipucu.visible = not bot_modu
+	if ritim:
+		ipucu.text = "Müziği dinle: sarı oklu lambaya vuruşta basınca zıpla\nKısa dokunuş: alçak tavanın altından geç"
 
 	# Başlangıçta iki düz parça: ısınma alanı.
 	_parca_ekle(ParcaListesi.DUZ)
@@ -262,7 +270,7 @@ func _physics_process(delta: float) -> void:
 	var m := mesafe()
 	istatistik["mesafe"] = m
 	mesafe_etiketi.text = "%d m" % m
-	if ipucu.visible and sure > 4.0:
+	if ipucu.visible and sure > (7.0 if ritim else 4.0):
 		ipucu.hide()
 	_altin_seri = maxf(_altin_seri - delta, 0.0)
 	_gecisleri_say()
@@ -680,7 +688,9 @@ func _kosu_sonucunu_isle() -> void:
 		d["toplam_altin"] = int(d["toplam_altin"]) + altin
 		d["kosu_sayisi"] = int(d["kosu_sayisi"]) + 1
 		d["toplam_mesafe"] = int(d["toplam_mesafe"]) + m
-		if gunluk:
+		if ritim_gunluk:
+			Ritim.gunluk_isle(d, m)
+		elif gunluk:
 			Gunluk.kosu_isle(d, m)
 			Gunluk.seri_isle(d)
 			if yeni_rekor and _hayalet_kayit:
@@ -697,7 +707,7 @@ func _kosu_sonucunu_isle() -> void:
 		Kayit.kaydet(d)
 	son_sonuc = {"mesafe": m, "yeni_rekor": yeni_rekor, "rekor": maxi(onceki_rekor, m), "gorev": gorev_sonuc,
 		"gorevler": d["gorevler"], "seviye": int(d["gorev_seviyesi"]), "olumler": onceki_olumler,
-		"basarimlar": basarimlar, "deneme": int(Gunluk.durum(d)["deneme"]) if gunluk else 0,
+		"basarimlar": basarimlar, "deneme": _gunluk_deneme(d),
 		"seri": Gunluk.seri(d) if gunluk else 0}
 	if ritim:
 		var toplam := 0.0
@@ -779,7 +789,7 @@ func _son_paneli_goster() -> void:
 	_yeniden_baslat_izni = maxf(_yeniden_baslat_izni, 0.35)
 	var s := son_sonuc
 	son_skor.text = "Mesafe: %d m" % int(s.get("mesafe", mesafe()))
-	if gunluk:
+	if gunluk or ritim_gunluk:
 		son_rekor.text = ("GÜNÜN REKORU!" if s.get("yeni_rekor", false) else "Bugünün rekoru: %d m" % int(s.get("rekor", _rekor))) \
 				+ "   (deneme %d)" % int(s.get("deneme", 0))
 	else:
@@ -810,7 +820,7 @@ func _son_paneli_goster() -> void:
 	# Kalabalık panelde alt ipucu yer kaplamasın (dokunma/boşluk yine çalışır).
 	%SonIpucu.visible = satirlar.size() <= 6
 	# Günlük koşuda üç düğme: Tekrar | Paylaş | Menü. Ritimde gecikme önerisi varsa: Tekrar | Gecikme | Menü
-	%PaylasDugme.visible = gunluk
+	%PaylasDugme.visible = gunluk or ritim_gunluk
 	%PaylasDugme.text = "Paylaş"
 	var gd: Button = %GecikmeDugme
 	gd.visible = ritim and _gecikme_onerisi != null
@@ -818,7 +828,10 @@ func _son_paneli_goster() -> void:
 	if gd.visible:
 		gd.text = "Gecikme %+d ms" % int(_gecikme_onerisi)
 		gd.tooltip_text = "Zıplamaların vuruştan ortalama %+d ms uzakta. Ses gecikmesi ayarını buna göre değiştir." % int(round(float(s.get("ritim_sapma", 0.0))))
-	var genislik := 110.0 if (gunluk or gd.visible) else 150.0
+	var dugme_sayisi := 2 + int(%PaylasDugme.visible) + int(gd.visible)
+	var genislik := 150.0 if dugme_sayisi == 2 else (110.0 if dugme_sayisi == 3 else 96.0)
+	for b in [%PaylasDugme, gd]:
+		b.custom_minimum_size.x = genislik
 	%TekrarDugme.custom_minimum_size.x = genislik
 	%SonMenuDugme.custom_minimum_size.x = genislik
 	son_paneli.reset_size()
@@ -839,6 +852,12 @@ func gecikme_uygula() -> void:
 	_gecikme_onerisi = null
 
 
+func _gunluk_deneme(d: Dictionary) -> int:
+	if ritim_gunluk:
+		return int(Ritim.gunluk_durum(d)["deneme"])
+	return int(Gunluk.durum(d)["deneme"]) if gunluk else 0
+
+
 func _ritim_anahtar(tur: String) -> String:
 	return str(Ritim.SARKILAR[ritim_sarki][tur])
 
@@ -846,6 +865,10 @@ func _ritim_anahtar(tur: String) -> String:
 # ------------------------------------------------------------------ v0.4: paylaşım
 func paylasim_metni() -> String:
 	var s := son_sonuc
+	if ritim_gunluk:
+		return Gunluk.paylasim_metni(Gunluk.bugun(), int(s.get("mesafe", 0)), int(s.get("deneme", 0)),
+				int(s.get("rekor", 0)), bool(s.get("yeni_rekor", false)), 0,
+				"Günün ritmi (%s)" % Ritim.SARKILAR[ritim_sarki]["ad"])
 	return Gunluk.paylasim_metni(Gunluk.bugun(), int(s.get("mesafe", 0)), int(s.get("deneme", 0)),
 			int(s.get("rekor", 0)), bool(s.get("yeni_rekor", false)), int(s.get("seri", 0)))
 
@@ -872,6 +895,8 @@ func _paylas() -> void:
 func _mod_rekoru(d: Dictionary) -> int:
 	if gunluk:
 		return int(Gunluk.durum(d)["rekor"])
+	if ritim_gunluk:
+		return int(Ritim.gunluk_durum(d)["rekor"])
 	if ritim:
 		return int(d[_ritim_anahtar("rekor")])
 	return int(d["rekor_rahat"] if rahat else d["rekor"])
@@ -880,6 +905,8 @@ func _mod_rekoru(d: Dictionary) -> int:
 func _rekor_metni(r: int) -> String:
 	if gunluk:
 		return "Günlük rekor: %d m" % r
+	if ritim_gunluk:
+		return "Günün ritmi rekoru: %d m" % r
 	if ritim:
 		return "%s rekoru: %d m" % [Ritim.SARKILAR[ritim_sarki]["ad"], r]
 	return ("Rahat rekor: %d m" if rahat else "Rekor: %d m") % r
@@ -888,6 +915,8 @@ func _rekor_metni(r: int) -> String:
 func _olum_listesi(d: Dictionary) -> Array:
 	if gunluk:
 		return Gunluk.durum(d).get("olumler", [])
+	if ritim_gunluk:
+		return Ritim.gunluk_durum(d).get("olumler", [])
 	return d[_ritim_anahtar("olumler") if ritim else ("olumler_rahat" if rahat else "olumler")]
 
 
