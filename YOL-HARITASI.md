@@ -92,7 +92,7 @@
 - [ ] Ritim: şarkıya özel desen seti (ör. 128 BPM'de daha sık kısa sıçrama) — yalnız ölçülmüş pencereyle
 - [ ] Gerçek telefonda deneme (dokunma gecikmesi, tam ekran, paylaşım menüsü)
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
-- [ ] Paylaşım metnine itch adresi (yayından sonra)
+- [ ] Paylaşım metnine itch adresi (yayından sonra `Ayarlar.ITCH_ADRESI` doldurulur — kod hazır)
 - [ ] Gerçek telefonda dokunma, tam ekran ve paylaşım menüsü denemesi
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] itch.io web yayını (Furki'nin onayıyla)

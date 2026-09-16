@@ -57,6 +57,7 @@ const ISKELE_GUVENLI := 60.0       ## İskelenin başında en düşük hızda bi
 const ISKELE_KALINLIK := 10.0
 const ISKELE_DUSUS := 1100.0       ## Çöken iskelenin düşüş yerçekimi
 const PAYLAS_SERIT := 10           ## Paylaşım metnindeki ilerleme şeridinin hücre sayısı
+const ITCH_ADRESI := ""            ## Yayından sonra doldur (ör. "https://kullanici.itch.io/tek-tus-kosu"); paylaşım metnine eklenir
 
 
 ## Tam basılı zıplamanın havada kalma süresi (saniye)

@@ -93,4 +93,6 @@ static func paylasim_metni(tarih: String, mesafe: int, deneme: int, rekor: int, 
 	satirlar.append("■".repeat(dolu) + "□".repeat(hucre - dolu) + ("" if yeni_rekor else "  rekor %d m" % en))
 	if seri_ >= 2:
 		satirlar.append("Seri: %d gün" % seri_)
+	if Ayarlar.ITCH_ADRESI != "":
+		satirlar.append(Ayarlar.ITCH_ADRESI)
 	return "\n".join(satirlar)
