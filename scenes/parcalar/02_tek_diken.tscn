@@ -5,40 +5,40 @@
 [ext_resource type="Script" path="res://scripts/tehlike.gd" id="3_81nfv"]
 [ext_resource type="Script" path="res://scripts/altin.gd" id="4_xk2lb"]
 
-[node name="Parca" type="Node2D" unique_id=1357715402]
+[node name="Parca" type="Node2D" unique_id=1472691709]
 script = ExtResource("1_qann6")
 
-[node name="Giris" type="Marker2D" parent="." unique_id=1226314795]
+[node name="Giris" type="Marker2D" parent="." unique_id=1181098710]
 position = Vector2(0, 280)
 
-[node name="Cikis" type="Marker2D" parent="." unique_id=865580225]
+[node name="Cikis" type="Marker2D" parent="." unique_id=1454284064]
 position = Vector2(640, 280)
 
-[node name="Zemin1" type="StaticBody2D" parent="." unique_id=782840059]
+[node name="Zemin1" type="StaticBody2D" parent="." unique_id=799258777]
 position = Vector2(0, 280)
 script = ExtResource("2_cys02")
 genislik = 640.0
 
-[node name="Diken1" type="Area2D" parent="." unique_id=391292701]
+[node name="Diken1" type="Area2D" parent="." unique_id=813139073]
 position = Vector2(300, 280)
 script = ExtResource("3_81nfv")
 
-[node name="Altin1" type="Area2D" parent="." unique_id=428673896]
+[node name="Altin1" type="Area2D" parent="." unique_id=1293578777]
 position = Vector2(258, 236)
 script = ExtResource("4_xk2lb")
 
-[node name="Altin2" type="Area2D" parent="." unique_id=598171294]
+[node name="Altin2" type="Area2D" parent="." unique_id=1965693108]
 position = Vector2(288, 206)
 script = ExtResource("4_xk2lb")
 
-[node name="Altin3" type="Area2D" parent="." unique_id=1333802664]
+[node name="Altin3" type="Area2D" parent="." unique_id=286860276]
 position = Vector2(318, 196)
 script = ExtResource("4_xk2lb")
 
-[node name="Altin4" type="Area2D" parent="." unique_id=1348092872]
+[node name="Altin4" type="Area2D" parent="." unique_id=733920649]
 position = Vector2(348, 206)
 script = ExtResource("4_xk2lb")
 
-[node name="Altin5" type="Area2D" parent="." unique_id=1219485354]
+[node name="Altin5" type="Area2D" parent="." unique_id=1251182639]
 position = Vector2(378, 236)
 script = ExtResource("4_xk2lb")

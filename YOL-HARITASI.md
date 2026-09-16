@@ -1,6 +1,6 @@
 # Tek Tuş Koşu — Yol haritası
 
-## Bitti (prototip, 2026-09-16)
+## Bitti — prototip (v0.1, 2026-09-16)
 
 - [x] Tek girdi: klavye / gamepad / dokunma / fare; basılı tut = yüksek, havada 1 ek zıplama
 - [x] Kojot süresi + zıplama tamponu + değişken yükseklik
@@ -11,16 +11,31 @@
 - [x] Otomatik testler (bot ile her parçanın geçilebilirliği, 3 dk bellek/hız testi)
 - [x] Windows + Web dışa aktarma
 
-## Sonraki adımlar
+## Bitti — geliştirme turu 1 (v0.2, 2026-09-16)
 
-- [ ] Windows'ta (PC) gerçek oynanış kontrolü; zıplama hissi ve hız eğrisi ayarı
-- [ ] Pixel art: oyuncu koşu/zıplama animasyonu, zemin karoları, diken, blok, altın (Pixelorama)
-- [ ] Parallaks arka plan (2-3 katman)
-- [ ] Ses: zıplama, altın, ölüm, rekor (rFXGen) + müzik; ses aç/kapa
-- [ ] Parça sayısını 25+'a çıkar; yeni öğeler: hareketli platform, alçak tavan, yükselen diken
-- [ ] Görev/başarım (ör. "tek koşuda 50 altın")
-- [ ] Toplanan altınla kozmetik karakter kilidi açma
-- [ ] Ekran sarsıntısı, toz parçacıkları, ölüm animasyonu (tümleşik GPU için hafif tut)
-- [ ] Mobil: dikey/yatay kararı, güvenli alan (çentik) payı, titreşim
+- [x] Kodla üretilmiş pixel art: 5 kostümlü koşu/zıplama/düşüş/takla/bekleme/ölüm animasyonu,
+      çatı ve tuğla karoları, diken, blok, tavan, piston, platform, altın
+- [x] 4 katmanlı parallaks (gökyüzü gradyanı, yıldızlar, ay, uzak/yakın şehir)
+- [x] Ses efektleri + menü/oyun müziği (koddan), Muzik/Efekt veri yolları, ses ayarı
+- [x] 26 parça; yeni öğeler: alçak tavan, piston, hareketli platform, nefes parçaları, riskli rotalar
+- [x] Kıl payı kaçış ödülü
+- [x] Görev sistemi (3 eşzamanlı görev, seviye), altın ödülleri
+- [x] Kostüm dükkânı (yalnız kozmetik)
+- [x] Ölüm tekrarı + vurgu, sahne yüklemeden hızlı yeniden başlama
+- [x] Tema döngüsü (500 m), yağış
+- [x] Ayarlar: ses, tam ekran, sarsıntı, yüksek kontrast, rahat mod (ayrı rekor)
+- [x] Kayıt yedeği ve eski kayıt taşıma
+- [x] Juice: ezilme/uzama, toz, altın serisi perde yükselişi, sarsıntı, rekor efekti
+- [x] itch.io paket taslağı (`yayin/`) — yükleme yapılmadı
+
+## Sonraki tur (v0.3) — rakip analizinden kalanlar
+
+- [ ] Günlük tohum koşusu (herkes aynı parça dizisi) + günlük rekor
+- [ ] Hayalet rakip: kendi en iyi koşunun hayaleti ekranda
+- [ ] Çatı ritmi: müzik vuruşuna hizalı parça dizileri (isteğe bağlı mod)
+- [ ] Şehir ışıkları haritası: koşu sonunda gidilen yolun mini haritası, ölüm noktaları
+- [ ] 35+ parça; yeni öğeler: kırılan çatı, rüzgâr, zincirleme platform
+- [ ] Başarımlar ve kostüm başına küçük görsel iz (parçacık rengi)
+- [ ] Mobil: güvenli alan (çentik) payı, titreşim, dikey yerleşim denemesi
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
-- [ ] itch.io sayfası + web yayını (Furki'nin onayıyla)
+- [ ] itch.io web yayını (Furki'nin onayıyla)

@@ -1,9 +1,10 @@
 # Tek Tuş Koşu
 
-Mobil öncelikli, tek tuşla oynanan sonsuz koşu oyunu. Karakter kendiliğinden koşar;
+Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** oynanabilir prototip (2026-09-16). Görseller yer tutucu şekiller, ses yok.
+**Durum:** v0.2 — geliştirme turu 1 (2026-09-16). Kodla üretilmiş pixel art, ses ve müzik,
+görevler, kostümler, ölüm tekrarı, ayarlar, 26 parça.
 
 ## Kontroller
 
@@ -11,9 +12,27 @@ oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 |---|---|---|---|
 | Zıpla | Boşluk / W / ↑ | A (veya B) | Ekrana dokun / sol tık |
 | Yüksek zıpla | Basılı tut | Basılı tut | Parmağını basılı tut |
+| Kısa sıçrama (alçak tavan altı) | Dokun, hemen bırak | Aynı | Kısa dokunuş |
 | Havada ikinci zıplama | Havada tekrar bas | Havada tekrar bas | Havada tekrar dokun |
 | Duraklat | Esc / P | Start | Sağ üstteki **II** |
 | Oyun bitince tekrar | Boşluk | A | Dokun |
+
+## Oyun içeriği (v0.2)
+
+- **26 parça:** zorluk 0 "nefes" parçaları (3–8 tehlikeli parçada bir), zorluk 1–3 parçalar;
+  öğeler: çukur, diken, blok, alçak tavan (yalnız kısa sıçramayla geçilir), piston (yükselip inen
+  diken), hareketli platform, riskli altın rotaları.
+- **Kıl payı kaçış:** engelin 14 px yakınından geçmek +1 altın, sesli/yazılı geri bildirim.
+- **Görevler:** her zaman 3 görev (kısa/orta/uzun); ödül 20/50/120 altın; her 3 görevde seviye artar,
+  hedefler büyür.
+- **Kostümler:** Klasik, Kızıl, Orman, Neon, Altın (60–600 altın). Menü → Karakter.
+- **Ölüm tekrarı:** son 1,5 sn yavaş çekimde, çarpılan engel vurgulu; ardından sonuç paneli
+  (mesafe, rekor, altın, görev ilerlemesi). Sahne yeniden yüklenmeden < 1 sn'de yeniden başlar.
+- **Tema döngüsü:** her 500 m'de Akşam → Gece → Yağış → Neon (gökyüzü geçişi, yağış parçacıkları).
+- **Ayarlar:** müzik/efekt ses düzeyi, tam ekran (masaüstü), ekran sarsıntısı, yüksek kontrast
+  tehlikeler, **Rahat mod** (hız ×0,8, ayrı rekor).
+- **Kayıt:** `user://kayit.cfg` + yedek `kayit.yedek.cfg`; bozuk kayıtta yedekten döner, eski
+  prototip kaydını taşır.
 
 ## Çalıştırma
 
@@ -24,58 +43,73 @@ oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 ## Yapı
 
 ```
-scripts/ayarlar.gd       tüm denge sabitleri (hız, zıplama, zorluk eşikleri)
-scripts/oyuncu.gd        koşu + zıplama (kojot süresi, zıplama tamponu, değişken yükseklik, 2. zıplama)
-scripts/oyun.gd          parça üretimi/silme, hız artışı, puan, duraklatma, oyun sonu, girdi
-scripts/parca.gd         parça tabanı + tehlike aralıklarının hesabı
-scripts/bot.gd           test/demodaki otomatik oyuncu
-scripts/kayit.gd         rekor + toplam altın (user://kayit.cfg)
-scenes/parcalar/*.tscn   12 hazır parça (zorluk 1-3)
-tools/sahne_uret.gd      parça ve arayüz sahnelerini koddan üretir
+scripts/ayarlar.gd       tüm denge sabitleri (hız, zıplama, zorluk eşikleri, piston, kıl payı, tema)
+scripts/oyuncu.gd        koşu + zıplama (kojot, tampon, değişken yükseklik, 2. zıplama), animasyon, geçmiş
+scripts/oyun.gd          parça üretimi, hız, puan, görev takibi, tema, efektler, ölüm tekrarı, sonuç paneli
+scripts/menu.gd          ana menü, karakter (kostüm satın alma), ayarlar
+scripts/parca.gd         parça tabanı + tehlike/tavan aralıkları
+scripts/tehlike.gd       diken / blok / tavan / piston + kıl payı algılayıcı
+scripts/hareketli.gd     hareketli platform (AnimatableBody2D)
+scripts/zemin.gd         dokulu çatı/tuğla çizimi
+scripts/altin.gd         toplanabilir altın
+scripts/gorevler.gd      görev şablonları, ilerleme, ödül
+scripts/kostumler.gd     kostüm listesi, SpriteFrames üretimi, satın alma
+scripts/ses.gd           ses efekti havuzu + müzik, Muzik/Efekt veri yolları
+scripts/kayit.gd         kayıt + yedek + ayarlar
+scripts/bot.gd           test/demodaki otomatik oyuncu (kısa sıçrama dahil)
+scenes/parcalar/*.tscn   26 hazır parça (koddan üretilir)
+tools/varlik_uret.gd     tüm sprite'ları (PNG) koddan üretir
+tools/ses_uret.gd        ses efektlerini (WAV) koddan üretir
+tools/muzik_uret.gd      menü ve oyun müziğini (WAV döngü) üretir
+tools/sahne_uret.gd      parça, oyun ve menü sahnelerini koddan üretir
 tools/proje_ayarla.gd    project.godot ayarlarını + girdi haritasını yazar
 tests/testler.gd         otomatik testler
+yayin/                   itch.io sayfa metni, ekran görüntüleri, kapak, butler komutları
 ```
 
-## Parça eklemek / değiştirmek
-
-`tools/sahne_uret.gd` içindeki `PARCALAR` listesini düzenle, sonra:
+## Varlıkları ve sahneleri yeniden üretmek
 
 ```
+godot --headless --path . -s res://tools/proje_ayarla.gd
+godot --headless --path . -s res://tools/varlik_uret.gd
+godot --headless --path . -s res://tools/ses_uret.gd
+godot --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_oyun.wav --ruh hizli --tohum 11
+godot --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_menu.wav --ruh sakin --tohum 4
+godot --headless --path . --import
 godot --headless --path . -s res://tools/sahne_uret.gd
 godot --headless --path . --import
 godot --headless --fixed-fps 60 --path . -s res://tests/testler.gd
 ```
 
-Test, her parçayı kendi en düşük hızında ve en yüksek hızda (460 px/sn) bot ile koşturur;
-geçilemeyen parça testi düşürür. Tasarım kuralları: parça uçlarında 60 px güvenli zemin,
-yüksek bloklar parça başından en az 360 px içeride.
+Parça eklemek için `tools/sahne_uret.gd` içindeki `PARCALAR` listesini düzenle. Test, her parçayı
+kendi en düşük hızında ve en yüksek hızda (460 px/sn) bot ile koşturur; geçilemeyen parça testi
+düşürür. Tasarım kuralları: parça uçlarında 60 px güvenli zemin, yüksek bloklar parça başından en
+az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, tam zıplama sığmaz).
 
 ## Tasarım kararları
 
-- **Oyuncu ilerler, dünya kaymaz.** Fizik (CharacterBody2D) doğal çalışsın, kamera takip etsin
-  diye. 3 dakikalık koşuda ~75.000 px; float hassasiyeti için sorun değil.
-- **Zorluk hıza bağlı:** zorluk 2 parçalar 280, zorluk 3 parçalar 360 px/sn'den sonra gelir;
-  hız arttıkça zor parçaların ağırlığı artar. Aynı parça art arda gelmez.
-- **Duvara çarpmak ölüm:** basamağa zıplamadan girersen biter (koşu oyunlarının alışılmış kuralı).
-  Zemin parçalarının eklem yerleri duvar sayılmaz.
-- **Dokunma:** kısa dokunuş ≈ 35 px sıçrama, basılı tutma ≈ 96 px. Menüde boş yere dokunmak da başlatır.
-- **Android dışa aktarma bu turda yok** (SDK kurulu değil). Web + Windows var.
+- **Oyuncu ilerler, dünya kaymaz.** Fizik (CharacterBody2D) doğal çalışsın, kamera takip etsin diye.
+- **Zorluk hıza bağlı:** zorluk 2 parçalar 280, zorluk 3 parçalar 360 px/sn'den sonra gelir.
+  Aynı parça art arda gelmez; 3–8 tehlikeli parçada bir nefes parçası gelir (rakip analizinde
+  "hiç durmayan yoğunluk" en sık şikâyetti).
+- **Ölüm adil görünmeli:** ölüm tekrarı ve vurgulu engel, "neden öldüm?" sorusunu yanıtlar.
+- **Hızlı tekrar:** sahne yeniden yüklenmez; ölümden yeni koşuya < 1 sn.
+- **Tek girdinin derinliği:** kısa dokunuş / basılı tutma / havada ikinci zıplama; alçak tavan
+  kısa sıçramayı zorunlu kılar.
+- **Satın alma yalnız kozmetik:** kostümler oynanışı değiştirmez; reklam ve gerçek para yok.
+- **Erişilebilirlik:** rahat mod (ayrı rekor), yüksek kontrast, sarsıntı kapatma.
+- **Android dışa aktarma yok** (SDK kurulu değil). Web + Windows var.
 
-## Doğrulama (2026-09-16, bulut ortamı, Godot 4.7.2 Linux headless)
+## Doğrulama
 
-- `--import`: hata yok · otomatik testler: **171 geçti, 0 hata**
-- 3 dk hızlandırılmış bot koşusu: 2362 m, 0 ölüm, hız 460'a ulaştı, aynı anda en çok 3 parça
-- Windows + Web dışa aktarma başarılı; web sürümü Chromium'da açıldı: menü, klavye ve
-  dokunmatik zıplama, oyun sonu paneli çalışıyor, konsolda hata yok.
+Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.2, bulut, Godot 4.7.2 Linux headless):
+otomatik testler **388 geçti, 0 hata**; web sürümü Chromium'da menü, karakter, ayarlar,
+oyun, ölüm tekrarı ve sonuç paneliyle denendi.
 
-## Doğrulama (2026-09-16, Windows 11, Godot 4.7.2 headless)
-
-Aynı proje bu depo yolunda yeniden koşuldu:
-
-- `godot --headless --path . --import` → çıkış 0, hata yok
-- `godot --headless --fixed-fps 60 --path . -s res://tests/testler.gd` → **171 geçti, 0 hata**
-- Windows dışa aktarma → `build/windows/tek-tus-kosu.exe` (106.768 KB)
-- Web dışa aktarma → `build/web/index.html` (pck 61 KB, wasm 38.589 KB)
+Windows 11 (Godot 4.7.2, 2026-09-16): varlık/ses/müzik/sahne üretimi, içe aktarma, testler
+(**388 geçti, 0 hata**), ekran görüntüsü aracı ve iki dışa aktarma çalıştı
+(`tek-tus-kosu.exe` 107 MB, web pck 480 KB). Üretilen PNG ve WAV dosyaları bulutta üretilenlerle
+bayt bayt aynı.
 
 `build/.gdignore` var: Godot'un dışa aktarma çıktısındaki PNG'leri proje kaynağı sanıp
-içeri aktarmasını (ve pck'yi şişirmesini) engeller. Silme.
+içeri aktarmasını engeller. Silme.

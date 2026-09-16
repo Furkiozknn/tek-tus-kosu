@@ -22,12 +22,26 @@ const ZIPLAMA_TAMPONU := 0.12       ## Yere değmeden hemen önce basılan zıpl
 const HIZ_BAS := 220.0      ## Başlangıç koşu hızı (piksel/sn)
 const HIZ_ARTIS := 4.0      ## Her saniye eklenen hız
 const HIZ_AZAMI := 460.0    ## Hız üst sınırı
+const RAHAT_MOD_CARPANI := 0.8  ## Rahat modda tüm hızlar bu oranla çarpılır (ayrı rekor)
 
 # --- Parçalar ---
 ## Zorluk -> o zorluktaki parçaların çıkabileceği en düşük hız
-const ZORLUK_ESIGI := {1: 0.0, 2: 280.0, 3: 360.0}
+const ZORLUK_ESIGI := {0: 0.0, 1: 0.0, 2: 280.0, 3: 360.0}
 const PARCA_ONDEN_URET := 360.0 ## Ekranın sağ kenarından bu kadar ileriye kadar parça hazır olsun
 const PARCA_ARKADA_SIL := 160.0 ## Ekranın sol kenarından bu kadar geride kalan parça silinir
+const NEFES_ARALIGI := Vector2i(3, 8)  ## Bu kadar tehlikeli parçadan sonra bir "nefes" parçası gelir
+
+# --- Tehlikeler ---
+const PISTON_PERIYOT := 1.6     ## Yükselip inen dikenin bir tur süresi (sn)
+const PISTON_ALCAK := 4.0       ## Piston inikken görünen yükseklik
+const YAKIN_KACIS_PAYI := 14.0  ## Engelin bu kadar üstünden geçmek "kıl payı" sayılır
+const YAKIN_KACIS_ODULU := 1    ## Kıl payı kaçış başına altın
+
+# --- Görsel ---
+const TEMA_ARALIGI_M := 500     ## Bu kadar metrede bir tema (ışık/hava) değişir
+const SARSINTI_OLUM := 7.0
+const OLUM_TEKRARI_KARE := 90   ## Ölüm tekrarında gösterilen son kare sayısı (1,5 sn)
+const OLUM_TEKRARI_HIZ := 0.4   ## Ölüm tekrarının oynatma hızı
 
 
 ## Tam basılı zıplamanın havada kalma süresi (saniye)
@@ -35,6 +49,16 @@ static func tam_ziplama_suresi() -> float:
 	return 2.0 * -ZIPLAMA_HIZI / YERCEKIMI
 
 
-## Verilen hızda, parçanın çıkabilmesi için gereken en düşük hız
+## Kısa (hemen bırakılmış) zıplamanın havada kalma süresi ve yüksekliği
+static func kisa_ziplama_suresi() -> float:
+	return 2.0 * -ZIPLAMA_HIZI * KISA_ZIPLAMA_CARPANI / YERCEKIMI
+
+
+static func kisa_ziplama_yuksekligi() -> float:
+	var v := -ZIPLAMA_HIZI * KISA_ZIPLAMA_CARPANI
+	return v * v / (2.0 * YERCEKIMI)
+
+
+## Verilen zorluktaki parçanın çıkabilmesi için gereken en düşük hız
 static func zorluk_esigi(zorluk: int) -> float:
 	return float(ZORLUK_ESIGI.get(zorluk, 0.0))

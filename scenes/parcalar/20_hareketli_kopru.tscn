@@ -1,0 +1,45 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/parca.gd" id="1_fyrla"]
+[ext_resource type="Script" path="res://scripts/zemin.gd" id="2_s5qf8"]
+[ext_resource type="Script" path="res://scripts/hareketli.gd" id="3_0svli"]
+[ext_resource type="Script" path="res://scripts/altin.gd" id="4_2kki7"]
+
+[node name="Parca" type="Node2D" unique_id=882378927]
+script = ExtResource("1_fyrla")
+zorluk = 2
+uzunluk = 1000.0
+
+[node name="Giris" type="Marker2D" parent="." unique_id=1020219568]
+position = Vector2(0, 280)
+
+[node name="Cikis" type="Marker2D" parent="." unique_id=436780223]
+position = Vector2(1000, 280)
+
+[node name="Zemin1" type="StaticBody2D" parent="." unique_id=975159125]
+position = Vector2(0, 280)
+script = ExtResource("2_s5qf8")
+genislik = 300.0
+
+[node name="Zemin2" type="StaticBody2D" parent="." unique_id=1116729892]
+position = Vector2(460, 280)
+script = ExtResource("2_s5qf8")
+genislik = 540.0
+
+[node name="Hareketli1" type="AnimatableBody2D" parent="." unique_id=153865019]
+position = Vector2(330, 232)
+script = ExtResource("3_0svli")
+sapma = Vector2(30, 0)
+periyot = 2.0
+
+[node name="Altin1" type="Area2D" parent="." unique_id=1955954213]
+position = Vector2(340, 214)
+script = ExtResource("4_2kki7")
+
+[node name="Altin2" type="Area2D" parent="." unique_id=1533913488]
+position = Vector2(360, 214)
+script = ExtResource("4_2kki7")
+
+[node name="Altin3" type="Area2D" parent="." unique_id=1739031231]
+position = Vector2(380, 214)
+script = ExtResource("4_2kki7")

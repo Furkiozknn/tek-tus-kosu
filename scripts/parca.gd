@@ -3,7 +3,8 @@ extends Node2D
 ## Sonsuz koşunun bir parçası. Sol kenar x=0, sağ kenar x=uzunluk.
 ## Giriş ve çıkış noktaları zemin hizasındadır; parçalar uç uca eklenir.
 
-@export_range(1, 3) var zorluk := 1
+## 0 = nefes parçası (tehlikesi az), 1-3 = zorluk
+@export_range(0, 3) var zorluk := 1
 @export var uzunluk := 640.0
 
 
@@ -22,7 +23,8 @@ func tehlike_araliklari() -> Array[Vector2]:
 	var zeminler: Array[Zemin] = []
 	for c in get_children():
 		if c is Tehlike:
-			ham.append(Vector2(c.position.x, c.position.x + c.genislik))
+			if c.tur != Tehlike.Tur.TAVAN:
+				ham.append(Vector2(c.position.x, c.position.x + c.genislik))
 		elif c is Zemin:
 			zeminler.append(c)
 
@@ -48,6 +50,16 @@ func tehlike_araliklari() -> Array[Vector2]:
 			ham.append(Vector2(z.position.x - 2.0, z.position.x + 10.0))
 
 	return birlestir(ham)
+
+
+## Tavandan sarkan engeller: [x0, x1, alt_y] (parçanın yerel koordinatında).
+## Bunların altında yalnızca kısa zıplama güvenlidir.
+func tavan_araliklari() -> Array:
+	var sonuc := []
+	for c in get_children():
+		if c is Tehlike and c.tur == Tehlike.Tur.TAVAN:
+			sonuc.append([c.position.x, c.position.x + c.genislik, c.position.y])
+	return sonuc
 
 
 static func birlestir(araliklar: Array[Vector2], bosluk := 8.0) -> Array[Vector2]:

@@ -19,6 +19,10 @@ func _initialize() -> void:
 	ps.set_setting("rendering/environment/defaults/default_clear_color", Color("222034"))
 	ps.set_setting("physics/common/physics_ticks_per_second", 60)
 	ps.set_setting("input_devices/pointing/emulate_mouse_from_touch", true)
+	# Web'de ses "Sample" oynatma türüyle (itch.io'da çıtırtı olmasın); Android'de çevik girdi.
+	ps.set_setting("audio/general/default_playback_type.web", 1)
+	ps.set_setting("input_devices/buffering/agile_event_flushing", true)
+	ps.set_setting("application/run/max_fps", 0)
 	ps.set_setting("layer_names/2d_physics/layer_1", "dunya")
 	ps.set_setting("layer_names/2d_physics/layer_2", "oyuncu")
 	ps.set_setting("layer_names/2d_physics/layer_3", "tehlike_ve_altin")

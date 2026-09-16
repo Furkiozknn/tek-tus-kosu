@@ -5,38 +5,38 @@
 [ext_resource type="Script" path="res://scripts/tehlike.gd" id="3_o7o50"]
 [ext_resource type="Script" path="res://scripts/altin.gd" id="4_vytv6"]
 
-[node name="Parca" type="Node2D" unique_id=628896492]
+[node name="Parca" type="Node2D" unique_id=688519402]
 script = ExtResource("1_imm4n")
 uzunluk = 800.0
 
-[node name="Giris" type="Marker2D" parent="." unique_id=31019413]
+[node name="Giris" type="Marker2D" parent="." unique_id=974987876]
 position = Vector2(0, 280)
 
-[node name="Cikis" type="Marker2D" parent="." unique_id=772852341]
+[node name="Cikis" type="Marker2D" parent="." unique_id=1813605]
 position = Vector2(800, 280)
 
-[node name="Zemin1" type="StaticBody2D" parent="." unique_id=1190436619]
+[node name="Zemin1" type="StaticBody2D" parent="." unique_id=686801258]
 position = Vector2(0, 280)
 script = ExtResource("2_o2mbo")
 genislik = 800.0
 
-[node name="Diken1" type="Area2D" parent="." unique_id=380480305]
+[node name="Diken1" type="Area2D" parent="." unique_id=538705656]
 position = Vector2(250, 280)
 script = ExtResource("3_o7o50")
 
-[node name="Diken2" type="Area2D" parent="." unique_id=1951895446]
+[node name="Diken2" type="Area2D" parent="." unique_id=708368706]
 position = Vector2(540, 280)
 script = ExtResource("3_o7o50")
 genislik = 48.0
 
-[node name="Altin1" type="Area2D" parent="." unique_id=189818349]
+[node name="Altin1" type="Area2D" parent="." unique_id=1891025000]
 position = Vector2(380, 250)
 script = ExtResource("4_vytv6")
 
-[node name="Altin2" type="Area2D" parent="." unique_id=683677898]
+[node name="Altin2" type="Area2D" parent="." unique_id=1980552871]
 position = Vector2(410, 250)
 script = ExtResource("4_vytv6")
 
-[node name="Altin3" type="Area2D" parent="." unique_id=102165606]
+[node name="Altin3" type="Area2D" parent="." unique_id=1783462199]
 position = Vector2(440, 250)
 script = ExtResource("4_vytv6")

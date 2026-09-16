@@ -4,46 +4,46 @@
 [ext_resource type="Script" path="res://scripts/zemin.gd" id="2_wmc4a"]
 [ext_resource type="Script" path="res://scripts/altin.gd" id="3_nfxf0"]
 
-[node name="Parca" type="Node2D" unique_id=493458591]
+[node name="Parca" type="Node2D" unique_id=1516163734]
 script = ExtResource("1_edbl5")
 zorluk = 2
 uzunluk = 960.0
 
-[node name="Giris" type="Marker2D" parent="." unique_id=276984242]
+[node name="Giris" type="Marker2D" parent="." unique_id=1489434336]
 position = Vector2(0, 280)
 
-[node name="Cikis" type="Marker2D" parent="." unique_id=475001038]
+[node name="Cikis" type="Marker2D" parent="." unique_id=1869974914]
 position = Vector2(960, 280)
 
-[node name="Zemin1" type="StaticBody2D" parent="." unique_id=2097584893]
+[node name="Zemin1" type="StaticBody2D" parent="." unique_id=1895327724]
 position = Vector2(0, 280)
 script = ExtResource("2_wmc4a")
 genislik = 300.0
 
-[node name="Platform1" type="StaticBody2D" parent="." unique_id=687059059]
+[node name="Platform1" type="StaticBody2D" parent="." unique_id=1208558520]
 position = Vector2(380, 250)
 script = ExtResource("2_wmc4a")
 genislik = 160.0
-yukseklik = 12.0
+yukseklik = 6.0
 tek_yonlu = true
 
-[node name="Zemin2" type="StaticBody2D" parent="." unique_id=1358463644]
+[node name="Zemin2" type="StaticBody2D" parent="." unique_id=1431008131]
 position = Vector2(640, 280)
 script = ExtResource("2_wmc4a")
 genislik = 320.0
 
-[node name="Altin1" type="Area2D" parent="." unique_id=1804658211]
+[node name="Altin1" type="Area2D" parent="." unique_id=1436429780]
 position = Vector2(404, 225)
 script = ExtResource("3_nfxf0")
 
-[node name="Altin2" type="Area2D" parent="." unique_id=1991974281]
+[node name="Altin2" type="Area2D" parent="." unique_id=1606769811]
 position = Vector2(440, 225)
 script = ExtResource("3_nfxf0")
 
-[node name="Altin3" type="Area2D" parent="." unique_id=1869187291]
+[node name="Altin3" type="Area2D" parent="." unique_id=271624647]
 position = Vector2(476, 225)
 script = ExtResource("3_nfxf0")
 
-[node name="Altin4" type="Area2D" parent="." unique_id=2120670492]
+[node name="Altin4" type="Area2D" parent="." unique_id=1101222903]
 position = Vector2(512, 225)
 script = ExtResource("3_nfxf0")

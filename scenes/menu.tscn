@@ -1,23 +1,270 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/menu.gd" id="1_yqeox"]
+[ext_resource type="Script" path="res://scripts/menu.gd" id="1_g3eks"]
+[ext_resource type="Texture2D" path="res://assets/sprites/yildizlar.png" id="2_v86rl"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ay.png" id="3_13sgg"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sehir_uzak.png" id="4_i6lef"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sehir_yakin.png" id="5_70i5f"]
+[ext_resource type="Texture2D" path="res://assets/sprites/zemin.png" id="6_mj5lg"]
 
-[node name="Menu" type="Control" unique_id=1504463629]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ufwb2"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.24705882, 0.24705882, 0.45490196, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.79607844, 0.85882354, 0.9882353, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6cdou"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.24705882, 0.24705882, 0.45490196, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.79607844, 0.85882354, 0.9882353, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_i42df"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.24705882, 0.24705882, 0.45490196, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.79607844, 0.85882354, 0.9882353, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="Menu" type="Control" unique_id=1831032455]
+texture_filter = 1
 layout_mode = 3
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-script = ExtResource("1_yqeox")
+script = ExtResource("1_g3eks")
 
-[node name="Arkaplan" type="ColorRect" parent="." unique_id=946138366]
-layout_mode = 0
+[node name="Sahne" type="Node2D" parent="." unique_id=1761893947]
+
+[node name="Gokyuzu" type="CanvasLayer" parent="Sahne" unique_id=1023196115]
+layer = -20
+
+[node name="Gok" type="TextureRect" parent="Sahne/Gokyuzu" unique_id=669796808]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+expand_mode = 1
 
-[node name="Kutu" type="VBoxContainer" parent="." unique_id=1190380132]
+[node name="Yildizlar" type="Parallax2D" parent="Sahne" unique_id=485468256]
+texture_filter = 1
+scroll_scale = Vector2(0.03, 0)
+repeat_size = Vector2(320, 0)
+autoscroll = Vector2(-3, 0)
+repeat_times = 3
+
+[node name="Resim" type="Sprite2D" parent="Sahne/Yildizlar" unique_id=1240649439]
+texture = ExtResource("2_v86rl")
+centered = false
+
+[node name="Ay" type="Parallax2D" parent="Sahne" unique_id=1168100361]
+texture_filter = 1
+scroll_scale = Vector2(0, 0)
+
+[node name="Resim" type="Sprite2D" parent="Sahne/Ay" unique_id=1133747135]
+position = Vector2(520, 34)
+texture = ExtResource("3_13sgg")
+centered = false
+
+[node name="SehirUzak" type="Parallax2D" parent="Sahne" unique_id=1485934482]
+texture_filter = 1
+scroll_scale = Vector2(0.2, 0)
+repeat_size = Vector2(640, 0)
+autoscroll = Vector2(-12, 0)
+repeat_times = 3
+
+[node name="Resim" type="Sprite2D" parent="Sahne/SehirUzak" unique_id=1960325717]
+position = Vector2(0, 150)
+texture = ExtResource("4_i6lef")
+centered = false
+
+[node name="SehirYakin" type="Parallax2D" parent="Sahne" unique_id=1514685269]
+texture_filter = 1
+scroll_scale = Vector2(0.45, 0)
+repeat_size = Vector2(640, 0)
+autoscroll = Vector2(-30, 0)
+repeat_times = 3
+
+[node name="Resim" type="Sprite2D" parent="Sahne/SehirYakin" unique_id=617511759]
+position = Vector2(0, 170)
+texture = ExtResource("5_70i5f")
+centered = false
+
+[node name="Cati" type="Sprite2D" parent="Sahne" unique_id=76377250]
+position = Vector2(0, 296)
+scale = Vector2(40, 1)
+texture = ExtResource("6_mj5lg")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 16, 16)
+
+[node name="CatiGovde" type="ColorRect" parent="Sahne" unique_id=876293895]
+offset_top = 312.0
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
+color = Color(0.24313726, 0.15294118, 0.19215687, 1)
+
+[node name="Onizleme" type="AnimatedSprite2D" parent="Sahne" unique_id=1402707514]
+unique_name_in_owner = true
+position = Vector2(560, 298)
+scale = Vector2(2, 2)
+centered = false
+offset = Vector2(-10, -25)
+
+[node name="Baslik" type="Label" parent="." unique_id=598170030]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_top = 14.0
+offset_right = 300.0
+offset_bottom = 64.0
+theme_override_font_sizes/font_size = 38
+theme_override_colors/font_color = Color(0.17254902, 0.9098039, 0.9607843, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 8
+text = "TEK TUŞ KOŞU"
+horizontal_alignment = 1
+
+[node name="AnaPanel" type="HBoxContainer" parent="." unique_id=1916983037]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 72.0
+offset_right = -28.0
+offset_bottom = -70.0
+mouse_filter = 2
+theme_override_constants/separation = 24
+
+[node name="Sol" type="VBoxContainer" parent="AnaPanel" unique_id=1337133949]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="BaslaDugme" type="Button" parent="AnaPanel/Sol" unique_id=2127028632]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Başla"
+
+[node name="KarakterDugme" type="Button" parent="AnaPanel/Sol" unique_id=1174627446]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Karakter"
+
+[node name="AyarlarDugme" type="Button" parent="AnaPanel/Sol" unique_id=1683937909]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Ayarlar"
+
+[node name="CikisDugme" type="Button" parent="AnaPanel/Sol" unique_id=1775355509]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Çıkış"
+
+[node name="RekorEtiketi" type="Label" parent="AnaPanel/Sol" unique_id=526841833]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.99607843, 0.90588236, 0.38039216, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Rekor: 0 m"
+
+[node name="AltinEtiketi" type="Label" parent="AnaPanel/Sol" unique_id=1403687464]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Altın: 0"
+
+[node name="GorevPaneli" type="PanelContainer" parent="AnaPanel" unique_id=1463931175]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ufwb2")
+
+[node name="Kutu" type="VBoxContainer" parent="AnaPanel/GorevPaneli" unique_id=309751865]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="GorevListesi" type="Label" parent="AnaPanel/GorevPaneli/Kutu" unique_id=1098073562]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.91764706, 0.83137256, 0.6666667, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "GÖREVLER"
+autowrap_mode = 3
+
+[node name="Ipucu" type="Label" parent="." unique_id=747368440]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -26.0
+offset_right = 300.0
+offset_bottom = -6.0
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.7529412, 0.79607844, 0.8627451, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Başlamak için boş bir yere dokun ya da Boşluk"
+horizontal_alignment = 1
+
+[node name="KarakterPaneli" type="PanelContainer" parent="." unique_id=2141966877]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(380, 0)
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -25,60 +272,145 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
-theme_override_constants/separation = 10
+theme_override_styles/panel = SubResource("StyleBoxFlat_6cdou")
+
+[node name="Kutu" type="VBoxContainer" parent="KarakterPaneli" unique_id=469426152]
+layout_mode = 2
+theme_override_constants/separation = 4
 alignment = 1
 
-[node name="Baslik" type="Label" parent="Kutu" unique_id=1307823051]
+[node name="KarakterBaslik" type="Label" parent="KarakterPaneli/Kutu" unique_id=1326481448]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 40
-theme_override_colors/font_color = Color(0.37254903, 0.8039216, 0.89411765, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
 theme_override_constants/outline_size = 4
-text = "TEK TUŞ KOŞU"
+text = "Karakter"
 horizontal_alignment = 1
 
-[node name="RekorEtiketi" type="Label" parent="Kutu" unique_id=1302612572]
+[node name="KarakterAltin" type="Label" parent="KarakterPaneli/Kutu" unique_id=1255188671]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-theme_override_colors/font_color = Color(0.9843137, 0.9490196, 0.21176471, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.99607843, 0.90588236, 0.38039216, 1)
 theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
 theme_override_constants/outline_size = 4
-text = "Rekor: 0 m"
+text = "Altın: 0"
 horizontal_alignment = 1
 
-[node name="AltinEtiketi" type="Label" parent="Kutu" unique_id=1946392463]
+[node name="KostumListesi" type="VBoxContainer" parent="KarakterPaneli/Kutu" unique_id=206244763]
 unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="KarakterGeri" type="Button" parent="KarakterPaneli/Kutu" unique_id=634018439]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Geri"
+
+[node name="AyarlarPaneli" type="PanelContainer" parent="." unique_id=1135836985]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_i42df")
+
+[node name="Kutu" type="VBoxContainer" parent="AyarlarPaneli" unique_id=1557654936]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="AyarlarBaslik" type="Label" parent="AyarlarPaneli/Kutu" unique_id=741942227]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Ayarlar"
+horizontal_alignment = 1
+
+[node name="MuzikKaydiriciSatir" type="HBoxContainer" parent="AyarlarPaneli/Kutu" unique_id=2052611274]
+layout_mode = 2
+
+[node name="MuzikKaydiriciEtiket" type="Label" parent="AyarlarPaneli/Kutu/MuzikKaydiriciSatir" unique_id=938151527]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
 theme_override_constants/outline_size = 4
-text = "Toplam altın: 0"
-horizontal_alignment = 1
+text = "Müzik"
 
-[node name="BaslaDugme" type="Button" parent="Kutu" unique_id=1503921793]
+[node name="MuzikKaydirici" type="HSlider" parent="AyarlarPaneli/Kutu/MuzikKaydiriciSatir" unique_id=1544827208]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(220, 48)
+custom_minimum_size = Vector2(220, 28)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Başla"
+step = 5.0
 
-[node name="CikisDugme" type="Button" parent="Kutu" unique_id=1035434456]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(220, 40)
+[node name="EfektKaydiriciSatir" type="HBoxContainer" parent="AyarlarPaneli/Kutu" unique_id=1473258233]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Çıkış"
 
-[node name="Ipucu" type="Label" parent="Kutu" unique_id=1065486197]
+[node name="EfektKaydiriciEtiket" type="Label" parent="AyarlarPaneli/Kutu/EfektKaydiriciSatir" unique_id=1668313565]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
-theme_override_colors/font_color = Color(0.60784316, 0.6784314, 0.7176471, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
 theme_override_constants/outline_size = 4
-text = "Başlamak için dokun ya da Boşluk"
-horizontal_alignment = 1
+text = "Efektler"
+
+[node name="EfektKaydirici" type="HSlider" parent="AyarlarPaneli/Kutu/EfektKaydiriciSatir" unique_id=373460082]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 28)
+layout_mode = 2
+step = 5.0
+
+[node name="TamEkranKutu" type="CheckButton" parent="AyarlarPaneli/Kutu" unique_id=354654826]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Tam ekran"
+
+[node name="SarsintiKutu" type="CheckButton" parent="AyarlarPaneli/Kutu" unique_id=886506411]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Ekran sarsıntısı"
+
+[node name="KontrastKutu" type="CheckButton" parent="AyarlarPaneli/Kutu" unique_id=946561828]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Yüksek kontrast (tehlike çerçevesi)"
+
+[node name="RahatKutu" type="CheckButton" parent="AyarlarPaneli/Kutu" unique_id=101779939]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Rahat mod (%80 hız, ayrı rekor)"
+
+[node name="AyarlarGeri" type="Button" parent="AyarlarPaneli/Kutu" unique_id=1213974857]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Geri"
+
+[node name="Perde" type="ColorRect" parent="." unique_id=1691990893]
+unique_name_in_owner = true
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.094, 0.078, 0.145, 0)
