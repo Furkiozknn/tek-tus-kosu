@@ -67,3 +67,15 @@ yüksek bloklar parça başından en az 360 px içeride.
 - 3 dk hızlandırılmış bot koşusu: 2362 m, 0 ölüm, hız 460'a ulaştı, aynı anda en çok 3 parça
 - Windows + Web dışa aktarma başarılı; web sürümü Chromium'da açıldı: menü, klavye ve
   dokunmatik zıplama, oyun sonu paneli çalışıyor, konsolda hata yok.
+
+## Doğrulama (2026-09-16, Windows 11, Godot 4.7.2 headless)
+
+Aynı proje bu depo yolunda yeniden koşuldu:
+
+- `godot --headless --path . --import` → çıkış 0, hata yok
+- `godot --headless --fixed-fps 60 --path . -s res://tests/testler.gd` → **171 geçti, 0 hata**
+- Windows dışa aktarma → `build/windows/tek-tus-kosu.exe` (106.768 KB)
+- Web dışa aktarma → `build/web/index.html` (pck 61 KB, wasm 38.589 KB)
+
+`build/.gdignore` var: Godot'un dışa aktarma çıktısındaki PNG'leri proje kaynağı sanıp
+içeri aktarmasını (ve pck'yi şişirmesini) engeller. Silme.
