@@ -3,8 +3,9 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v0.6 — geliştirme turu 5 (2026-09-16). **Ritim koşusu:** engelleri müziğin vuruşlarına
-hizalı, koddan üretilen ayrı kip. (v0.5: rüzgâr, telefonda dikey uyarısı + tam ekran. v0.4: çürük iskele, günlük seri ve paylaşım, kostüm izleri, web simge düzeltmesi.
+**Durum:** v0.7 — geliştirme turu 6 (2026-09-16). Ritim koşusuna ikinci şarkı (128 BPM), şarkı başına
+rekor ve ses gecikmesi ayarı (oyunun ölçtüğü sapmadan tek dokunuşla öneri). (v0.6: **ritim koşusu** —
+engelleri müziğin vuruşlarına hizalı, koddan üretilen ayrı kip. v0.5: rüzgâr, telefonda dikey uyarısı + tam ekran. v0.4: çürük iskele, günlük seri ve paylaşım, kostüm izleri, web simge düzeltmesi.
 v0.3: günlük koşu + hayalet, işaretler, şehir haritası. v0.2: pixel art, ses/müzik, görevler,
 kostümler, ölüm tekrarı, ayarlar.)
 
@@ -29,6 +30,11 @@ kostümler, ölüm tekrarı, ayarlar.)
   ve ölüm listesi; sonuç panelinde tam vuruş sayısı; 13. başarım "Vuruşu yakala" (tek koşuda 20 tam vuruş).
   Duraklatınca müzik de durur; müzik oyun zamanından 60 ms'den fazla kayarsa (sekme gizlendi,
   uzun takılma) müzik oyuna göre yeniden sarılır.
+- **Ritim şarkıları ve gecikme (v0.7):** Ritim düğmesi şarkı panelini açar: "Gece Koşusu · 150 BPM"
+  ve "Çatı Neşesi · 128 BPM" (vuruş 140,6 px — aynı engeller, daha geniş aralık). Her şarkının rekoru ve
+  ölüm işaretleri ayrı. Panelde **Ses gecikmesi** kaydırıcısı (−150…+300 ms): vuruş ızgarasını (engelleri)
+  duyulan müziğe göre kaydırır. Koşu sonunda zıplamaların vuruştan ortalama sapması yazılır; en az 6
+  zıplamada ortalama 25 ms'yi aşarsa "Gecikme +N ms" düğmesi çıkar, basınca ayar yazılır.
 - **Günlük koşu (v0.3):** tarihten türeyen tohumla o gün herkes aynı çatı dizisini koşar. Günün
   rekoru ve deneme sayısı ayrı tutulur; günün en iyi denemesi **hayalet rakip** olarak sonraki
   denemelerde yanında koşar, bittiği yere "HAYALET" işareti konur. Günlük koşuda rahat mod kapalıdır.
@@ -94,7 +100,7 @@ scripts/mini_harita.gd   koşu sonu şehir ışıkları şeridi
 scripts/coken.gd         çürük iskele (basınca çöken tahta köprü)
 scripts/ruzgar.gd        rüzgâr bölgesi (havadayken yatay hıza eklenir)
 scripts/dikey_uyari.gd   telefon dikeyken "yan çevir" perdesi
-scripts/ritim.gd         ritim koşusu: vuruş ızgarası, ölçü desenleri, parçayı koddan üretme
+scripts/ritim.gd         ritim koşusu: şarkılar, vuruş ızgarası, ölçü desenleri, parçayı koddan üretme, gecikme önerisi
 scripts/ritim_isaret.gd  ritim parçasındaki vuruş lambaları
 scripts/simgeler.gd      web'de eksik simgeler (★ ✓ ←…) için yedek yazı tipini bağlar
 scripts/bot.gd           test/demodaki otomatik oyuncu (kısa sıçrama dahil)
@@ -107,7 +113,7 @@ tools/sahne_uret.gd      parça, oyun ve menü sahnelerini koddan üretir
 tools/proje_ayarla.gd    project.godot ayarlarını + girdi haritasını yazar
 tools/ekran_goruntusu.gd itch ekran görüntüleri + kapak (pencere açar)
 tools/bot_stres.gd       farklı tohumlarla uzun bot koşuları (ölümleri parça adıyla, parça kullanımını yazar);
-                         --ritim: ritim koşusu, --vurus <ms>: vuruştan kaydırarak zıplayan oyuncu (zamanlama penceresi)
+                         --ritim [--sarki 1]: ritim koşusu, --vurus <ms>: vuruştan kaydırarak zıplayan oyuncu (zamanlama penceresi)
 tools/simge_fontu.py     simge yazı tipini üretir (Python + fonttools; yalnız simge seti değişince)
 tests/testler.gd         otomatik testler
 yayin/                   itch.io sayfa metni, ekran görüntüleri, kapak, butler komutları
@@ -121,6 +127,7 @@ godot --headless --path . -s res://tools/varlik_uret.gd
 godot --headless --path . -s res://tools/ses_uret.gd
 godot --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_oyun.wav --ruh hizli --tohum 11
 godot --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_menu.wav --ruh sakin --tohum 4
+godot --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_ritim2.wav --ruh neseli --tohum 7
 godot --headless --path . --import
 godot --headless --path . -s res://tools/sahne_uret.gd
 godot --headless --path . --import
@@ -153,6 +160,10 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
   Hız sabit, çünkü değişen hızda vuruş aralığı (px) da değişir ve engeller müzikten kopar.
   Zamanlama penceresi ölçüldü: vuruştan 175 ms erken ile 150 ms geç arasındaki zıplamalar tüm
   desenlerde yaşatıyor (dar bir "ya tam ya ölüm" yerine: tam vuruş ödül, ceza değil).
+- **İkinci şarkıda hız değil vuruş aralığı değişir:** engel geometrisi (zıplama boyu) hıza bağlı; hızı
+  sabit tutup yalnız vuruş aralığını açmak, bütün desenleri ve ölçülmüş zamanlama penceresini aynen korur.
+- **Gecikme ayarı ayrı ekran değil, oyunun kendi ölçümü:** kalibrasyon ekranı oyuncunun atlayacağı bir adım;
+  koşu zaten her zıplamanın sapmasını ölçüyor, tutarlı bir kayma varsa sonuçta tek dokunuşla düzeltiliyor.
 - **Oyun zamanı yetkili, müzik ona uyar:** fizik ve dünya belirlenimci kalsın diye kayma olunca oyun
   değil müzik sarılır.
 - **Paylaşımda bağlantı yok:** oyun henüz yayında değil; itch adresi belli olunca metne eklenir.
@@ -165,15 +176,16 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 
 ## Doğrulama
 
-Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.6, bulut, Godot 4.7.2 Linux headless):
-otomatik testler **740 geçti, 0 hata**; ritim koşusunda bot 12 tohum × 3 dk, 0 ölüm, 10 desenin hepsi
+Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.7, bulut, Godot 4.7.2 Linux headless):
+otomatik testler **765 geçti, 0 hata**; 128 BPM şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere yine
+−175…+150 ms. (v0.6: 740 test; ritim koşusunda bot 12 tohum × 3 dk, 0 ölüm, 10 desenin hepsi
 görüldü; vuruşta zıplayan oyuncu −175…+150 ms kaydırmayla 8 tohum × 3 dk, 0 ölüm. (v0.5: 714 test,
 32 tohum bot stresi, telefon emülasyonu; v0.4: 660, v0.3: 558 test.) v0.2: web sürümü Chromium'da menü, karakter, ayarlar, oyun, ölüm tekrarı
 ve sonuç paneliyle denendi.
 
 Windows 11 (Godot 4.7.2, 2026-09-16): varlık/ses/müzik/sahne üretimi, içe aktarma, testler
-(v0.5: **714 geçti, 0 hata**; v0.4: 660; v0.3: 558; v0.2: 388), bot stresi (8 tohum, 0 ölüm), ekran görüntüsü aracı ve iki
-dışa aktarma çalıştı (`tek-tus-kosu.exe` 105 MB, web pck 560 KB). Üretilen PNG ve WAV dosyaları bulutta üretilenlerle
+(v0.6: **742 geçti, 0 hata**, ritim stresi 4 tohum 0 ölüm; v0.5: 714; v0.4: 660; v0.3: 558; v0.2: 388), bot stresi (8 tohum, 0 ölüm), ekran görüntüsü aracı ve iki
+dışa aktarma çalıştı (`tek-tus-kosu.exe` 105 MB, web pck 570 KB). Üretilen PNG ve WAV dosyaları bulutta üretilenlerle
 bayt bayt aynı.
 
 `build/.gdignore` var: Godot'un dışa aktarma çıktısındaki PNG'leri proje kaynağı sanıp

@@ -1,21 +1,50 @@
 class_name Ritim
 extends RefCounted
-## Ritim koşusu. Oyun müziği 150 BPM; hız sabit 300 px/sn → her vuruş 120 px.
+## Ritim koşusu. Hız sabit 300 px/sn; vuruş aralığı şarkının temposundan gelir
+## (150 BPM → 120 px, 128 BPM → 140,6 px). Engel geometrisi yalnız hıza bağlı, tempoya değil.
 ## Parçalar ölçü ölçü koddan üretilir: her engelde ideal zıplama anı bir vuruşa denk gelir.
-## Vuruş ızgarası: x_k = izgara0 + k × ADIM (izgara0 ses gecikmesi kadar kaydırılır).
+## Vuruş ızgarası: x_k = izgara0 + k × adım (izgara0 ses gecikmesi + oyuncu ayarı kadar kaydırılır).
 
 const BPM := 150.0
 const HIZ := 300.0
 const VURUS_SN := 60.0 / BPM
-const ADIM := HIZ * VURUS_SN
+const ADIM := HIZ * VURUS_SN     ## ilk şarkının vuruş aralığı (px)
+
+## Şarkılar. bpm, üretilen WAV'ın örnek düzeyindeki gerçek temposu (muzik_uret: 22050 Hz, onaltılık = round(22050·15/bpm)).
+const SARKILAR := [
+	{"ad": "Gece Koşusu", "muzik": "muzik_oyun", "bpm": 150.0, "rekor": "rekor_ritim", "olumler": "olumler_ritim"},
+	{"ad": "Çatı Neşesi", "muzik": "muzik_ritim2", "bpm": 22050.0 * 15.0 / 2584.0, "rekor": "rekor_ritim2", "olumler": "olumler_ritim2"},
+]
+const GECIKME_ARALIK := Vector2i(-150, 300)   ## oyuncu ses gecikmesi ayarı (ms)
+const ONERI_ESIK_MS := 25.0                    ## ortalama sapma bundan büyükse ayar önerilir
+const ONERI_EN_AZ := 6                         ## öneri için en az değerlendirilen zıplama
 const OLCU := 4                  ## ölçü başına vuruş
 const PARCA_OLCU := 4            ## parça başına ölçü
 const TAM_VURUS_MS := 70.0       ## bu kadar içinde zıplamak "tam vuruş"
 const ISINMA_OLCU := 2           ## koşu başında boş ölçü
 const SES_KAYMA_SN := 0.06       ## müzik oyundan bu kadar kayarsa yeniden sarılır
 
-## Menüden seçilen kip.
+## Menüden seçilen kip ve şarkı.
 static var secili := false
+static var sarki := 0
+
+
+static func adim(sarki_no: int) -> float:
+	return HIZ * 60.0 / float(SARKILAR[clampi(sarki_no, 0, SARKILAR.size() - 1)]["bpm"])
+
+
+## Ortalama sapmaya (ms, + geç) göre önerilen yeni gecikme ayarı; öneri yoksa null.
+static func gecikme_onerisi(simdiki_ms: int, sapmalar: Array) -> Variant:
+	if sapmalar.size() < ONERI_EN_AZ:
+		return null
+	var toplam := 0.0
+	for m in sapmalar:
+		toplam += float(m)
+	var ort := toplam / sapmalar.size()
+	if absf(ort) < ONERI_ESIK_MS:
+		return null
+	var yeni := int(round((simdiki_ms + ort) / 10.0)) * 10
+	return clampi(yeni, GECIKME_ARALIK.x, GECIKME_ARALIK.y)
 
 ## Ölçü desenleri: [vuruş, tür]. Türler: diken, cukur, kisa (alçak tavan + kısa sıçrama).
 ## Olaylar yalnız 0. ve 2. vuruşta; tam zıplama 1,86 vuruş sürer.
@@ -34,10 +63,10 @@ const DESENLER := [
 
 
 ## x noktası kaçıncı vuruşa ne kadar uzak: [en yakın vuruş, sapma ms (+ geç, − erken)].
-static func vurus_konumu(x: float, izgara0: float) -> Array:
-	var k := (x - izgara0) / ADIM
+static func vurus_konumu(x: float, izgara0: float, adim_px := ADIM) -> Array:
+	var k := (x - izgara0) / adim_px
 	var n := int(round(k))
-	return [n, (k - n) * VURUS_SN * 1000.0]
+	return [n, (k - n) * adim_px / HIZ * 1000.0]
 
 
 ## Bir sonraki ölçü deseni. `olcu_no` koşunun kaçıncı ölçüsü; `onceki_son` önceki ölçünün son olay vuruşu (-1 yok).
@@ -60,10 +89,10 @@ static func desen_sec(rng: RandomNumberGenerator, olcu_no: int, onceki_son: int)
 
 
 ## Ritim parçası üretir. bas_x: parçanın dünya x'i. Dönüş: [Parca, son olay vuruşu, olay vuruşları (dünya indeksleri)].
-static func parca_uret(bas_x: float, izgara0: float, rng: RandomNumberGenerator, olcu_no: int, onceki_son: int) -> Array:
-	var k0 := int(ceil((bas_x - izgara0) / ADIM - 0.001))
-	var giris := izgara0 + k0 * ADIM - bas_x          # parça başından ilk vuruşa (0..ADIM)
-	var uzunluk := giris + PARCA_OLCU * OLCU * ADIM
+static func parca_uret(bas_x: float, izgara0: float, rng: RandomNumberGenerator, olcu_no: int, onceki_son: int, adim_px := ADIM) -> Array:
+	var k0 := int(ceil((bas_x - izgara0) / adim_px - 0.001))
+	var giris := izgara0 + k0 * adim_px - bas_x          # parça başından ilk vuruşa (0..adım)
+	var uzunluk := giris + PARCA_OLCU * OLCU * adim_px
 	var p := Parca.new()
 	p.name = "RitimParca"
 	p.zorluk = 1
@@ -87,7 +116,7 @@ static func parca_uret(bas_x: float, izgara0: float, rng: RandomNumberGenerator,
 			ozel[int(olay[0])] = str(olay[1])
 		son = -1 if ozel.is_empty() else int((d["olaylar"] as Array)[-1][0])
 		for v in OLCU:
-			var xb := giris + (o * OLCU + v) * ADIM
+			var xb := giris + (o * OLCU + v) * adim_px
 			vuruslar.append(xb)
 			zipla.append(1 if ozel.has(v) else 0)
 			if not ozel.has(v):

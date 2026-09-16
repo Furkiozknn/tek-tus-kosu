@@ -521,6 +521,10 @@ func _oyun() -> Node:
 	var pd := _dugme("PaylasDugme", "Paylaş", Vector2(110, 36))
 	pd.visible = false
 	dugmeler.add_child(pd)
+	var gcd := _dugme("GecikmeDugme", "Gecikme", Vector2(110, 36))
+	gcd.add_theme_font_size_override("font_size", 13)
+	gcd.visible = false
+	dugmeler.add_child(gcd)
 	dugmeler.add_child(_dugme("SonMenuDugme", "Menü", Vector2(150, 36)))
 	sk.add_child(_etiket("SonIpucu", "Tekrar için dokun ya da Boşluk", 11, Color("8b9bb4")))
 	_ortala(dk)
@@ -749,6 +753,44 @@ func _menu() -> Node:
 		av.add_child(cb)
 	av.add_child(_dugme("AyarlarGeri", "Geri", Vector2(160, 36)))
 	av.get_node("AyarlarBaslik").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	# --- Ritim paneli: şarkı seçimi + ses gecikmesi ---
+	var rp := _panel("RitimPaneli")
+	rp.custom_minimum_size = Vector2(380, 0)
+	kok.add_child(rp)
+	var rv: VBoxContainer = rp.get_child(0)
+	rv.add_theme_constant_override("separation", 6)
+	rv.add_child(_etiket("RitimBaslik", "Ritim koşusu", 22))
+	rv.add_child(_etiket("RitimAciklama", "Engeller müziğin vuruşuna hizalı. Sarı oklu lambada zıpla.", 12, Color("c0cbdc")))
+	for i in 2:
+		var sd := _dugme("SarkiDugme%d" % i, "Şarkı %d" % (i + 1), Vector2(300, 36))
+		sd.add_theme_font_size_override("font_size", 16)
+		rv.add_child(sd)
+	var gs := HBoxContainer.new()
+	gs.name = "GecikmeSatir"
+	gs.add_theme_constant_override("separation", 8)
+	var gl2 := _etiket("GecikmeEtiket", "Ses gecikmesi", 14)
+	gl2.custom_minimum_size = Vector2(110, 0)
+	gs.add_child(gl2)
+	var gk := HSlider.new()
+	gk.name = "GecikmeKaydirici"
+	gk.unique_name_in_owner = true
+	gk.min_value = -150
+	gk.max_value = 300
+	gk.step = 10
+	gk.custom_minimum_size = Vector2(150, 28)
+	gk.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gs.add_child(gk)
+	var gd2 := _etiket("GecikmeDeger", "+0 ms", 14, Color("fee761"))
+	gd2.custom_minimum_size = Vector2(64, 0)
+	gd2.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	gs.add_child(gd2)
+	rv.add_child(gs)
+	var gi := _etiket("GecikmeIpucu", "Vuruşları geç duyuyorsan (bluetooth kulaklık) artır.", 11, Color("8b9bb4"))
+	rv.add_child(gi)
+	rv.add_child(_dugme("RitimGeri", "Geri", Vector2(160, 32)))
+	for ad in ["RitimBaslik", "RitimAciklama", "GecikmeIpucu"]:
+		rv.get_node(ad).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	# --- Başarımlar paneli ---
 	var bp := _panel("BasarimPaneli")

@@ -20,7 +20,12 @@ func _ready() -> void:
 
 	%BaslaDugme.pressed.connect(basla)
 	%GunlukDugme.pressed.connect(basla.bind(true))
-	%RitimDugme.pressed.connect(basla.bind(false, true))
+	%RitimDugme.pressed.connect(func() -> void: _panel_ac(%RitimPaneli))
+	for i in Ritim.SARKILAR.size():
+		get_node("%%SarkiDugme%d" % i).pressed.connect(basla.bind(false, true, i))
+	%RitimGeri.pressed.connect(func() -> void: _panel_ac(%AnaPanel))
+	%GecikmeKaydirici.value = float(d["ayarlar"].get("ritim_gecikme", 0))
+	%GecikmeKaydirici.value_changed.connect(func(v: float) -> void: _ayar("ritim_gecikme", int(v)); _yenile())
 	%KarakterDugme.pressed.connect(func() -> void: _panel_ac(%KarakterPaneli))
 	%BasarimDugme.pressed.connect(func() -> void: _panel_ac(%BasarimPaneli))
 	%AyarlarDugme.pressed.connect(func() -> void: _panel_ac(%AyarlarPaneli))
@@ -73,7 +78,7 @@ func _tam_ekran_uygula(acik: bool) -> void:
 
 
 func _panel_ac(panel: Control) -> void:
-	for p in [%AnaPanel, %KarakterPaneli, %AyarlarPaneli, %BasarimPaneli]:
+	for p in [%AnaPanel, %KarakterPaneli, %AyarlarPaneli, %BasarimPaneli, %RitimPaneli]:
 		p.visible = p == panel
 	_aktif_panel = panel
 	%Ipucu.visible = panel == %AnaPanel
@@ -83,6 +88,8 @@ func _panel_ac(panel: Control) -> void:
 		%KarakterGeri.grab_focus()
 	elif panel == %BasarimPaneli:
 		%BasarimGeri.grab_focus()
+	elif panel == %RitimPaneli:
+		%SarkiDugme0.grab_focus()
 	else:
 		%AyarlarGeri.grab_focus()
 	Ses.cal("tik")
@@ -94,9 +101,17 @@ func _yenile() -> void:
 	%AltinEtiketi.text = "Altın: %d" % int(d["toplam_altin"])
 	%KarakterAltin.text = "Altın: %d" % int(d["toplam_altin"])
 	var gun := Gunluk.durum(d)
-	var rr := int(d.get("rekor_ritim", 0))
+	var rr := 0
+	for i in Ritim.SARKILAR.size():
+		var sk: Dictionary = Ritim.SARKILAR[i]
+		var r := int(d.get(sk["rekor"], 0))
+		rr = maxi(rr, r)
+		var b: Button = get_node("%%SarkiDugme%d" % i)
+		b.text = "%s · %d BPM" % [sk["ad"], int(round(float(sk["bpm"])))] + ("" if r <= 0 else " · %d m" % r)
 	%RitimDugme.text = "Ritim" if rr <= 0 else "Ritim · %d m" % rr
 	%RitimDugme.tooltip_text = "Engeller müziğin vuruşlarına hizalı; vuruşta zıpla."
+	var gc := int(d["ayarlar"].get("ritim_gecikme", 0))
+	%GecikmeDeger.text = "%+d ms" % gc
 	var seri := Gunluk.seri(d)
 	%GunlukDugme.text = "Günlük koşu" if int(gun["deneme"]) == 0 else "Günlük · %d m" % int(gun["rekor"])
 	if seri >= 2:
@@ -216,12 +231,13 @@ func _telefonda_tam_ekran() -> void:
 	JavaScriptBridge.eval(js, true)
 
 
-func basla(gunluk := false, ritim := false) -> void:
+func basla(gunluk := false, ritim := false, sarki := 0) -> void:
 	if _basliyor:
 		return
 	_basliyor = true
 	Gunluk.secili = gunluk and not ritim
 	Ritim.secili = ritim
+	Ritim.sarki = sarki
 	set_process_unhandled_input(false)
 	_telefonda_tam_ekran()
 	var tw := create_tween()

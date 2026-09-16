@@ -400,6 +400,14 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Paylaş"
 
+[node name="GecikmeDugme" type="Button" parent="Arayuz/SonPaneli/Kutu/Dugmeler" unique_id=74188023]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(110, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Gecikme"
+
 [node name="SonMenuDugme" type="Button" parent="Arayuz/SonPaneli/Kutu/Dugmeler" unique_id=1708625895]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 36)

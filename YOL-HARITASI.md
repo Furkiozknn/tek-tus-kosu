@@ -65,11 +65,17 @@
 - [x] 13. başarım (Vuruşu yakala); menüde Ritim düğmesi, Çıkış sol üste taşındı
 - [x] `bot_stres --ritim --vurus <ms>`: zamanlama penceresi ölçümü (−175…+150 ms yaşanır)
 
-## Sonraki tur (v0.7)
+## Bitti — geliştirme turu 6 (v0.7, 2026-09-16)
 
-- [ ] Ritim: ikinci bir müzik/tempo (ör. 128 BPM "neşeli"), şarkıya göre desen seti
+- [x] Ritim: ikinci şarkı "Çatı Neşesi" (128 BPM, vuruş 140,6 px), şarkı paneli, şarkı başına rekor ve ölümler
+- [x] Ritim: ses gecikmesi ayarı (−150…+300 ms) + koşu sonunda ölçülen sapmadan öneri düğmesi
+      (ayrı kalibrasyon ekranı yerine)
+- [x] `bot_stres --sarki`
+
+## Sonraki tur (v0.8)
+
 - [ ] Ritim: günlük ritim koşusu (tarih tohumu) — isteğe bağlı
-- [ ] Ritim: ses gecikmesi ayarı (kalibrasyon ekranı; bluetooth kulaklık)
+- [ ] Ritim: şarkıya özel desen (ör. 128 BPM'de senkoplu çift diken) — yeni desen yalnız ölçülmüş pencereyle
 - [ ] Paylaşım metnine itch adresi (yayından sonra)
 - [ ] Gerçek telefonda dokunma, tam ekran ve paylaşım menüsü denemesi
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)

@@ -35,6 +35,7 @@ $G --headless --path . -s res://tools/varlik_uret.gd
 $G --headless --path . -s res://tools/ses_uret.gd
 $G --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_oyun.wav --ruh hizli --tohum 11
 $G --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_menu.wav --ruh sakin --tohum 4
+$G --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_ritim2.wav --ruh neseli --tohum 7
 # (yalnız simge seti değişirse) python3 tools/simge_fontu.py   # fonttools gerekir
 $G --headless --path . --import
 $G --headless --path . -s res://tools/sahne_uret.gd
@@ -80,6 +81,11 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   `oyun._izgara0` (başlangıç + ses gecikmesi). Olay vuruşları `_ritim_olaylar`; zıplamada
   `_ritim_degerlendir()`. Müzik `Ses.muzik(..., true)` ile baştan; `_ritim_ses_hizala()` kaymada müziği
   sarar (oyun zamanı yetkili). Headless'ta müzik çalmaz (`Ses.muzik_konumu() == -1`), hizalama atlanır.
+  Şarkılar `Ritim.SARKILAR` (müzik, gerçek BPM, rekor/ölüm anahtarları); oyun `ritim_sarki` ve `_adim` tutar.
+  Hız bütün şarkılarda 300 px/sn — engel geometrisi hıza bağlı. Yeni şarkının BPM'i 2 vuruşta ≥ 223 px
+  (tam zıplama boyu) bırakmalı: 300 px/sn'de en fazla ~160 BPM. BPM'i WAV'ın gerçek temposundan yaz
+  (`22050·15 / round(22050·15/bpm)`). Ses gecikmesi ayarı `ayarlar.ritim_gecikme` (ms) ızgarayı kaydırır;
+  `_ritim_sapmalar` → `Ritim.gecikme_onerisi()` → sonuçta `%GecikmeDugme`.
   Desen eklerken: olaylar yalnız 0/2. vuruşta (tam zıplama 1,86 vuruş sürer), sonra
   `bot_stres --ritim` ve `--vurus -175 / 150` ile pencereyi yeniden ölç.
 - Günlük seri kayıtta `gunluk_seri`; paylaşım metni `Gunluk.paylasim_metni()`. Web'de dokunmatik
@@ -106,9 +112,13 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
+- v0.7 (bulut): 765 test geçti. 128 BPM: bot 12 tohum × 3 dk 0 ölüm (10 desen); kaydırmalı oyuncu
+  −175 / 0 / +150 ms 0 ölüm, −200 ve +175 ms'de ölüm (150 BPM ile aynı pencere).
 - v0.6 (bulut): 740 test geçti. Ritim: bot 12 tohum × 3 dk 0 ölüm (10 desenin hepsi); vuruşa göre
   kaydırarak zıplayan oyuncu 8 tohum × 3 dk: −175…+150 ms 0 ölüm, −200 ms ve +175 ms'de alçak tavan
   dikeninde ölüm (pencerenin sınırı). Çukur 140 → 120 px daraltılarak erken sınır −125'ten −175 ms'ye genişledi.
+- v0.6 (Windows 11): 742 test geçti; bot stresi 8 tohum ve ritim stresi 4 tohum, 0 ölüm; dışa aktarmalar tamam
+  (exe 107 MB, web pck 570 KB).
 - v0.1 (bulut + Windows): 171 test geçti; Windows ve Web dışa aktarma çalıştı.
 - v0.2 (bulut, Linux headless): 388 test geçti, 0 hata. Web sürümü Playwright/Chromium ile:
   menü, karakter paneli, ayarlar paneli, fareyle başlatma, oyun, ölüm tekrarı, sonuç paneli.

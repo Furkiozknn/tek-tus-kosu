@@ -71,6 +71,22 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mxgkd"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.24705882, 0.24705882, 0.45490196, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.79607844, 0.85882354, 0.9882353, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [node name="Menu" type="Control" unique_id=11311504]
 texture_filter = 1
 layout_mode = 3
@@ -468,6 +484,108 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Geri"
 
+[node name="RitimPaneli" type="PanelContainer" parent="." unique_id=516237430]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_7jp70")
+
+[node name="Kutu" type="VBoxContainer" parent="RitimPaneli" unique_id=1165364273]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="RitimBaslik" type="Label" parent="RitimPaneli/Kutu" unique_id=1500355739]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Ritim koşusu"
+horizontal_alignment = 1
+
+[node name="RitimAciklama" type="Label" parent="RitimPaneli/Kutu" unique_id=478166520]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.7529412, 0.79607844, 0.8627451, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Engeller müziğin vuruşuna hizalı. Sarı oklu lambada zıpla."
+horizontal_alignment = 1
+
+[node name="SarkiDugme0" type="Button" parent="RitimPaneli/Kutu" unique_id=149926876]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Şarkı 1"
+
+[node name="SarkiDugme1" type="Button" parent="RitimPaneli/Kutu" unique_id=149926877]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Şarkı 2"
+
+[node name="GecikmeSatir" type="HBoxContainer" parent="RitimPaneli/Kutu" unique_id=365459544]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GecikmeEtiket" type="Label" parent="RitimPaneli/Kutu/GecikmeSatir" unique_id=124408706]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Ses gecikmesi"
+
+[node name="GecikmeKaydirici" type="HSlider" parent="RitimPaneli/Kutu/GecikmeSatir" unique_id=1868511733]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -150.0
+max_value = 300.0
+step = 10.0
+
+[node name="GecikmeDeger" type="Label" parent="RitimPaneli/Kutu/GecikmeSatir" unique_id=36708867]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.99607843, 0.90588236, 0.38039216, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "+0 ms"
+horizontal_alignment = 2
+
+[node name="GecikmeIpucu" type="Label" parent="RitimPaneli/Kutu" unique_id=354140283]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.54509807, 0.60784316, 0.7058824, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+text = "Vuruşları geç duyuyorsan (bluetooth kulaklık) artır."
+horizontal_alignment = 1
+
+[node name="RitimGeri" type="Button" parent="RitimPaneli/Kutu" unique_id=484146156]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Geri"
+
 [node name="BasarimPaneli" type="PanelContainer" parent="." unique_id=327033232]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(400, 0)
@@ -478,7 +596,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_7jp70")
+theme_override_styles/panel = SubResource("StyleBoxFlat_mxgkd")
 
 [node name="Kutu" type="VBoxContainer" parent="BasarimPaneli" unique_id=1256209995]
 layout_mode = 2

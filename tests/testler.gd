@@ -1130,47 +1130,35 @@ func _test_ritim() -> void:
 	_kayit_temizle()
 	var sonuclar := {}
 	for gecikme in [0.0, 25.0]:
-		var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
-		oyun.ritim = true
-		oyun.kayit_yap = false
-		oyun.olum_tekrari_acik = false
-		oyun.tohum = 5
-		root.add_child(oyun)
-		await process_frame
+		var oyun := await _ritim_oyunu(0, 5, false)
 		dogrula(oyun.ritim and not oyun.gunluk and not oyun.rahat and is_equal_approx(oyun.oyuncu.hiz, Ritim.HIZ), "ritim koşusu sabit 300 px/sn")
-		var o: Oyuncu = oyun.oyuncu
-		var yapilan := {}
-		var olay_sayisi := 0
-		var birak := -1
-		for kare in 60 * 75:
-			await physics_frame
-			if not o.canli:
-				break
-			if birak == 0:
-				o.zipla_birak()
-			birak -= 1
-			var x := o.global_position.x
-			var k := int(round((x - gecikme - oyun._izgara0) / Ritim.ADIM))
-			var kx: float = oyun._izgara0 + k * Ritim.ADIM + gecikme
-			if x + 2.5 >= kx and not yapilan.has(k) and oyun._ritim_olaylar.has(k):
-				yapilan[k] = true
-				olay_sayisi += 1
-				var tavan := false
-				for t in oyun.dunya_tavan_araliklari():
-					if kx - gecikme >= float(t[0]) - 1.0 and kx - gecikme <= float(t[1]):
-						tavan = true
-				o.zipla_bas()
-				birak = 1 if tavan else 24
-		sonuclar[gecikme] = [o.canli, olay_sayisi, int(oyun.istatistik["ritim"]), oyun.mesafe()]
+		sonuclar[gecikme] = await _ritim_oyna(oyun, gecikme, 60 * 75)
 		oyun.queue_free()
 		await process_frame
 	var s0: Array = sonuclar[0.0]
 	var s1: Array = sonuclar[25.0]
-	print("  kusursuz: %s  geç: %s" % [str(sonuclar[0.0]), str(sonuclar[25.0])])
+	print("  kusursuz: %s  geç: %s" % [str(s0), str(s1)])
 	dogrula(s0[0] and s0[1] >= 30, "vuruşta zıplayan oyuncu 75 sn yaşamalı (%s)" % str(s0))
 	dogrula(s0[2] == s0[1], "vuruşta zıplamalar tam vuruş sayılmalı (%s)" % str(s0))
 	dogrula(s1[0] and s1[1] >= 30, "83 ms geç zıplayan da yaşamalı (pencere geniş) (%s)" % str(s1))
 	dogrula(s1[2] == 0, "83 ms geç zıplama tam vuruş sayılmamalı (%s)" % str(s1))
+
+	# İkinci şarkı (128 BPM): vuruş aralığı 140,6 px, aynı engeller, kusursuz oyuncu yaşar.
+	dogrula(absf(Ritim.adim(1) - 140.625) < 0.05, "128 BPM → vuruş ≈140,6 px (%.3f)" % Ritim.adim(1))
+	var o2 := await _ritim_oyunu(1, 6, false)
+	dogrula(is_equal_approx(o2._adim, Ritim.adim(1)), "oyun ikinci şarkının adımını kullanmalı")
+	var s2: Array = await _ritim_oyna(o2, 0.0, 60 * 60)
+	print("  128 BPM kusursuz: %s" % str(s2))
+	dogrula(s2[0] and s2[1] >= 20 and s2[2] == s2[1], "128 BPM'de vuruşta zıplayan yaşar, hepsi tam vuruş (%s)" % str(s2))
+	var ilk_parca: Parca = null
+	for p in o2.parcalar:
+		if p.has_meta("desenler"):
+			ilk_parca = p
+			break
+	var kalan := fposmod(ilk_parca.position.x + ilk_parca.uzunluk - o2._izgara0, Ritim.adim(1)) if ilk_parca else -1.0
+	dogrula(ilk_parca != null and minf(kalan, Ritim.adim(1) - kalan) < 0.01, "128 BPM parçaları ızgarada bitmeli (%.4f)" % kalan)
+	o2.queue_free()
+	await process_frame
 
 	# Bot ritim koşusunda yaşar
 	var bo: Node2D = (load(OYUN) as PackedScene).instantiate()
@@ -1190,25 +1178,49 @@ func _test_ritim() -> void:
 	bo.queue_free()
 	await process_frame
 
-	# Ayrı rekor + menü düğmesi
+	# Gecikme önerisi: 83 ms geç zıplayan oyuncuya +80 ms önerilir; uygulanınca aynı oyuncu tam vuruş yapar.
+	dogrula(Ritim.gecikme_onerisi(0, [10.0, 12.0, 9.0, 11.0, 10.0, 8.0]) == null, "küçük sapmada öneri yok")
+	dogrula(Ritim.gecikme_onerisi(0, [80.0, 90.0, 85.0]) == null, "az zıplamada öneri yok")
+	dogrula(Ritim.gecikme_onerisi(40, [-60.0, -62.0, -58.0, -61.0, -59.0, -60.0]) == -20, "erken sapma öneriyi düşürür")
+	dogrula(Ritim.gecikme_onerisi(280, [90.0, 90.0, 90.0, 90.0, 90.0, 90.0]) == Ritim.GECIKME_ARALIK.y, "öneri üst sınırda kırpılır")
 	_kayit_temizle()
+	var go := await _ritim_oyunu(0, 5, true)
+	var sg: Array = await _ritim_oyna(go, 25.0, 60 * 30)
+	go.oyuncu.ol()
+	await _kareler(2)
+	var gd: Button = go.get_node("%GecikmeDugme")
+	dogrula(sg[1] >= 6 and absf(float(go.son_sonuc["ritim_sapma"]) - 83.3) < 5.0, "ortalama sapma ölçülmeli (%s)" % str(go.son_sonuc.get("ritim_sapma")))
+	dogrula(gd.visible and gd.text.contains("+80"), "sonuç panelinde +80 ms önerisi (%s)" % gd.text)
+	dogrula(go.son_altin.text.contains("Ort. sapma: +83"), "sonuç satırında ortalama sapma (%s)" % go.son_altin.text)
+	var ekr: Rect2 = go.get_viewport().get_visible_rect()
+	dogrula(ekr.encloses(go.get_node("%SonPaneli").get_global_rect()), "üç düğmeli ritim sonuç paneli ekrana sığmalı")
+	gd.pressed.emit()
+	dogrula(int(Kayit.ayar("ritim_gecikme")) == 80 and gd.disabled, "öneri uygulanınca ayar yazılmalı")
+	go.queue_free()
+	await process_frame
+	var go2 := await _ritim_oyunu(0, 5, false)
+	# Oyuncu müziğe göre (ayar olmadan ızgara = müzik başı) yine 25 px geç zıplıyor.
+	dogrula(is_equal_approx(go2._izgara0 - go2._ritim_bas_x, 24.0 + Ritim.HIZ * AudioServer.get_output_latency()), "80 ms ayar ızgarayı 24 px kaydırmalı")
+	var sg2: Array = await _ritim_oyna(go2, 25.0, 60 * 30, go2._ritim_bas_x + Ritim.HIZ * AudioServer.get_output_latency())
+	dogrula(sg2[0] and sg2[1] >= 6 and sg2[2] == sg2[1], "gecikme ayarıyla geç oyuncu tam vuruş yapmalı (%s)" % str(sg2))
+	go2.queue_free()
+	await process_frame
+	_kayit_temizle()
+
+	# Ayrı rekor (şarkı başına) + menü paneli
 	var kd := Kayit.yukle()
 	kd["rekor"] = 500
 	Kayit.kaydet(kd)
-	var ro: Node2D = (load(OYUN) as PackedScene).instantiate()
-	ro.ritim = true
-	ro.kayit_yap = true
-	ro.olum_tekrari_acik = false
-	ro.tohum = 3
-	root.add_child(ro)
+	var ro := await _ritim_oyunu(1, 3, true)
 	await _kareler(90)
 	ro.oyuncu.ol()
 	await _kareler(2)
 	kd = Kayit.yukle()
-	dogrula(int(kd["rekor"]) == 500 and int(kd["rekor_ritim"]) == ro.son_sonuc["mesafe"] and int(kd["rekor_ritim"]) > 0,
-		"ritim rekoru ayrı tutulmalı (%d / %d)" % [kd["rekor"], kd["rekor_ritim"]])
-	dogrula((kd["olumler_ritim"] as Array).size() == 1 and (kd["olumler"] as Array).is_empty(), "ritim ölümleri ayrı listede")
+	dogrula(int(kd["rekor"]) == 500 and int(kd["rekor_ritim"]) == 0 and int(kd["rekor_ritim2"]) == ro.son_sonuc["mesafe"] and int(kd["rekor_ritim2"]) > 0,
+		"ritim rekoru şarkı başına ayrı tutulmalı (%d / %d / %d)" % [kd["rekor"], kd["rekor_ritim"], kd["rekor_ritim2"]])
+	dogrula((kd["olumler_ritim2"] as Array).size() == 1 and (kd["olumler_ritim"] as Array).is_empty() and (kd["olumler"] as Array).is_empty(), "ritim ölümleri şarkı başına ayrı listede")
 	dogrula(ro.son_altin.text.contains("Tam vuruş"), "sonuç panelinde tam vuruş sayısı (%s)" % ro.son_altin.text)
+	dogrula(ro.rekor_etiketi.text.begins_with("Çatı Neşesi rekoru"), "HUD şarkının rekorunu göstermeli (%s)" % ro.rekor_etiketi.text)
 	ro.duraklat()
 	ro.queue_free()
 	await process_frame
@@ -1216,10 +1228,27 @@ func _test_ritim() -> void:
 	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
 	root.add_child(menu)
 	await _kareler(3)
-	var rd: Button = menu.get_node("%RitimDugme")
-	dogrula(rd.visible and rd.text.begins_with("Ritim") and rd.text.contains("%d m" % int(kd["rekor_ritim"])), "menüde Ritim düğmesi rekoru göstermeli (%s)" % rd.text)
-	var cikis: Control = menu.get_node("%CikisDugme")
 	var ekran: Rect2 = menu.get_viewport().get_visible_rect()
+	var rd: Button = menu.get_node("%RitimDugme")
+	var r2 := int(kd["rekor_ritim2"])
+	dogrula(rd.visible and rd.text.begins_with("Ritim") and rd.text.contains("%d m" % r2), "menüde Ritim düğmesi en iyi ritim rekorunu göstermeli (%s)" % rd.text)
+	rd.pressed.emit()
+	await _kareler(3)
+	var rp: Control = menu.get_node("%RitimPaneli")
+	dogrula(rp.visible and not menu.get_node("%AnaPanel").visible, "Ritim düğmesi şarkı panelini açmalı")
+	dogrula(ekran.encloses(rp.get_global_rect()), "ritim paneli ekrana sığmalı (%s)" % rp.get_global_rect())
+	var sd0: Button = menu.get_node("%SarkiDugme0")
+	var sd1: Button = menu.get_node("%SarkiDugme1")
+	dogrula(sd0.text.begins_with("Gece Koşusu · 150 BPM") and not sd0.text.ends_with(" m"), "1. şarkı düğmesi (%s)" % sd0.text)
+	dogrula(sd1.text.begins_with("Çatı Neşesi · 128 BPM") and sd1.text.ends_with("%d m" % r2), "2. şarkı düğmesi rekoru göstermeli (%s)" % sd1.text)
+	var gk: HSlider = menu.get_node("%GecikmeKaydirici")
+	gk.value = 60
+	await _kareler(1)
+	dogrula(int(Kayit.ayar("ritim_gecikme")) == 60 and (menu.get_node("%GecikmeDeger") as Label).text == "+60 ms", "gecikme kaydırıcısı ayarı yazmalı")
+	(menu.get_node("%RitimGeri") as Button).pressed.emit()
+	await _kareler(2)
+	dogrula(menu.get_node("%AnaPanel").visible and not rp.visible, "Geri ana menüye dönmeli")
+	var cikis: Control = menu.get_node("%CikisDugme")
 	dogrula(ekran.encloses(cikis.get_global_rect()) and cikis.get_global_rect().position.y < 40.0, "Çıkış düğmesi sol üstte")
 	var dugmeler: Array = []
 	for ad in ["%BaslaDugme", "%GunlukDugme", "%KarakterDugme", "%BasarimDugme", "%RitimDugme", "%AyarlarDugme", "%CikisDugme"]:
@@ -1230,11 +1259,58 @@ func _test_ritim() -> void:
 			if dugmeler[i].visible and dugmeler[j].visible and dugmeler[i].get_global_rect().intersects(dugmeler[j].get_global_rect()):
 				cakisma = true
 	dogrula(not cakisma, "menü düğmeleri üst üste binmemeli")
+	# Şarkı düğmesi ritim kipini ve şarkıyı seçer
+	menu.basla(false, true, 1)
+	dogrula(Ritim.secili and Ritim.sarki == 1 and not Gunluk.secili, "2. şarkı düğmesi ritim kipini ve şarkıyı seçmeli")
 	menu.queue_free()
 	await process_frame
 	Ritim.secili = false
+	Ritim.sarki = 0
 	_kayit_temizle()
 
+
+func _ritim_oyunu(sarki: int, tohum: int, kayit: bool) -> Node2D:
+	var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+	oyun.ritim = true
+	oyun.ritim_sarki = sarki
+	oyun.kayit_yap = kayit
+	oyun.olum_tekrari_acik = false
+	oyun.tohum = tohum
+	root.add_child(oyun)
+	await process_frame
+	return oyun
+
+
+## Her olay vuruşunda (gecikme px kaydırarak) zıplayan oyuncu. Dönüş: [canlı, olay sayısı, tam vuruş, mesafe].
+## taban: oyuncunun duyduğu vuruş ızgarasının başı (varsayılan: oyunun ızgarası).
+func _ritim_oyna(oyun: Node2D, gecikme: float, kare_sayisi: int, taban := NAN) -> Array:
+	var o: Oyuncu = oyun.oyuncu
+	var adim: float = oyun._adim
+	var t0: float = oyun._izgara0 if is_nan(taban) else taban
+	var yapilan := {}
+	var olay_sayisi := 0
+	var birak := -1
+	for kare in kare_sayisi:
+		await physics_frame
+		if not o.canli:
+			break
+		if birak == 0:
+			o.zipla_birak()
+		birak -= 1
+		var x := o.global_position.x
+		var k := int(round((x - gecikme - t0) / adim))
+		var kx: float = t0 + k * adim + gecikme
+		if x + 2.5 >= kx and not yapilan.has(k) and oyun._ritim_olaylar.has(k):
+			yapilan[k] = true
+			olay_sayisi += 1
+			var tavan := false
+			var olay_x: float = oyun._izgara0 + k * adim
+			for t in oyun.dunya_tavan_araliklari():
+				if olay_x >= float(t[0]) - 1.0 and olay_x <= float(t[1]):
+					tavan = true
+			o.zipla_bas()
+			birak = 1 if tavan else 24
+	return [o.canli, olay_sayisi, int(oyun.istatistik["ritim"]), oyun.mesafe()]
 
 class YakinDinleyici extends Node:
 	var sayi := 0

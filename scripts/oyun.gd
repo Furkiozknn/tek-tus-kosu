@@ -14,6 +14,7 @@ var kayit_yap := true
 var olum_tekrari_acik := true         ## Testlerde kapatılabilir
 var gunluk := false                   ## Günlük koşu (menüden Gunluk.secili ile gelir)
 var ritim := false                    ## Ritim koşusu (menüden Ritim.secili ile gelir)
+var ritim_sarki := -1                 ## Ritim şarkısı (-1: menüden Ritim.sarki)
 
 const TEMALAR := [
 	{"ad": "Akşam", "ust": Color("68386c"), "alt": Color("f77622"), "uzak": Color(1, 0.85, 0.8), "yakin": Color(1, 0.9, 0.9), "yildiz": 0.3, "yagis": false},
@@ -96,6 +97,9 @@ var _ritim_bas_x := 0.0                 ## ritim: müziğin başladığı andaki
 var _ritim_ses_onceki := -1.0            ## ritim: son okunan müzik konumu (döngü sayımı için)
 var _ritim_ses_tur := 0
 var _ritim_kayma_kare := 0
+var _adim := Ritim.ADIM                 ## ritim: bu şarkıda vuruş aralığı (px)
+var _ritim_sapmalar: Array[float] = []  ## ritim: değerlendirilen zıplamaların sapması (ms, + geç)
+var _gecikme_onerisi: Variant = null
 
 
 func _ready() -> void:
@@ -105,6 +109,10 @@ func _ready() -> void:
 	add_child(du)
 	du.dikey_oldu.connect(_dikey_oldu)
 	ritim = ritim or Ritim.secili
+	if ritim_sarki < 0:
+		ritim_sarki = Ritim.sarki
+	ritim_sarki = clampi(ritim_sarki, 0, Ritim.SARKILAR.size() - 1)
+	_adim = Ritim.adim(ritim_sarki)
 	gunluk = (gunluk or Gunluk.secili) and not ritim
 	for yol in ParcaListesi.YOLLAR:
 		_sahneler[yol] = load(yol)
@@ -125,6 +133,7 @@ func _ready() -> void:
 	%TekrarDugme.pressed.connect(yeniden_baslat)
 	%SonMenuDugme.pressed.connect(menuye_don)
 	%PaylasDugme.pressed.connect(_paylas)
+	%GecikmeDugme.pressed.connect(gecikme_uygula)
 	yeniden_baslat()
 
 
@@ -184,7 +193,10 @@ func yeniden_baslat() -> void:
 	oyuncu.sifirla(Vector2(100.0, Ayarlar.ZEMIN_Y))
 	oyuncu.hiz = _hiz_hesapla()
 	baslangic_x = oyuncu.global_position.x
-	_izgara0 = baslangic_x + Ritim.HIZ * AudioServer.get_output_latency()
+	var gecikme := clampi(int(ayar.get("ritim_gecikme", 0)), Ritim.GECIKME_ARALIK.x, Ritim.GECIKME_ARALIK.y)
+	_izgara0 = baslangic_x + Ritim.HIZ * (AudioServer.get_output_latency() + gecikme / 1000.0)
+	_ritim_sapmalar.clear()
+	_gecikme_onerisi = null
 	_ritim_olcu = 0
 	_ritim_son = -1
 	_ritim_olaylar.clear()
@@ -216,7 +228,7 @@ func yeniden_baslat() -> void:
 		_bot.ruzgar = ruzgar_gucu
 	%RuzgarEtiketi.hide()
 	if ritim:
-		Ses.muzik("muzik_oyun", true)  # vuruş ızgarası müziğin başıyla hizalı
+		Ses.muzik(str(Ritim.SARKILAR[ritim_sarki]["muzik"]), true)  # vuruş ızgarası müziğin başıyla hizalı
 	elif not bot_modu:
 		Ses.muzik("muzik_oyun")
 	gecis.color.a = 1.0
@@ -259,7 +271,7 @@ func _physics_process(delta: float) -> void:
 	_hayalet_adim()
 	_tema_guncelle(false)
 	if ritim:
-		RitimIsaret.faz = fposmod((oyuncu.global_position.x - _izgara0) / Ritim.ADIM, 1.0)
+		RitimIsaret.faz = fposmod((oyuncu.global_position.x - _izgara0) / _adim, 1.0)
 		_ritim_kacanlar()
 		_ritim_ses_hizala()
 
@@ -366,12 +378,14 @@ func iskele_coktu(iskele: Node2D) -> void:
 
 ## Ritim: zıplama bir olay vuruşuna ne kadar yakın?
 func _ritim_degerlendir() -> void:
-	var vk := Ritim.vurus_konumu(oyuncu.global_position.x, _izgara0)
+	var vk := Ritim.vurus_konumu(oyuncu.global_position.x, _izgara0, _adim)
 	var n: int = vk[0]
 	var ms: float = vk[1]
 	if not _ritim_olaylar.has(n):
 		return
 	_ritim_olaylar.erase(n)
+	if absf(ms) < 250.0:
+		_ritim_sapmalar.append(ms)
 	var yer := oyuncu.global_position + Vector2(0, -40)
 	if absf(ms) <= Ritim.TAM_VURUS_MS:
 		_ritim_seri += 1
@@ -406,7 +420,7 @@ func _ritim_ses_hizala() -> void:
 
 ## Ritim: zıplanmadan (ya da çok erken/geç zıplanarak) geçilen vuruşlar seriyi bozar.
 func _ritim_kacanlar() -> void:
-	var sinir := (oyuncu.global_position.x - _izgara0) / Ritim.ADIM - 0.5
+	var sinir := (oyuncu.global_position.x - _izgara0) / _adim - 0.5
 	for k in _ritim_olaylar.keys():
 		if k < sinir:
 			_ritim_olaylar.erase(k)
@@ -529,7 +543,7 @@ func _parca_ekle(yol: String) -> void:
 
 
 func _ritim_parcasi_ekle() -> void:
-	var r := Ritim.parca_uret(sonraki_x, _izgara0, parca_rng, _ritim_olcu, _ritim_son)
+	var r := Ritim.parca_uret(sonraki_x, _izgara0, parca_rng, _ritim_olcu, _ritim_son, _adim)
 	_ritim_olcu += Ritim.PARCA_OLCU
 	_ritim_son = r[1]
 	for k in r[2]:
@@ -655,7 +669,7 @@ func _kosu_sonucunu_isle() -> void:
 	istatistik["mesafe"] = m
 	istatistik["kosu"] = 1
 	var d := Kayit.yukle()
-	var anahtar := "rekor_ritim" if ritim else ("rekor_rahat" if rahat else "rekor")
+	var anahtar := _ritim_anahtar("rekor") if ritim else ("rekor_rahat" if rahat else "rekor")
 	var onceki_olumler := _olum_listesi(d).duplicate()
 	var onceki_rekor := _mod_rekoru(d)
 	var yeni_rekor: bool = m > onceki_rekor
@@ -674,7 +688,7 @@ func _kosu_sonucunu_isle() -> void:
 				_hayalet_kayit.mesafe = m
 				_hayalet_kayit.kaydet()
 		else:
-			var liste: Array = d["olumler_ritim" if ritim else ("olumler_rahat" if rahat else "olumler")]
+			var liste: Array = d[_ritim_anahtar("olumler") if ritim else ("olumler_rahat" if rahat else "olumler")]
 			liste.append(m)
 			while liste.size() > Ayarlar.OLUM_ISARETI_SAYISI:
 				liste.pop_front()
@@ -685,6 +699,13 @@ func _kosu_sonucunu_isle() -> void:
 		"gorevler": d["gorevler"], "seviye": int(d["gorev_seviyesi"]), "olumler": onceki_olumler,
 		"basarimlar": basarimlar, "deneme": int(Gunluk.durum(d)["deneme"]) if gunluk else 0,
 		"seri": Gunluk.seri(d) if gunluk else 0}
+	if ritim:
+		var toplam := 0.0
+		for m2 in _ritim_sapmalar:
+			toplam += m2
+		son_sonuc["ritim_sapma"] = toplam / _ritim_sapmalar.size() if not _ritim_sapmalar.is_empty() else 0.0
+		son_sonuc["ritim_sapma_sayi"] = _ritim_sapmalar.size()
+		_gecikme_onerisi = Ritim.gecikme_onerisi(int(d["ayarlar"].get("ritim_gecikme", 0)), _ritim_sapmalar)
 	kosu_bitti.emit(m, altin)
 
 
@@ -773,7 +794,8 @@ func _son_paneli_goster() -> void:
 	var satirlar := []
 	var ek_odul := int(g.get("odul", 0)) + Ayarlar.BASARIM_ODULU * (s.get("basarimlar", []) as Array).size()
 	satirlar.append("Altın: %d" % altin + ("   Ödül: +%d" % ek_odul if ek_odul > 0 else "")
-			+ ("   Tam vuruş: %d" % int(istatistik["ritim"]) if ritim else ""))
+			+ ("   Tam vuruş: %d" % int(istatistik["ritim"]) if ritim else "")
+			+ ("   Ort. sapma: %+d ms" % int(round(float(s.get("ritim_sapma", 0.0)))) if ritim and int(s.get("ritim_sapma_sayi", 0)) > 0 else ""))
 	var yeni_basarimlar: Array = s.get("basarimlar", [])
 	if not yeni_basarimlar.is_empty():
 		satirlar.append("★ " + ", ".join(yeni_basarimlar.map(func(b: Dictionary) -> String: return str(b["ad"]))))
@@ -787,16 +809,38 @@ func _son_paneli_goster() -> void:
 	son_gorevler.text = "\n".join(satirlar.slice(1))
 	# Kalabalık panelde alt ipucu yer kaplamasın (dokunma/boşluk yine çalışır).
 	%SonIpucu.visible = satirlar.size() <= 6
-	# Günlük koşuda üç düğme: Tekrar | Paylaş | Menü
+	# Günlük koşuda üç düğme: Tekrar | Paylaş | Menü. Ritimde gecikme önerisi varsa: Tekrar | Gecikme | Menü
 	%PaylasDugme.visible = gunluk
 	%PaylasDugme.text = "Paylaş"
-	var genislik := 110.0 if gunluk else 150.0
+	var gd: Button = %GecikmeDugme
+	gd.visible = ritim and _gecikme_onerisi != null
+	gd.disabled = false
+	if gd.visible:
+		gd.text = "Gecikme %+d ms" % int(_gecikme_onerisi)
+		gd.tooltip_text = "Zıplamaların vuruştan ortalama %+d ms uzakta. Ses gecikmesi ayarını buna göre değiştir." % int(round(float(s.get("ritim_sapma", 0.0))))
+	var genislik := 110.0 if (gunluk or gd.visible) else 150.0
 	%TekrarDugme.custom_minimum_size.x = genislik
 	%SonMenuDugme.custom_minimum_size.x = genislik
 	son_paneli.reset_size()
 	son_paneli.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 	son_paneli.show()
 	%TekrarDugme.grab_focus()
+
+
+## Ritim: önerilen ses gecikmesini ayara yaz (sonraki koşuda geçerli).
+func gecikme_uygula() -> void:
+	if _gecikme_onerisi == null:
+		return
+	Kayit.ayar_yaz("ritim_gecikme", int(_gecikme_onerisi))
+	Ses.cal("tik")
+	var gd: Button = %GecikmeDugme
+	gd.text = "Ayarlandı ✓"
+	gd.disabled = true
+	_gecikme_onerisi = null
+
+
+func _ritim_anahtar(tur: String) -> String:
+	return str(Ritim.SARKILAR[ritim_sarki][tur])
 
 
 # ------------------------------------------------------------------ v0.4: paylaşım
@@ -829,7 +873,7 @@ func _mod_rekoru(d: Dictionary) -> int:
 	if gunluk:
 		return int(Gunluk.durum(d)["rekor"])
 	if ritim:
-		return int(d["rekor_ritim"])
+		return int(d[_ritim_anahtar("rekor")])
 	return int(d["rekor_rahat"] if rahat else d["rekor"])
 
 
@@ -837,14 +881,14 @@ func _rekor_metni(r: int) -> String:
 	if gunluk:
 		return "Günlük rekor: %d m" % r
 	if ritim:
-		return "Ritim rekoru: %d m" % r
+		return "%s rekoru: %d m" % [Ritim.SARKILAR[ritim_sarki]["ad"], r]
 	return ("Rahat rekor: %d m" if rahat else "Rekor: %d m") % r
 
 
 func _olum_listesi(d: Dictionary) -> Array:
 	if gunluk:
 		return Gunluk.durum(d).get("olumler", [])
-	return d["olumler_ritim" if ritim else ("olumler_rahat" if rahat else "olumler")]
+	return d[_ritim_anahtar("olumler") if ritim else ("olumler_rahat" if rahat else "olumler")]
 
 
 ## Rekor ve son ölüm yerine dünyada işaret koyar.

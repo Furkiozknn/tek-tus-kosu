@@ -9,6 +9,7 @@ const VARSAYILAN := {
 	"rekor": 0,
 	"rekor_rahat": 0,
 	"rekor_ritim": 0,
+	"rekor_ritim2": 0,
 	"toplam_altin": 0,
 	"kostum": "klasik",
 	"acik_kostumler": ["klasik"],
@@ -21,9 +22,10 @@ const VARSAYILAN := {
 	"olumler": [],
 	"olumler_rahat": [],
 	"olumler_ritim": [],
+	"olumler_ritim2": [],
 	"gunluk": {"tarih": "", "rekor": 0, "deneme": 0, "olumler": []},
 	"gunluk_seri": {"son": "", "seri": 0, "en_iyi": 0},
-	"ayarlar": {"muzik": 0.7, "efekt": 0.9, "tam_ekran": false, "sarsinti": true, "kontrast": false, "rahat": false, "titresim": true},
+	"ayarlar": {"muzik": 0.7, "efekt": 0.9, "tam_ekran": false, "sarsinti": true, "kontrast": false, "rahat": false, "titresim": true, "ritim_gecikme": 0},
 }
 
 
