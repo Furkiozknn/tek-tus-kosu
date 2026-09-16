@@ -27,6 +27,8 @@ func _ready() -> void:
 	%GunlukRitimDugme.pressed.connect(func() -> void: basla(false, true, Ritim.gunun_sarkisi(Gunluk.bugun()), true))
 	%GecikmeKaydirici.value = float(d["ayarlar"].get("ritim_gecikme", 0))
 	%GecikmeKaydirici.value_changed.connect(func(v: float) -> void: _ayar("ritim_gecikme", int(v)); _yenile())
+	%IpucuSesiKutu.button_pressed = bool(d["ayarlar"].get("ritim_ipucu", true))
+	%IpucuSesiKutu.toggled.connect(func(v: bool) -> void: _ayar("ritim_ipucu", v))
 	%KarakterDugme.pressed.connect(func() -> void: _panel_ac(%KarakterPaneli))
 	%BasarimDugme.pressed.connect(func() -> void: _panel_ac(%BasarimPaneli))
 	%AyarlarDugme.pressed.connect(func() -> void: _panel_ac(%AyarlarPaneli))

@@ -101,6 +101,9 @@ var _ritim_kayma_kare := 0
 var _adim := Ritim.ADIM                 ## ritim: bu şarkıda vuruş aralığı (px)
 var _ritim_sapmalar: Array[float] = []  ## ritim: değerlendirilen zıplamaların sapması (ms, + geç)
 var _gecikme_onerisi: Variant = null
+var _ritim_ipucu := true                ## ritim: zıplama vuruşundan bir vuruş önce tık sesi (ayar)
+var _ritim_vurus_k := -999999           ## ritim: son geçilen vuruş indeksi
+var _ritim_ipucu_sayisi := 0            ## ritim: çalınan ipucu sesi sayısı (test)
 
 
 func _ready() -> void:
@@ -203,6 +206,9 @@ func yeniden_baslat() -> void:
 	_izgara0 = baslangic_x + Ritim.HIZ * (AudioServer.get_output_latency() + gecikme / 1000.0)
 	_ritim_sapmalar.clear()
 	_gecikme_onerisi = null
+	_ritim_ipucu = bool(ayar.get("ritim_ipucu", true)) and not bot_modu
+	_ritim_vurus_k = -999999
+	_ritim_ipucu_sayisi = 0
 	_ritim_olcu = 0
 	_ritim_son = -1
 	_ritim_olaylar.clear()
@@ -282,6 +288,7 @@ func _physics_process(delta: float) -> void:
 		RitimIsaret.faz = fposmod((oyuncu.global_position.x - _izgara0) / _adim, 1.0)
 		_ritim_kacanlar()
 		_ritim_ses_hizala()
+		_ritim_ipucu_sesi()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -424,6 +431,17 @@ func _ritim_ses_hizala() -> void:
 		_ritim_ses_tur = int(floor(oyun_t / uzunluk))
 		_ritim_ses_onceki = hedef
 		Ses.muzik_sar(hedef)
+
+
+## Ritim: bir sonraki vuruş zıplama vuruşuysa bu vuruşta (bir vuruş önceden) tık çal — sayım gibi.
+func _ritim_ipucu_sesi() -> void:
+	var k := int(floor((oyuncu.global_position.x - _izgara0) / _adim))
+	if k == _ritim_vurus_k:
+		return
+	_ritim_vurus_k = k
+	if _ritim_ipucu and _ritim_olaylar.has(k + 1):
+		_ritim_ipucu_sayisi += 1
+		Ses.cal("tik", 0.7)
 
 
 ## Ritim: zıplanmadan (ya da çok erken/geç zıplanarak) geçilen vuruşlar seriyi bozar.

@@ -85,7 +85,8 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   Hız bütün şarkılarda 300 px/sn — engel geometrisi hıza bağlı. Yeni şarkının BPM'i 2 vuruşta ≥ 223 px
   (tam zıplama boyu) bırakmalı: 300 px/sn'de en fazla ~160 BPM. BPM'i WAV'ın gerçek temposundan yaz
   (`22050·15 / round(22050·15/bpm)`). Ses gecikmesi ayarı `ayarlar.ritim_gecikme` (ms) ızgarayı kaydırır;
-  `_ritim_sapmalar` → `Ritim.gecikme_onerisi()` → sonuçta `%GecikmeDugme`.
+  `_ritim_sapmalar` → `Ritim.gecikme_onerisi()` → sonuçta `%GecikmeDugme`. Vuruş ipucu sesi: `_ritim_ipucu_sesi()`
+  her vuruş geçişinde bir sonraki vuruş olaysa `tik` çalar (ayar `ritim_ipucu`, botta kapalı, sayaç `_ritim_ipucu_sayisi`).
   Günün ritmi: `Ritim.gunluk_secili` → `oyun.ritim_gunluk`; şarkı `Ritim.gunun_sarkisi(tarih)`, tohum
   `Ritim.gunun_tohumu(tarih)` (günlük koşudan ayrı), kayıt `gunluk_ritim` (`Ritim.gunluk_durum/gunluk_isle`).
   `oyun.gunluk` bu kipte false kalır (günlük seri ve `gunluk300` başarımı çalışmaz). Hayalet var: dosya
@@ -117,6 +118,7 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
+- v1.0 (bulut): 791 test geçti (tık sesi ayarı ve sayacı, ritim paneli sığıyor).
 - v0.9 (bulut): 788 test geçti. 13 desenle iki şarkıda bot 12 tohum × 3 dk 0 ölüm (bütün desenler görüldü);
   kaydırmalı oyuncu −175 ve +150 ms iki şarkıda 8 tohum × 3 dk 0 ölüm (pencere değişmedi).
 - v0.8 (bulut): 782 test geçti; web'de (Chromium) ritim paneli → Günün ritmi → koşu → sonuç → Paylaş

@@ -83,10 +83,15 @@
 - [x] Günün ritmi hayaleti (ayrı dosya, vuruş ızgarasına hizalı)
 - [x] Arka vuruş desenleri: diken1, diken3, arka_vurus (13 desen); ölçüler arası boşluk kuralı genelleştirildi
 
-## Sonraki tur (v1.0)
+## Bitti — geliştirme turu 9 (v1.0, 2026-09-16)
+
+- [x] Ritim: vuruş ipucu sesi (zıplama vuruşundan bir vuruş önce tık; ayarla kapanır)
+
+## Sonraki tur (v1.1)
 
 - [ ] Ritim: şarkıya özel desen seti (ör. 128 BPM'de daha sık kısa sıçrama) — yalnız ölçülmüş pencereyle
-- [ ] Ritim: müzikte olay vuruşlarına vurgu (davul dolgusu) — müzik üreticiye desen bilgisi
+- [ ] Gerçek telefonda deneme (dokunma gecikmesi, tam ekran, paylaşım menüsü)
+- [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] Paylaşım metnine itch adresi (yayından sonra)
 - [ ] Gerçek telefonda dokunma, tam ekran ve paylaşım menüsü denemesi
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)

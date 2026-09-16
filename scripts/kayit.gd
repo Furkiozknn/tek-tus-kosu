@@ -26,7 +26,7 @@ const VARSAYILAN := {
 	"gunluk": {"tarih": "", "rekor": 0, "deneme": 0, "olumler": []},
 	"gunluk_seri": {"son": "", "seri": 0, "en_iyi": 0},
 	"gunluk_ritim": {"tarih": "", "rekor": 0, "deneme": 0, "olumler": []},
-	"ayarlar": {"muzik": 0.7, "efekt": 0.9, "tam_ekran": false, "sarsinti": true, "kontrast": false, "rahat": false, "titresim": true, "ritim_gecikme": 0},
+	"ayarlar": {"muzik": 0.7, "efekt": 0.9, "tam_ekran": false, "sarsinti": true, "kontrast": false, "rahat": false, "titresim": true, "ritim_gecikme": 0, "ritim_ipucu": true},
 }
 
 

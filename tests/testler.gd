@@ -1170,6 +1170,21 @@ func _test_ritim() -> void:
 	o2.queue_free()
 	await process_frame
 
+	# Vuruş ipucu sesi: zıplamadan koşan oyuncu ilk engelde ölene kadar en az bir tık duyar; ayar kapalıyken hiç
+	var ipucu_sayilari := {}
+	for acik in [true, false]:
+		Kayit.ayar_yaz("ritim_ipucu", acik)
+		var io := await _ritim_oyunu(0, 5, false)
+		for kare in 60 * 30:
+			await physics_frame
+			if not io.oyuncu.canli:
+				break
+		ipucu_sayilari[acik] = io._ritim_ipucu_sayisi
+		io.queue_free()
+		await process_frame
+	Kayit.ayar_yaz("ritim_ipucu", true)
+	dogrula(int(ipucu_sayilari[true]) >= 1 and int(ipucu_sayilari[false]) == 0, "tık sesi yalnız ayar açıkken ve olay vuruşundan önce (%s)" % str(ipucu_sayilari))
+
 	# Bot ritim koşusunda yaşar
 	var bo: Node2D = (load(OYUN) as PackedScene).instantiate()
 	bo.ritim = true
@@ -1255,6 +1270,13 @@ func _test_ritim() -> void:
 	gk.value = 60
 	await _kareler(1)
 	dogrula(int(Kayit.ayar("ritim_gecikme")) == 60 and (menu.get_node("%GecikmeDeger") as Label).text == "+60 ms", "gecikme kaydırıcısı ayarı yazmalı")
+	var ik: CheckButton = menu.get_node("%IpucuSesiKutu")
+	dogrula(ik.button_pressed, "tık sesi varsayılan açık")
+	ik.button_pressed = false
+	await _kareler(1)
+	dogrula(not bool(Kayit.ayar("ritim_ipucu")), "tık sesi ayarı yazılmalı")
+	ik.button_pressed = true
+	await _kareler(1)
 	(menu.get_node("%RitimGeri") as Button).pressed.emit()
 	await _kareler(2)
 	dogrula(menu.get_node("%AnaPanel").visible and not rp.visible, "Geri ana menüye dönmeli")

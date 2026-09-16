@@ -791,6 +791,12 @@ func _menu() -> Node:
 	rv.add_child(gs)
 	var gi := _etiket("GecikmeIpucu", "Vuruşları geç duyuyorsan (bluetooth kulaklık) artır.", 11, Color("8b9bb4"))
 	rv.add_child(gi)
+	var ik := CheckButton.new()
+	ik.name = "IpucuSesiKutu"
+	ik.unique_name_in_owner = true
+	ik.text = "Zıplama vuruşundan önce tık sesi"
+	ik.add_theme_font_size_override("font_size", 13)
+	rv.add_child(ik)
 	rv.add_child(_dugme("RitimGeri", "Geri", Vector2(160, 32)))
 	for ad in ["RitimBaslik", "RitimAciklama", "GecikmeIpucu"]:
 		rv.get_node(ad).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

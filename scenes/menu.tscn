@@ -586,6 +586,12 @@ theme_override_constants/outline_size = 4
 text = "Vuruşları geç duyuyorsan (bluetooth kulaklık) artır."
 horizontal_alignment = 1
 
+[node name="IpucuSesiKutu" type="CheckButton" parent="RitimPaneli/Kutu" unique_id=126116035]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Zıplama vuruşundan önce tık sesi"
+
 [node name="RitimGeri" type="Button" parent="RitimPaneli/Kutu" unique_id=484146156]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(160, 32)
