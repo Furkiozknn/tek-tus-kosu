@@ -111,6 +111,7 @@ func _yenile() -> void:
 		rr = maxi(rr, r)
 		var b: Button = get_node("%%SarkiDugme%d" % i)
 		b.text = "%s · %d BPM" % [sk["ad"], int(round(float(sk["bpm"])))] + ("" if r <= 0 else " · %d m" % r)
+		b.tooltip_text = str(sk.get("aciklama", ""))
 	var gr := Ritim.gunluk_durum(d)
 	var gs: Dictionary = Ritim.SARKILAR[Ritim.gunun_sarkisi(Gunluk.bugun())]
 	%GunlukRitimDugme.text = "Günün ritmi · %s" % gs["ad"] + ("" if int(gr["deneme"]) == 0 else " · %d m" % int(gr["rekor"]))

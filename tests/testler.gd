@@ -1104,6 +1104,18 @@ func _test_ritim() -> void:
 				kural = false
 	dogrula(kural, "ısınma ölçüleri boş; olaylar arası ≥ 2 vuruş, alçak tavana ≥ 3; 3. vuruşta yalnız diken")
 	dogrula(gorulen_desen.size() == Ritim.DESENLER.size(), "bütün desenler seçilebilmeli (%d/%d)" % [gorulen_desen.size(), Ritim.DESENLER.size()])
+	# Şarkı karakteri: Çatı Neşesi'nde alçak tavan desenleri belirgin biçimde daha sık, çukur daha seyrek
+	var sayim := {0: {"kisa": 0, "cukur": 0}, 1: {"kisa": 0, "cukur": 0}}
+	for sarki in [0, 1]:
+		var r2 := RandomNumberGenerator.new()
+		r2.seed = 42
+		for i in 1500:
+			var d2 := Ritim.desen_sec(r2, 12 + i % 20, [-1, 0, 2][i % 3], sarki)
+			for o in d2["olaylar"]:
+				if sayim[sarki].has(o[1]):
+					sayim[sarki][o[1]] += 1
+	dogrula(sayim[1]["kisa"] > sayim[0]["kisa"] * 1.5 and sayim[1]["cukur"] < sayim[0]["cukur"], "şarkı ağırlıkları desen dağılımını değiştirmeli (%s)" % str(sayim))
+	dogrula(is_equal_approx(Ritim.desen_agirligi(Ritim.DESENLER[0], 1), 1.0) and Ritim.desen_agirligi(Ritim.DESENLER[8], 1) > 2.0, "boş desen ağırlığı 1, kisa_diken > 2 (%.2f)" % Ritim.desen_agirligi(Ritim.DESENLER[8], 1))
 	dogrula(not zor2_erken and zor2_gec, "zor desenler ancak 10. ölçüden sonra")
 	# Parça üretimi belirlenimci ve vuruşa hizalı
 	var imzalar: Array = []

@@ -12,8 +12,8 @@ godot --headless --path . --export-release "Web" build/web/index.html
 godot --headless --path . --export-release "Windows Desktop" build/windows/tek-tus-kosu.exe
 
 # 3) Yükleme — kanal adları itch'in platform etiketlemesi için önemli
-butler push build/web      KULLANICI/tek-tus-kosu:html5   --userversion 1.0.0
-butler push build/windows  KULLANICI/tek-tus-kosu:windows --userversion 1.0.0
+butler push build/web      KULLANICI/tek-tus-kosu:html5   --userversion 1.2.0
+butler push build/windows  KULLANICI/tek-tus-kosu:windows --userversion 1.2.0
 
 # 4) Durum
 butler status KULLANICI/tek-tus-kosu

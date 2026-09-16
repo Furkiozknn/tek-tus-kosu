@@ -81,7 +81,9 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   `oyun._izgara0` (başlangıç + ses gecikmesi). Olay vuruşları `_ritim_olaylar`; zıplamada
   `_ritim_degerlendir()`. Müzik `Ses.muzik(..., true)` ile baştan; `_ritim_ses_hizala()` kaymada müziği
   sarar (oyun zamanı yetkili). Headless'ta müzik çalmaz (`Ses.muzik_konumu() == -1`), hizalama atlanır.
-  Şarkılar `Ritim.SARKILAR` (müzik, gerçek BPM, rekor/ölüm anahtarları); oyun `ritim_sarki` ve `_adim` tutar.
+  Şarkılar `Ritim.SARKILAR` (müzik, gerçek BPM, rekor/ölüm anahtarları, `agirlik` desen türü çarpanları, `aciklama`);
+  oyun `ritim_sarki` ve `_adim` tutar. `desen_sec(..., sarki_no)` ağırlığı `desen_agirligi()` ile çarpar; yeni çarpan
+  eklerken o şarkı için `bot_stres --ritim --sarki N` ve `--vurus` ölçümünü yinele.
   Hız bütün şarkılarda 300 px/sn — engel geometrisi hıza bağlı. Yeni şarkının BPM'i 2 vuruşta ≥ 223 px
   (tam zıplama boyu) bırakmalı: 300 px/sn'de en fazla ~160 BPM. BPM'i WAV'ın gerçek temposundan yaz
   (`22050·15 / round(22050·15/bpm)`). Ses gecikmesi ayarı `ayarlar.ritim_gecikme` (ms) ızgarayı kaydırır;
@@ -118,6 +120,7 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
+- v1.2 (bulut): 793 test geçti; Çatı Neşesi ağırlıklarıyla bot 16 tohum × 3 dk 0 ölüm, −175/+150 ms 8 tohum 0 ölüm.
 - v1.0 (bulut): 791 test geçti (tık sesi ayarı ve sayacı, ritim paneli sığıyor).
 - v0.9 (bulut): 788 test geçti. 13 desenle iki şarkıda bot 12 tohum × 3 dk 0 ölüm (bütün desenler görüldü);
   kaydırmalı oyuncu −175 ve +150 ms iki şarkıda 8 tohum × 3 dk 0 ölüm (pencere değişmedi).

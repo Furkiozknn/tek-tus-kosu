@@ -87,9 +87,14 @@
 
 - [x] Ritim: vuruş ipucu sesi (zıplama vuruşundan bir vuruş önce tık; ayarla kapanır)
 
-## Sonraki tur (v1.1)
+## Bitti — v1.1 / v1.2 (2026-09-16)
 
-- [ ] Ritim: şarkıya özel desen seti (ör. 128 BPM'de daha sık kısa sıçrama) — yalnız ölçülmüş pencereyle
+- [x] `Ayarlar.ITCH_ADRESI` (yayından sonra paylaşım metnine adres)
+- [x] Ritim: şarkıya özel desen ağırlığı (Çatı Neşesi: daha sık alçak tavan, daha seyrek çukur), şarkı düğmesi ipucu
+
+## Sonraki tur (v1.3)
+
+- [ ] Üçüncü şarkı (ör. 140 BPM "gergin": daha sık ikili diken) — `agirlik` + stres + pencere ölçümü
 - [ ] Gerçek telefonda deneme (dokunma gecikmesi, tam ekran, paylaşım menüsü)
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] Paylaşım metnine itch adresi (yayından sonra `Ayarlar.ITCH_ADRESI` doldurulur — kod hazır)

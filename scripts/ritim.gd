@@ -11,9 +11,13 @@ const VURUS_SN := 60.0 / BPM
 const ADIM := HIZ * VURUS_SN     ## ilk şarkının vuruş aralığı (px)
 
 ## Şarkılar. bpm, üretilen WAV'ın örnek düzeyindeki gerçek temposu (muzik_uret: 22050 Hz, onaltılık = round(22050·15/bpm)).
+## agirlik: desen türüne göre seçim çarpanı (şarkının karakteri): Çatı Neşesi'nde alçak tavan (kısa sıçrama) daha sık,
+## çukur daha seyrek — geniş vuruş aralığında (140 px) kısa sıçramalar daha rahat sığar.
 const SARKILAR := [
-	{"ad": "Gece Koşusu", "muzik": "muzik_oyun", "bpm": 150.0, "rekor": "rekor_ritim", "olumler": "olumler_ritim"},
-	{"ad": "Çatı Neşesi", "muzik": "muzik_ritim2", "bpm": 22050.0 * 15.0 / 2584.0, "rekor": "rekor_ritim2", "olumler": "olumler_ritim2"},
+	{"ad": "Gece Koşusu", "muzik": "muzik_oyun", "bpm": 150.0, "rekor": "rekor_ritim", "olumler": "olumler_ritim",
+		"agirlik": {}, "aciklama": "150 BPM · dengeli"},
+	{"ad": "Çatı Neşesi", "muzik": "muzik_ritim2", "bpm": 22050.0 * 15.0 / 2584.0, "rekor": "rekor_ritim2", "olumler": "olumler_ritim2",
+		"agirlik": {"kisa": 2.2, "cukur": 0.7}, "aciklama": "128 BPM · daha çok alçak tavan"},
 ]
 const GECIKME_ARALIK := Vector2i(-150, 300)   ## oyuncu ses gecikmesi ayarı (ms)
 const ONERI_ESIK_MS := 25.0                    ## ortalama sapma bundan büyükse ayar önerilir
@@ -107,8 +111,17 @@ static func vurus_konumu(x: float, izgara0: float, adim_px := ADIM) -> Array:
 	return [n, (k - n) * adim_px / HIZ * 1000.0]
 
 
+## Desenin türlerine göre şarkı ağırlığı çarpanı (desendeki her olay türü için çarpım).
+static func desen_agirligi(d: Dictionary, sarki_no: int) -> float:
+	var carpanlar: Dictionary = SARKILAR[clampi(sarki_no, 0, SARKILAR.size() - 1)].get("agirlik", {})
+	var a := 1.0
+	for olay in d["olaylar"]:
+		a *= float(carpanlar.get(str(olay[1]), 1.0))
+	return a
+
+
 ## Bir sonraki ölçü deseni. `olcu_no` koşunun kaçıncı ölçüsü; `onceki_son` önceki ölçünün son olay vuruşu (-1 yok).
-static func desen_sec(rng: RandomNumberGenerator, olcu_no: int, onceki_son: int) -> Dictionary:
+static func desen_sec(rng: RandomNumberGenerator, olcu_no: int, onceki_son: int, sarki_no := 0) -> Dictionary:
 	if olcu_no < ISINMA_OLCU:
 		return DESENLER[0]
 	var zor := 1 if olcu_no < 10 else 2
@@ -126,12 +139,12 @@ static func desen_sec(rng: RandomNumberGenerator, olcu_no: int, onceki_son: int)
 			if bosluk < 2 or (str(ilk[1]) == "kisa" and bosluk < 3):
 				continue
 		adaylar.append(d)
-		agirlik.append(0.6 if olaylar.is_empty() else (1.4 if int(d["zorluk"]) == zor else 1.0))
+		agirlik.append(0.6 if olaylar.is_empty() else (1.4 if int(d["zorluk"]) == zor else 1.0) * desen_agirligi(d, sarki_no))
 	return adaylar[rng.rand_weighted(agirlik)]
 
 
 ## Ritim parçası üretir. bas_x: parçanın dünya x'i. Dönüş: [Parca, son olay vuruşu, olay vuruşları (dünya indeksleri)].
-static func parca_uret(bas_x: float, izgara0: float, rng: RandomNumberGenerator, olcu_no: int, onceki_son: int, adim_px := ADIM) -> Array:
+static func parca_uret(bas_x: float, izgara0: float, rng: RandomNumberGenerator, olcu_no: int, onceki_son: int, adim_px := ADIM, sarki_no := 0) -> Array:
 	var k0 := int(ceil((bas_x - izgara0) / adim_px - 0.001))
 	var giris := izgara0 + k0 * adim_px - bas_x          # parça başından ilk vuruşa (0..adım)
 	var uzunluk := giris + PARCA_OLCU * OLCU * adim_px
@@ -151,7 +164,7 @@ static func parca_uret(bas_x: float, izgara0: float, rng: RandomNumberGenerator,
 	var son := onceki_son
 	var adlar: Array[String] = []
 	for o in PARCA_OLCU:
-		var d := desen_sec(rng, olcu_no + o, son)
+		var d := desen_sec(rng, olcu_no + o, son, sarki_no)
 		adlar.append(str(d["ad"]))
 		var ozel := {}
 		for olay in d["olaylar"]:

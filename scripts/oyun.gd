@@ -569,7 +569,7 @@ func _parca_ekle(yol: String) -> void:
 
 
 func _ritim_parcasi_ekle() -> void:
-	var r := Ritim.parca_uret(sonraki_x, _izgara0, parca_rng, _ritim_olcu, _ritim_son, _adim)
+	var r := Ritim.parca_uret(sonraki_x, _izgara0, parca_rng, _ritim_olcu, _ritim_son, _adim, ritim_sarki)
 	_ritim_olcu += Ritim.PARCA_OLCU
 	_ritim_son = r[1]
 	for k in r[2]:

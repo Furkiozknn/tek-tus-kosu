@@ -3,7 +3,9 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v1.0 — geliştirme turu 9 (2026-09-16). Ritimde **vuruş ipucu sesi**: zıplama vuruşundan bir vuruş
+**Durum:** v1.2 — geliştirme turu 10 (2026-09-16). Şarkıya özel desen ağırlığı: Çatı Neşesi'nde alçak tavan daha
+sık, çukur daha seyrek; şarkı düğmelerinde karakter ipucu; paylaşım metni için `Ayarlar.ITCH_ADRESI`. (v1.0: ritimde
+**vuruş ipucu sesi**: zıplama vuruşundan bir vuruş
 önce tık (sayım gibi; ritim panelinden kapatılır). (v0.9: Günün ritminde **hayalet rakip** (günün en iyi denemesi,
 vuruş ızgarasına hizalı) ve **arka vuruş desenleri** (1. ve 3. vuruşta diken; 13 desen). (v0.8: günün ritmi —
 her gün tarihten seçilen şarkı ve çatı dizisi, ayrı günlük rekor ve paylaşım; ritim koşusunda başlangıç ipucu. v0.7: ikinci şarkı
@@ -33,6 +35,9 @@ kostümler, ölüm tekrarı, ayarlar.)
   ve ölüm listesi; sonuç panelinde tam vuruş sayısı; 13. başarım "Vuruşu yakala" (tek koşuda 20 tam vuruş).
   Duraklatınca müzik de durur; müzik oyun zamanından 60 ms'den fazla kayarsa (sekme gizlendi,
   uzun takılma) müzik oyuna göre yeniden sarılır.
+- **Şarkı karakteri (v1.2):** `Ritim.SARKILAR[i].agirlik` desen türlerine seçim çarpanı verir (Çatı Neşesi: kısa ×2,2,
+  çukur ×0,7 — geniş vuruş aralığında kısa sıçramalar daha rahat sığar). Zorluk ve boşluk kuralları aynı; bot 16 tohum × 3 dk
+  ve zamanlama penceresi −175/+150 ms yeniden ölçüldü, 0 ölüm.
 - **Vuruş ipucu sesi (v1.0):** ritim koşusunda zıplanacak vuruştan bir vuruş önce kısa bir tık çalar (müziğin
   vuruşuyla çakışır, sayım gibi). Ritim panelinde "Zıplama vuruşundan önce tık sesi" ile kapatılır; botta çalmaz.
 - **Günün ritmi hayaleti ve arka vuruş (v0.9):** günün ritminde en iyi denemen hayalet olarak yanında koşar
@@ -193,8 +198,8 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 
 ## Doğrulama
 
-Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v1.0, bulut, Godot 4.7.2 Linux headless):
-otomatik testler **791 geçti, 0 hata**; (v0.9: 788 test, 13 desenle iki şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere −175…+150 ms
+Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v1.2, bulut, Godot 4.7.2 Linux headless):
+otomatik testler **793 geçti, 0 hata**; (v1.0: 791 test; (v0.9: 788 test, 13 desenle iki şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere −175…+150 ms
 yeniden ölçüldü. (v0.8: 782 test, web'de günün ritmi ve paylaşım; v0.7: 765 test; 128 BPM şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere yine
 −175…+150 ms. (v0.6: 740 test; ritim koşusunda bot 12 tohum × 3 dk, 0 ölüm, 10 desenin hepsi
 görüldü; vuruşta zıplayan oyuncu −175…+150 ms kaydırmayla 8 tohum × 3 dk, 0 ölüm. (v0.5: 714 test,
