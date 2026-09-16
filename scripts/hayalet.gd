@@ -13,8 +13,9 @@ var y := PackedFloat32Array()
 var anim := PackedByteArray()
 
 
-static func dosya_yolu() -> String:
-	return Kayit.yol.get_basename() + ".hayalet.cfg"
+## tur: "" günlük koşu, "ritim" günün ritmi (ayrı dosya).
+static func dosya_yolu(tur := "") -> String:
+	return Kayit.yol.get_basename() + ".hayalet" + ("" if tur == "" else "_" + tur) + ".cfg"
 
 
 func ekle(konum: Vector2, anim_adi: String) -> void:
@@ -49,20 +50,20 @@ func anim_adi(t: float) -> String:
 	return ANIMLER[anim[i]]
 
 
-func kaydet() -> Error:
+func kaydet(tur := "") -> Error:
 	var cfg := ConfigFile.new()
 	cfg.set_value("hayalet", "tarih", tarih)
 	cfg.set_value("hayalet", "mesafe", mesafe)
 	cfg.set_value("hayalet", "x", x)
 	cfg.set_value("hayalet", "y", y)
 	cfg.set_value("hayalet", "anim", anim)
-	return cfg.save(dosya_yolu())
+	return cfg.save(dosya_yolu(tur))
 
 
 ## Verilen tarihe ait kayıtlı hayalet; yoksa ya da başka güne aitse null.
-static func yukle(istenen_tarih: String) -> Hayalet:
+static func yukle(istenen_tarih: String, tur := "") -> Hayalet:
 	var cfg := ConfigFile.new()
-	if cfg.load(dosya_yolu()) != OK:
+	if cfg.load(dosya_yolu(tur)) != OK:
 		return null
 	if str(cfg.get_value("hayalet", "tarih", "")) != istenen_tarih:
 		return null

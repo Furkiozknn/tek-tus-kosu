@@ -1078,24 +1078,32 @@ func _test_ritim() -> void:
 	var kural := true
 	var zor2_erken := false
 	var zor2_gec := false
-	for i in 400:
+	var gorulen_desen := {}
+	for i in 600:
 		var olcu := i % 30
-		var onceki: int = [-1, 0, 2][i % 3]
+		var onceki: int = [-1, 0, 1, 2, 3][i % 5]
 		var d := Ritim.desen_sec(rng, olcu, onceki)
 		var olaylar: Array = d["olaylar"]
+		gorulen_desen[d["ad"]] = true
 		if olcu < Ritim.ISINMA_OLCU and not olaylar.is_empty():
 			kural = false
-		if onceki == 2 and not olaylar.is_empty() and olaylar[0][1] == "kisa":
-			kural = false
+		if not olaylar.is_empty() and onceki >= 0:
+			var bosluk: int = Ritim.OLCU - onceki + int(olaylar[0][0])
+			if bosluk < 2 or (str(olaylar[0][1]) == "kisa" and bosluk < 3):
+				kural = false
 		if int(d["zorluk"]) == 2:
 			if olcu < 10:
 				zor2_erken = true
 			else:
 				zor2_gec = true
-		for o in olaylar:
-			if int(o[0]) != 0 and int(o[0]) != 2:
+		for j in olaylar.size():
+			var v := int(olaylar[j][0])
+			if v < 0 or v >= Ritim.OLCU or (v == 3 and str(olaylar[j][1]) != "diken"):
 				kural = false
-	dogrula(kural, "ısınma ölçüleri boş, olaylar yalnız 0/2. vuruşta, 2. vuruştan sonra alçak tavan yok")
+			if j > 0 and v - int(olaylar[j - 1][0]) < 2:
+				kural = false
+	dogrula(kural, "ısınma ölçüleri boş; olaylar arası ≥ 2 vuruş, alçak tavana ≥ 3; 3. vuruşta yalnız diken")
+	dogrula(gorulen_desen.size() == Ritim.DESENLER.size(), "bütün desenler seçilebilmeli (%d/%d)" % [gorulen_desen.size(), Ritim.DESENLER.size()])
 	dogrula(not zor2_erken and zor2_gec, "zor desenler ancak 10. ölçüden sonra")
 	# Parça üretimi belirlenimci ve vuruşa hizalı
 	var imzalar: Array = []
@@ -1274,6 +1282,8 @@ func _test_ritim() -> void:
 func _test_gunun_ritmi() -> void:
 	print("[günün ritmi]")
 	_kayit_temizle()
+	for tur in ["", "ritim"]:
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(Hayalet.dosya_yolu(tur)))
 	Gunluk.tarih_ezme = "2026-09-16"
 	var beklenen_sarki := Ritim.gunun_sarkisi("2026-09-16")
 	dogrula(Ritim.gunun_tohumu("2026-09-16") == Ritim.gunun_tohumu("2026-09-16") and Ritim.gunun_tohumu("2026-09-16") != Ritim.gunun_tohumu("2026-09-17"),
@@ -1325,6 +1335,30 @@ func _test_gunun_ritmi() -> void:
 	dogrula(Gunluk.paylasim_metni("2026-09-16", 10, 1, 10, true, 0).begins_with("Tek Tuş Koşu · Günlük 16.09.2026"), "günlük paylaşım metni değişmemeli")
 	go.queue_free()
 	await process_frame
+	# Hayalet: günün rekoru ayrı dosyaya yazılır, ikinci denemede ızgaraya hizalı geri oynar
+	var hr := Hayalet.yukle("2026-09-16", "ritim")
+	dogrula(hr != null and hr.sayi() >= 5 and hr.mesafe == int(gr["rekor"]), "günün ritmi hayaleti kaydedilmeli")
+	dogrula(Hayalet.yukle("2026-09-16") == null, "günlük koşu hayaleti yazılmamalı")
+	var g2: Node2D = (load(OYUN) as PackedScene).instantiate()
+	g2.ritim = true
+	g2.ritim_gunluk = true
+	g2.kayit_yap = false
+	g2.olum_tekrari_acik = false
+	root.add_child(g2)
+	await _kareler(30)
+	var hs: AnimatedSprite2D = g2._hayalet_sprite
+	dogrula(g2._hayalet_rakip != null and hs != null and hs.visible, "ikinci denemede günün ritmi hayaleti görünmeli")
+	if hs:
+		var fark := absf(hs.global_position.x - g2.oyuncu.global_position.x)
+		dogrula(fark < 40.0, "hayalet oyuncuyla yan yana olmalı (fark %.1f)" % fark)
+	await _kareler(60)
+	var isaret_var := false
+	for c in g2.get_children():
+		if c is Isaret and c.metin == "HAYALET":
+			isaret_var = true
+	dogrula(g2._hayalet_bitti and isaret_var, "hayalet kaydı bitince işaret konmalı")
+	g2.queue_free()
+	await process_frame
 	# Menü düğmesi
 	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
 	root.add_child(menu)
@@ -1342,6 +1376,7 @@ func _test_gunun_ritmi() -> void:
 	Ritim.gunluk_secili = false
 	Ritim.sarki = 0
 	Gunluk.tarih_ezme = ""
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Hayalet.dosya_yolu("ritim")))
 	_kayit_temizle()
 
 

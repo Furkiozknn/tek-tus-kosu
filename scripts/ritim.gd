@@ -81,7 +81,8 @@ static func gecikme_onerisi(simdiki_ms: int, sapmalar: Array) -> Variant:
 	return clampi(yeni, GECIKME_ARALIK.x, GECIKME_ARALIK.y)
 
 ## Ölçü desenleri: [vuruş, tür]. Türler: diken, cukur, kisa (alçak tavan + kısa sıçrama).
-## Olaylar yalnız 0. ve 2. vuruşta; tam zıplama 1,86 vuruş sürer.
+## Ardışık olaylar arası en az 2 vuruş (tam zıplama 1,86 vuruş sürer), alçak tavana en az 3 (`desen_sec`).
+## 3. vuruşta yalnız diken: çukur ve tavan geometrisi ölçü sınırını (parça sonunu) aşar.
 const DESENLER := [
 	{"ad": "bos", "zorluk": 0, "olaylar": []},
 	{"ad": "diken0", "zorluk": 1, "olaylar": [[0, "diken"]]},
@@ -93,6 +94,9 @@ const DESENLER := [
 	{"ad": "karma", "zorluk": 2, "olaylar": [[0, "cukur"], [2, "diken"]]},
 	{"ad": "kisa_diken", "zorluk": 2, "olaylar": [[0, "kisa"], [2, "diken"]]},
 	{"ad": "cift_cukur", "zorluk": 2, "olaylar": [[0, "cukur"], [2, "cukur"]]},
+	{"ad": "diken1", "zorluk": 1, "olaylar": [[1, "diken"]]},
+	{"ad": "diken3", "zorluk": 1, "olaylar": [[3, "diken"]]},
+	{"ad": "arka_vurus", "zorluk": 2, "olaylar": [[1, "diken"], [3, "diken"]]},
 ]
 
 
@@ -114,9 +118,13 @@ static func desen_sec(rng: RandomNumberGenerator, olcu_no: int, onceki_son: int)
 		if int(d["zorluk"]) > zor:
 			continue
 		var olaylar: Array = d["olaylar"]
-		# 2. vuruştaki zıplamanın inişi bir sonraki ölçünün başındaki alçak tavana çarpar.
-		if onceki_son == 2 and not olaylar.is_empty() and olaylar[0][1] == "kisa":
-			continue
+		# Önceki ölçünün son olayıyla bu ölçünün ilk olayı arası: zıplama 1,86 vuruş sürer → en az 2;
+		# alçak tavan olay vuruşundan 0,5 vuruş önce başlar → iniş çarpmasın diye en az 3.
+		if not olaylar.is_empty() and onceki_son >= 0:
+			var ilk: Array = olaylar[0]
+			var bosluk := OLCU - onceki_son + int(ilk[0])
+			if bosluk < 2 or (str(ilk[1]) == "kisa" and bosluk < 3):
+				continue
 		adaylar.append(d)
 		agirlik.append(0.6 if olaylar.is_empty() else (1.4 if int(d["zorluk"]) == zor else 1.0))
 	return adaylar[rng.rand_weighted(agirlik)]

@@ -78,10 +78,15 @@
 - [x] Ritim koşusunda başlangıç ipucu (lambalar, kısa dokunuş)
 - [x] Sonuç paneli dört düğmeye kadar (Tekrar | Paylaş | Gecikme | Menü)
 
-## Sonraki tur (v0.9)
+## Bitti — geliştirme turu 8 (v0.9, 2026-09-16)
 
-- [ ] Günün ritmi hayaleti (günlük koşudaki gibi)
-- [ ] Ritim: şarkıya özel desen (ör. 128 BPM'de senkoplu çift diken) — yeni desen yalnız ölçülmüş pencereyle
+- [x] Günün ritmi hayaleti (ayrı dosya, vuruş ızgarasına hizalı)
+- [x] Arka vuruş desenleri: diken1, diken3, arka_vurus (13 desen); ölçüler arası boşluk kuralı genelleştirildi
+
+## Sonraki tur (v1.0)
+
+- [ ] Ritim: şarkıya özel desen seti (ör. 128 BPM'de daha sık kısa sıçrama) — yalnız ölçülmüş pencereyle
+- [ ] Ritim: müzikte olay vuruşlarına vurgu (davul dolgusu) — müzik üreticiye desen bilgisi
 - [ ] Paylaşım metnine itch adresi (yayından sonra)
 - [ ] Gerçek telefonda dokunma, tam ekran ve paylaşım menüsü denemesi
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)

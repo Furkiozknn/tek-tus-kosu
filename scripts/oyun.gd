@@ -690,6 +690,10 @@ func _kosu_sonucunu_isle() -> void:
 		d["toplam_mesafe"] = int(d["toplam_mesafe"]) + m
 		if ritim_gunluk:
 			Ritim.gunluk_isle(d, m)
+			if yeni_rekor and _hayalet_kayit:
+				_hayalet_kayit.tarih = Gunluk.bugun()
+				_hayalet_kayit.mesafe = m
+				_hayalet_kayit.kaydet("ritim")
 		elif gunluk:
 			Gunluk.kosu_isle(d, m)
 			Gunluk.seri_isle(d)
@@ -954,10 +958,10 @@ func _hayalet_kur() -> void:
 	_hayalet_rakip = null
 	_hayalet_kayit = null
 	_hayalet_bitti = false
-	if not gunluk:
+	if not (gunluk or ritim_gunluk):
 		return
 	_hayalet_kayit = Hayalet.new()
-	_hayalet_rakip = Hayalet.yukle(Gunluk.bugun())
+	_hayalet_rakip = Hayalet.yukle(Gunluk.bugun(), _hayalet_turu())
 	if _hayalet_rakip == null or _hayalet_rakip.sayi() < 2:
 		_hayalet_rakip = null
 		return
@@ -974,9 +978,19 @@ func _hayalet_kur() -> void:
 	_hayalet_adim()
 
 
+## Günün ritminde hayalet vuruş ızgarasına göre kaydedilir: engeller ızgaraya bağlı olduğundan
+## başka ses gecikmesiyle oynayanda da hayalet engelin üstünde zıplar.
+func _hayalet_taban() -> Vector2:
+	return Vector2(_izgara0 if ritim_gunluk else baslangic_x, 0.0)
+
+
+func _hayalet_turu() -> String:
+	return "ritim" if ritim_gunluk else ""
+
+
 func _hayalet_adim() -> void:
 	if _hayalet_kayit:
-		var basla := Vector2(baslangic_x, 0.0)
+		var basla := _hayalet_taban()
 		while _hayalet_kayit.sayi() <= int(sure * Ayarlar.HAYALET_HZ):
 			_hayalet_kayit.ekle(oyuncu.global_position - basla, str(oyuncu.gorsel.animation))
 	if _hayalet_rakip == null or _hayalet_bitti or not is_instance_valid(_hayalet_sprite):
@@ -986,9 +1000,9 @@ func _hayalet_adim() -> void:
 		_hayalet_sprite.visible = false
 		var son := _hayalet_rakip.konum(_hayalet_rakip.sure())
 		var i := _isaret_ekle(int(son.x / Ayarlar.PIKSEL_METRE), "HAYALET", Color(0.6, 0.9, 1.0), 84.0)
-		i.position.x = baslangic_x + son.x
+		i.position.x = _hayalet_taban().x + son.x
 		return
-	_hayalet_sprite.global_position = Vector2(baslangic_x, 0.0) + _hayalet_rakip.konum(sure)
+	_hayalet_sprite.global_position = _hayalet_taban() + _hayalet_rakip.konum(sure)
 	var a := _hayalet_rakip.anim_adi(sure)
 	if _hayalet_sprite.animation != a:
 		_hayalet_sprite.play(a)

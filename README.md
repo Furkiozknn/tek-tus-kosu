@@ -3,8 +3,9 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v0.8 — geliştirme turu 7 (2026-09-16). **Günün ritmi:** her gün tarihten seçilen şarkı ve
-çatı dizisi, ayrı günlük rekor ve paylaşım; ritim koşusunda başlangıç ipucu. (v0.7: ikinci şarkı
+**Durum:** v0.9 — geliştirme turu 8 (2026-09-16). Günün ritminde **hayalet rakip** (günün en iyi denemesi,
+vuruş ızgarasına hizalı) ve **arka vuruş desenleri** (1. ve 3. vuruşta diken; 13 desen). (v0.8: günün ritmi —
+her gün tarihten seçilen şarkı ve çatı dizisi, ayrı günlük rekor ve paylaşım; ritim koşusunda başlangıç ipucu. v0.7: ikinci şarkı
 (128 BPM), şarkı başına rekor, ses gecikmesi ayarı ve öneri. v0.6: **ritim koşusu** —
 engelleri müziğin vuruşlarına hizalı, koddan üretilen ayrı kip. v0.5: rüzgâr, telefonda dikey uyarısı + tam ekran. v0.4: çürük iskele, günlük seri ve paylaşım, kostüm izleri, web simge düzeltmesi.
 v0.3: günlük koşu + hayalet, işaretler, şehir haritası. v0.2: pixel art, ses/müzik, görevler,
@@ -27,10 +28,14 @@ kostümler, ölüm tekrarı, ayarlar.)
   120 px. Engeller ölçü ölçü koddan üretilir; her engelin ideal zıplama anı bir vuruşa denk gelir.
   Çatı kenarındaki lambalar müzikle nabız atar, zıplanacak vuruşlar sarı ve oklu. Vuruşun ±70 ms
   içinde zıplamak "Tam vuruş ×N" serisi; dışında "Erken/Geç N ms". Engeller dikenler, çukurlar ve
-  alçak tavan (kısa sıçrama); ilk 2 ölçü boş, 10. ölçüden sonra iki olaylı ölçüler. Ayrı rekor
+  alçak tavan (kısa sıçrama); ilk 2 ölçü boş, 10. ölçüden sonra iki olaylı ölçüler (13 desen). Ayrı rekor
   ve ölüm listesi; sonuç panelinde tam vuruş sayısı; 13. başarım "Vuruşu yakala" (tek koşuda 20 tam vuruş).
   Duraklatınca müzik de durur; müzik oyun zamanından 60 ms'den fazla kayarsa (sekme gizlendi,
   uzun takılma) müzik oyuna göre yeniden sarılır.
+- **Günün ritmi hayaleti ve arka vuruş (v0.9):** günün ritminde en iyi denemen hayalet olarak yanında koşar
+  (ayrı dosya `kayit.hayalet_ritim.cfg`; konumlar vuruş ızgarasına göre kaydedilir, başka ses gecikmesiyle
+  oynayanda da engelin üstünde zıplar). Desenlere 1. ve 3. vuruştaki dikenler eklendi (davulun zayıf vuruşu):
+  `diken1`, `diken3`, `arka_vurus`; ardışık olaylar arası en az 2 vuruş, alçak tavana en az 3 kuralı genelleştirildi.
 - **Günün ritmi (v0.8):** ritim panelinde üçüncü düğme. Şarkı ve çatı dizisi tarihten gelir (günlük koşudan
   ayrı tohum); herkes o gün aynı ritimde koşar. Günün rekoru, deneme sayısı ve ölüm işaretleri ayrı
   (`gunluk_ritim`); sonuçta Paylaş ("Tek Tuş Koşu · Günün ritmi (şarkı) tarih"). Ritim koşularında ilk
@@ -184,8 +189,9 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 
 ## Doğrulama
 
-Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.8, bulut, Godot 4.7.2 Linux headless):
-otomatik testler **782 geçti, 0 hata**; web'de günün ritmi → sonuç → Paylaş pano metni doğrulandı. (v0.7: 765 test; 128 BPM şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere yine
+Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.9, bulut, Godot 4.7.2 Linux headless):
+otomatik testler **788 geçti, 0 hata**; 13 desenle iki şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere −175…+150 ms
+yeniden ölçüldü. (v0.8: 782 test, web'de günün ritmi ve paylaşım; v0.7: 765 test; 128 BPM şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere yine
 −175…+150 ms. (v0.6: 740 test; ritim koşusunda bot 12 tohum × 3 dk, 0 ölüm, 10 desenin hepsi
 görüldü; vuruşta zıplayan oyuncu −175…+150 ms kaydırmayla 8 tohum × 3 dk, 0 ölüm. (v0.5: 714 test,
 32 tohum bot stresi, telefon emülasyonu; v0.4: 660, v0.3: 558 test.) v0.2: web sürümü Chromium'da menü, karakter, ayarlar, oyun, ölüm tekrarı

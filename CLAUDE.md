@@ -88,9 +88,11 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   `_ritim_sapmalar` → `Ritim.gecikme_onerisi()` → sonuçta `%GecikmeDugme`.
   Günün ritmi: `Ritim.gunluk_secili` → `oyun.ritim_gunluk`; şarkı `Ritim.gunun_sarkisi(tarih)`, tohum
   `Ritim.gunun_tohumu(tarih)` (günlük koşudan ayrı), kayıt `gunluk_ritim` (`Ritim.gunluk_durum/gunluk_isle`).
-  `oyun.gunluk` bu kipte false kalır (hayalet, günlük seri ve `gunluk300` başarımı çalışmaz).
-  Desen eklerken: olaylar yalnız 0/2. vuruşta (tam zıplama 1,86 vuruş sürer), sonra
-  `bot_stres --ritim` ve `--vurus -175 / 150` ile pencereyi yeniden ölç.
+  `oyun.gunluk` bu kipte false kalır (günlük seri ve `gunluk300` başarımı çalışmaz). Hayalet var: dosya
+  `Hayalet.dosya_yolu("ritim")`, konumlar `_hayalet_taban()` = `_izgara0`'a göre (günlük koşuda `baslangic_x`).
+  Desen eklerken: ardışık olaylar arası ≥ 2 vuruş (tam zıplama 1,86 vuruş), alçak tavana ≥ 3 (`desen_sec`
+  ölçüler arasında da uygular); 3. vuruşta yalnız diken (çukur/tavan geometrisi parça sonunu aşar). Sonra
+  `bot_stres --ritim [--sarki 1]` ve `--vurus -175 / 150` ile pencereyi yeniden ölç.
 - Günlük seri kayıtta `gunluk_seri`; paylaşım metni `Gunluk.paylasim_metni()`. Web'de dokunmatik
   cihazda `navigator.share`, diğerlerinde panoya kopyalama (`oyun._paylas`).
 
@@ -115,6 +117,8 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
+- v0.9 (bulut): 788 test geçti. 13 desenle iki şarkıda bot 12 tohum × 3 dk 0 ölüm (bütün desenler görüldü);
+  kaydırmalı oyuncu −175 ve +150 ms iki şarkıda 8 tohum × 3 dk 0 ölüm (pencere değişmedi).
 - v0.8 (bulut): 782 test geçti; web'de (Chromium) ritim paneli → Günün ritmi → koşu → sonuç → Paylaş
   (pano: "Tek Tuş Koşu · Günün ritmi (Gece Koşusu) 16.09.2026 …"); dört düğmeli sonuç paneli testte sığıyor.
 - v0.7 (Windows 11): 765 test; bot stresi 8 tohum, iki şarkıda ritim stresi 4'er tohum, 0 ölüm; web pck 707 KB.
