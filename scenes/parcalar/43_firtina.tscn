@@ -1,0 +1,89 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/parca.gd" id="1_wkg6m"]
+[ext_resource type="Script" path="res://scripts/ruzgar.gd" id="2_vpx4a"]
+[ext_resource type="Script" path="res://scripts/zemin.gd" id="3_2qsco"]
+[ext_resource type="Script" path="res://scripts/tehlike.gd" id="4_lg8b3"]
+[ext_resource type="Script" path="res://scripts/altin.gd" id="5_bc0ic"]
+
+[node name="Parca" type="Node2D" unique_id=1105112288]
+script = ExtResource("1_wkg6m")
+zorluk = 3
+uzunluk = 1300.0
+
+[node name="Giris" type="Marker2D" parent="." unique_id=655221364]
+position = Vector2(0, 280)
+
+[node name="Cikis" type="Marker2D" parent="." unique_id=650470057]
+position = Vector2(1300, 280)
+
+[node name="Ruzgar1" type="Node2D" parent="." unique_id=823344290]
+position = Vector2(120, 280)
+script = ExtResource("2_vpx4a")
+genislik = 400.0
+guc = -90.0
+
+[node name="Zemin1" type="StaticBody2D" parent="." unique_id=461608042]
+position = Vector2(0, 280)
+script = ExtResource("3_2qsco")
+genislik = 300.0
+
+[node name="Zemin2" type="StaticBody2D" parent="." unique_id=461608043]
+position = Vector2(460, 280)
+script = ExtResource("3_2qsco")
+genislik = 300.0
+
+[node name="Ruzgar2" type="Node2D" parent="." unique_id=823344291]
+position = Vector2(700, 280)
+script = ExtResource("2_vpx4a")
+genislik = 440.0
+guc = 100.0
+
+[node name="Zemin3" type="StaticBody2D" parent="." unique_id=461608044]
+position = Vector2(900, 280)
+script = ExtResource("3_2qsco")
+genislik = 400.0
+
+[node name="Diken1" type="Area2D" parent="." unique_id=1605296850]
+position = Vector2(1080, 280)
+script = ExtResource("4_lg8b3")
+
+[node name="Altin1" type="Area2D" parent="." unique_id=1491776223]
+position = Vector2(320, 230)
+script = ExtResource("5_bc0ic")
+
+[node name="Altin2" type="Area2D" parent="." unique_id=1491776224]
+position = Vector2(350, 200)
+script = ExtResource("5_bc0ic")
+
+[node name="Altin3" type="Area2D" parent="." unique_id=1491776225]
+position = Vector2(380, 190)
+script = ExtResource("5_bc0ic")
+
+[node name="Altin4" type="Area2D" parent="." unique_id=1491776226]
+position = Vector2(410, 200)
+script = ExtResource("5_bc0ic")
+
+[node name="Altin5" type="Area2D" parent="." unique_id=1491776227]
+position = Vector2(440, 230)
+script = ExtResource("5_bc0ic")
+
+[node name="Altin6" type="Area2D" parent="." unique_id=1491776228]
+position = Vector2(780, 230)
+script = ExtResource("5_bc0ic")
+
+[node name="Altin7" type="Area2D" parent="." unique_id=1491776229]
+position = Vector2(805, 200)
+script = ExtResource("5_bc0ic")
+
+[node name="Altin8" type="Area2D" parent="." unique_id=1491776230]
+position = Vector2(830, 190)
+script = ExtResource("5_bc0ic")
+
+[node name="Altin9" type="Area2D" parent="." unique_id=1491776231]
+position = Vector2(855, 200)
+script = ExtResource("5_bc0ic")
+
+[node name="Altin10" type="Area2D" parent="." unique_id=1983975119]
+position = Vector2(880, 230)
+script = ExtResource("5_bc0ic")

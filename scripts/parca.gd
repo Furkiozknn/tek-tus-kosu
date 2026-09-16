@@ -55,6 +55,15 @@ func tehlike_araliklari() -> Array[Vector2]:
 	return birlestir(ham)
 
 
+## Rüzgâr bölgeleri: [x0, x1, guc] (parçanın yerel koordinatında).
+func ruzgar_araliklari() -> Array:
+	var sonuc := []
+	for c in get_children():
+		if c is Ruzgar:
+			sonuc.append([c.position.x, c.position.x + c.genislik, c.guc])
+	return sonuc
+
+
 ## Tavandan sarkan engeller: [x0, x1, alt_y] (parçanın yerel koordinatında).
 ## Bunların altında yalnızca kısa zıplama güvenlidir.
 func tavan_araliklari() -> Array:

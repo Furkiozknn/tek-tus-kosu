@@ -17,6 +17,9 @@ Proje sahibi: Furki. İlgili kurallar: `D:\Claude Projeleri\oyun-terminalleri\GE
   `min/max`, üçlü ifade). Böyle yerlerde türü açık yaz (`var x: float = ...`). Derlenmeyen bir betik
   testlerde "Nonexistent function new" olarak görünür.
 - Fizik geri çağrısı içinde çarpışma nesnesini kapatma/ekleme: `set_deferred` kullan.
+- **Yeni `class_name` ekledikten sonra `sahne_uret`'ten önce `--import` çalıştır.** Aksi hâlde sınıfı kullanan
+  betik (ör. `parca.gd`) derlenmez; eskiden sahneler betiksiz kaydedilip testler "Parca değil" diye
+  düşüyordu. `sahne_uret` artık derlenmeyen betikte durur (`_betik()`).
 - Godot'nun gömülü yazı tipinde (Open Sans) ★ ☆ ✓ ✗ ← ↑ → ↓ ■ □ yok. Masaüstünde sistem yazı tipi
   örter, **web'de kutu çıkar**. Bu simgeler `assets/fonts/simgeler.ttf` yedeğinden gelir
   (`Simgeler.kur()`, üretici `tools/simge_fontu.py`). Yeni bir simge kullanacaksan önce oraya ekle.
@@ -67,6 +70,11 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 - Çürük iskele (`Coken`, `Zemin` alt sınıfı): `Oyuncu._zemine_bildir()` ayağın altını yoklar,
   `basildi()` → `ISKELE_COKME` sn sonra çarpışma kapanır. Olaylar `call_group("oyun",
   "iskele_catirdadi" | "iskele_coktu")`. Bot için tehlike aralığı iskelenin ilk `ISKELE_GUVENLI` px'inden sonra başlar.
+- Rüzgâr (`Ruzgar`, parça çocuğu): `oyun.ruzgar_gucu(x)` her kare `oyuncu.ruzgar`'a yazılır; yalnız
+  havadayken yatay hıza eklenir. Bot `ruzgar` Callable'ı ile menzil ve iniş hesabına katar. HUD: `%RuzgarEtiketi`.
+- Dikey telefon: `DikeyUyari` (CanvasLayer) menü ve oyuna eklenir; dikeyde perde açılır, oyunda koşu
+  duraklar. Web'de dokunmatik cihazda Başla'ya basınca tam ekran + yatay kilit denenir (`menu._telefonda_tam_ekran`).
+  Testler `DikeyUyari.zorla` ile yönü sabitler.
 - Günlük seri kayıtta `gunluk_seri`; paylaşım metni `Gunluk.paylasim_metni()`. Web'de dokunmatik
   cihazda `navigator.share`, diğerlerinde panoya kopyalama (`oyun._paylas`).
 
@@ -79,7 +87,11 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   `--fixed-fps 60 ... tools/bot_stres.gd -- --tohumlar 1,...,24` ile uzun koşularda ölüm olmamalı
   (`--fixed-fps` olmadan gerçek zamanda koşar: 24 tohum 72 dk sürer).
 - Botun iniş noktası (hız × 0,743 sn / 2) bir sonraki tehlikenin üstüne düşmemeli: art arda
-  tehlikeler arasında en az ~260 px ya da birleşik tek tehlike bırak.
+  tehlikeler arasında en az ~260 px ya da birleşik tek tehlike bırak. Bu kılavuzdur; çok parça bilerek
+  daha sıkı. Asıl ölçüt uzun bot stresidir (v0.5'te 35'te tabancadan hemen sonraki çukur ancak
+  yeni parça dizileriyle ortaya çıktı: bot pistondan kaçarken ikinci zıplamayla çukura iniyordu).
+- Rüzgâr bölgesi parçanın başından en az 120 px içeride başlamalı; karşı rüzgâr altındaki çukur, en düşük
+  hızda (280 − 80) × 0,743 ≈ 150 px'ten dar olmalı.
 - Hareketli ve tek yönlü kirişlerin yan yüzü öldürmez (`Oyuncu._duvara_carpti`).
 - Çatı hizasının altında duvara çarpmak "çukur" ölümü sayılır (boşluğa düşülmüştür).
 - Çürük iskele parçaları 150 px'lik dilimlerdir (her dilim ayrı tetiklenir). Dilimin ilk 60 px'i
@@ -92,6 +104,9 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   menü, karakter paneli, ayarlar paneli, fareyle başlatma, oyun, ölüm tekrarı, sonuç paneli.
 - v0.3 (bulut): 558 test geçti; bot stresi 24 tohum × 3 dk, 0 ölüm; web'de günlük koşu açıldı.
 - v0.2 (Windows 11): aynı akış + `tools/ekran_goruntusu.gd`; 388 test geçti, dışa aktarmalar tamam.
+- v0.5 (bulut): 714 test geçti; bot stresi 32 tohum × 3 dk, 0 ölüm, 43 parçanın hepsi görüldü. Web'de
+  (Chromium, telefon emülasyonu) dikey → perde + duraklama, yatay → Devam; dokunuşla tam ekran açıldı.
+- v0.4 (Windows 11): 660 test geçti; bot stresi 8 tohum, 0 ölüm; dışa aktarmalar tamam (pck 546 KB).
 - v0.4 (bulut): 660 test geçti; bot stresi 24 tohum × 3 dk, 0 ölüm, 40 parçanın hepsi görüldü
   (`bot_stres` artık parça kullanımını yazar). Web'de (Chromium) günlük sonuç → Paylaş → pano
   metni doğrulandı; ★ ve ✓ simgeleri web'de görünüyor.

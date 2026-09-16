@@ -3,9 +3,9 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v0.4 — geliştirme turu 3 (2026-09-16). Çürük iskele (yeni engel, 4 parça → 40),
-günlük seri ve paylaşılabilir sonuç, kostüm izleri, 12 başarım; web'de simge yazı tipi düzeltmesi.
-(v0.3: günlük koşu + hayalet, işaretler, şehir haritası. v0.2: pixel art, ses/müzik, görevler,
+**Durum:** v0.5 — geliştirme turu 4 (2026-09-16). Rüzgâr (yeni öğe, 3 parça → 43), telefonda dikey
+uyarısı + tam ekran. (v0.4: çürük iskele, günlük seri ve paylaşım, kostüm izleri, web simge düzeltmesi.
+v0.3: günlük koşu + hayalet, işaretler, şehir haritası. v0.2: pixel art, ses/müzik, görevler,
 kostümler, ölüm tekrarı, ayarlar.)
 
 ## Kontroller
@@ -34,11 +34,16 @@ kostümler, ölüm tekrarı, ayarlar.)
 - **Çürük iskele (v0.4):** iki çatı arasındaki tahta köprü. Üstüne basınca sallanıp çatırdar,
   0,5 sn sonra çöker. Koşucu yavaşlayamadığı için iş, iskelenin başında zıplamak ya da dilimler
   arasında sekmek. 4 parça: 37–40.
+- **Rüzgâr (v0.5):** bayrakla işaretli bölgede, havadayken yatay hıza eklenir. Karşı rüzgâr zıplamayı
+  kısaltır (çukuru geçmek için basılı tut ya da ikinci zıplama), arka rüzgâr uzatır (dikene inme).
+  Üstte "← karşı rüzgâr / arka rüzgâr →" yazısı. 3 parça: 41–43.
+- **Telefonda (v0.5):** dikey tutulunca "Telefonu yan çevir" perdesi ve koşu duraklar; web'de dokunmatik
+  cihazda Başla'ya basınca tam ekran + yatay kilit denenir.
 - **Kostüm izleri (v0.4):** zıplama/iniş tozu kostüm renginde; Neon ve Altın Taç koşarken iz bırakır.
 - **Başarımlar (v0.3):** 12 başarım (her biri +25 altın), menüde liste, koşu sırasında duyuru.
-- **40 parça:** zorluk 0 "nefes" parçaları (3–8 tehlikeli parçada bir), zorluk 1–3 parçalar;
+- **43 parça:** zorluk 0 "nefes" parçaları (3–8 tehlikeli parçada bir), zorluk 1–3 parçalar;
   öğeler: çukur, diken, blok, alçak tavan (yalnız kısa sıçramayla geçilir), piston (yükselip inen
-  diken), hareketli platform, çürük iskele, riskli altın rotaları.
+  diken), hareketli platform, çürük iskele, rüzgâr, riskli altın rotaları.
 - **Kıl payı kaçış:** engelin 14 px yakınından geçmek +1 altın, sesli/yazılı geri bildirim.
 - **Görevler:** her zaman 3 görev (kısa/orta/uzun); ödül 20/50/120 altın; her 3 görevde seviye artar,
   hedefler büyür.
@@ -79,9 +84,11 @@ scripts/basarimlar.gd    başarım listesi ve denetimi
 scripts/isaret.gd        dünyadaki rekor / son ölüm / hayalet bayrakları
 scripts/mini_harita.gd   koşu sonu şehir ışıkları şeridi
 scripts/coken.gd         çürük iskele (basınca çöken tahta köprü)
+scripts/ruzgar.gd        rüzgâr bölgesi (havadayken yatay hıza eklenir)
+scripts/dikey_uyari.gd   telefon dikeyken "yan çevir" perdesi
 scripts/simgeler.gd      web'de eksik simgeler (★ ✓ ←…) için yedek yazı tipini bağlar
 scripts/bot.gd           test/demodaki otomatik oyuncu (kısa sıçrama dahil)
-scenes/parcalar/*.tscn   40 hazır parça (koddan üretilir)
+scenes/parcalar/*.tscn   43 hazır parça (koddan üretilir)
 assets/fonts/simgeler.ttf  DejaVu Sans Bold'dan 10 simgelik alt küme ("TTK Simgeler", lisans yanında)
 tools/varlik_uret.gd     tüm sprite'ları (PNG) koddan üretir
 tools/ses_uret.gd        ses efektlerini (WAV) koddan üretir
@@ -128,6 +135,8 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
   Koşucu yavaşlayamadığından alçalan zemin ya zemine yapışma sorununa ya da belirsiz bir
   duvar ölümüne dönüşüyordu. Basınca belli bir sürede çöken iskele aynı gerilimi okunur bir
   zamanlamayla veriyor (sallanma + çatırtı uyarısı).
+- **Dikeyde oynatmak yerine uyarı:** 640×360 yatay tasarımı dikeye sığdırmak ya oyun alanını
+  küçültüyor ya da önünü görme mesafesini 0,4 sn'nin altına indiriyor. Koşu oyunu yatay kalıyor.
 - **Paylaşımda bağlantı yok:** oyun henüz yayında değil; itch adresi belli olunca metne eklenir.
 - **Hayalet yalnız günlük koşuda:** rastgele koşuda çatılar farklı olduğundan hayalet yanıltıcı olurdu.
 - **Tek girdinin derinliği:** kısa dokunuş / basılı tutma / havada ikinci zıplama; alçak tavan
@@ -138,9 +147,9 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 
 ## Doğrulama
 
-Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.4, bulut, Godot 4.7.2 Linux headless):
-otomatik testler **660 geçti, 0 hata**; bot stres testi 24 tohum × 3 dk, 0 ölüm, 40 parçanın hepsi
-koşuldu; web sürümünde günlük sonuç → Paylaş → pano metni doğrulandı. (v0.3: 558 test.) v0.2: web sürümü Chromium'da menü, karakter, ayarlar, oyun, ölüm tekrarı
+Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.5, bulut, Godot 4.7.2 Linux headless):
+otomatik testler **714 geçti, 0 hata**; bot stres testi 32 tohum × 3 dk, 0 ölüm, 43 parçanın hepsi
+koşuldu; web sürümünde telefon emülasyonuyla dikey perde ve tam ekran denendi. (v0.4: 660, v0.3: 558 test.) v0.2: web sürümü Chromium'da menü, karakter, ayarlar, oyun, ölüm tekrarı
 ve sonuç paneliyle denendi.
 
 Windows 11 (Godot 4.7.2, 2026-09-16): varlık/ses/müzik/sahne üretimi, içe aktarma, testler

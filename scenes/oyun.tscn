@@ -184,6 +184,17 @@ theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.203921
 theme_override_constants/outline_size = 4
 text = "0"
 
+[node name="RuzgarEtiketi" type="Label" parent="Arayuz/Ust" unique_id=1296735249]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.17254902, 0.9098039, 0.9607843, 1)
+theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
+theme_override_constants/outline_size = 4
+vertical_alignment = 1
+
 [node name="Bosluk" type="Control" parent="Arayuz/Ust" unique_id=133560279]
 layout_mode = 2
 size_flags_horizontal = 3

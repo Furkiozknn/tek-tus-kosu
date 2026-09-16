@@ -45,6 +45,9 @@ const YOLLAR: Array[String] = [
 	"res://scenes/parcalar/38_iskele_zinciri.tscn",
 	"res://scenes/parcalar/39_iskele_diken.tscn",
 	"res://scenes/parcalar/40_uzun_iskele.tscn",
+	"res://scenes/parcalar/41_karsi_ruzgar.tscn",
+	"res://scenes/parcalar/42_arka_ruzgar.tscn",
+	"res://scenes/parcalar/43_firtina.tscn",
 ]
 
 const ZORLUK := {
@@ -88,4 +91,7 @@ const ZORLUK := {
 	"res://scenes/parcalar/38_iskele_zinciri.tscn": 2,
 	"res://scenes/parcalar/39_iskele_diken.tscn": 2,
 	"res://scenes/parcalar/40_uzun_iskele.tscn": 3,
+	"res://scenes/parcalar/41_karsi_ruzgar.tscn": 2,
+	"res://scenes/parcalar/42_arka_ruzgar.tscn": 2,
+	"res://scenes/parcalar/43_firtina.tscn": 3,
 }

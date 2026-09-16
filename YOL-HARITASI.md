@@ -50,11 +50,17 @@
 - [x] Boşluğa düşüp karşı duvara çarpmak artık "çukur" ölümü (tekrar yazısı doğru)
 - [x] `bot_stres` parça kullanım özeti
 
-## Sonraki tur (v0.5)
+## Bitti — geliştirme turu 4 (v0.5, 2026-09-16)
+
+- [x] Rüzgâr öğesi (havadayken yatay hıza eklenir), 3 parça (41–43), bot desteği, HUD yazısı, yön bayrakları
+- [x] Telefon: dikeyde "yan çevir" perdesi + duraklama; web'de dokunuşla tam ekran + yatay kilit
+- [x] 35_cift_piston_cukur: çukur pistondan uzağa alındı (uzun streste bot ölümü)
+- [x] `sahne_uret` derlenmeyen betikte durur (yeni class_name + import sırası tuzağı)
+
+## Sonraki tur (v0.6)
 
 - [ ] Çatı ritmi: müzik vuruşuna hizalı parça dizileri (isteğe bağlı mod)
-- [ ] Rüzgâr öğesi (zıplama mesafesini değiştirir); bot desteğiyle
 - [ ] Paylaşım metnine itch adresi (yayından sonra)
-- [ ] Mobil: dikey yerleşim denemesi, gerçek cihazda dokunma testi
+- [ ] Gerçek telefonda dokunma, tam ekran ve paylaşım menüsü denemesi
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] itch.io web yayını (Furki'nin onayıyla)

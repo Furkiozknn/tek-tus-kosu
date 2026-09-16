@@ -19,12 +19,12 @@ position = Vector2(1100, 280)
 [node name="Zemin1" type="StaticBody2D" parent="." unique_id=78961897]
 position = Vector2(0, 280)
 script = ExtResource("2_os4g3")
-genislik = 620.0
+genislik = 710.0
 
 [node name="Zemin2" type="StaticBody2D" parent="." unique_id=78961898]
-position = Vector2(780, 280)
+position = Vector2(850, 280)
 script = ExtResource("2_os4g3")
-genislik = 320.0
+genislik = 250.0
 
 [node name="Piston1" type="Area2D" parent="." unique_id=1596034147]
 position = Vector2(160, 280)
@@ -66,13 +66,13 @@ position = Vector2(472, 230)
 script = ExtResource("4_3a6n4")
 
 [node name="Altin7" type="Area2D" parent="." unique_id=1109130084]
-position = Vector2(645, 236)
+position = Vector2(725, 236)
 script = ExtResource("4_3a6n4")
 
 [node name="Altin8" type="Area2D" parent="." unique_id=1109130085]
-position = Vector2(700, 196)
+position = Vector2(780, 196)
 script = ExtResource("4_3a6n4")
 
 [node name="Altin9" type="Area2D" parent="." unique_id=1109130086]
-position = Vector2(755, 236)
+position = Vector2(835, 236)
 script = ExtResource("4_3a6n4")

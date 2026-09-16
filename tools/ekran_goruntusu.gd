@@ -32,6 +32,7 @@ func _calistir() -> void:
 	await _oyun_son()
 	await _gunluk_hayalet()
 	await _iskele()
+	await _ruzgar()
 	await _menu_paneller()
 	await _kapak()
 	Gunluk.tarih_ezme = ""
@@ -214,6 +215,36 @@ func _iskele() -> void:
 	d = Kayit.yukle()
 	d["kostum"] = eski_kostum
 	Kayit.kaydet(d)
+
+
+## v0.5: karşı rüzgârda zıplama (denetim görüntüsü) ve dikey uyarı perdesi.
+func _ruzgar() -> void:
+	var sira: Array[String] = ["res://scenes/parcalar/13_nefes_altin.tscn", "res://scenes/parcalar/41_karsi_ruzgar.tscn",
+		"res://scenes/parcalar/43_firtina.tscn"]
+	var oyun := await _oyun(sira, 320.0, 900, 6)
+	var sinir := 60 * 20
+	var cekilen := 0
+	while sinir > 0 and cekilen < 2:
+		sinir -= 1
+		await process_frame
+		var r: float = oyun.oyuncu.ruzgar
+		if not oyun.oyuncu.is_on_floor() and ((cekilen == 0 and r < 0.0) or (cekilen == 1 and r > 0.0)) and oyun.oyuncu.velocity.y > -100.0:
+			await _kaydet("ruzgar-karsi.png" if cekilen == 0 else "ruzgar-arka.png", KONTROL)
+			cekilen += 1
+	if cekilen < 2:
+		push_error("rüzgâr görüntüsü için uygun an bulunamadı (%d)" % cekilen)
+	DikeyUyari.zorla = 1
+	(oyun.get_node("DikeyUyari") as DikeyUyari).denetle()
+	await _bekle(5)
+	await _kaydet("dikey-uyari.png", KONTROL)
+	DikeyUyari.zorla = -1
+	get_root_paused_sifirla()
+	oyun.queue_free()
+	await _bekle(2)
+
+
+func get_root_paused_sifirla() -> void:
+	paused = false
 
 
 func _menu_paneller() -> void:

@@ -30,6 +30,8 @@ func _calistir() -> void:
 	await _test_iskele()
 	await _test_seri_ve_paylasim()
 	await _test_kostum_izi()
+	await _test_ruzgar()
+	await _test_dikey_uyari()
 	print("\n=== SONUÇ: %d geçti, %d hata ===" % [gecen, hatalar])
 	quit(1 if hatalar > 0 else 0)
 
@@ -945,6 +947,119 @@ func _test_kostum_izi() -> void:
 	dogrula(o.get_node_or_null("Iz") == null, "iz kapalıyken (bot) iz düğümü kurulmamalı")
 	kok.queue_free()
 	await process_frame
+
+
+func _test_ruzgar() -> void:
+	print("[rüzgâr]")
+	var kok := Node2D.new()
+	root.add_child(kok)
+	var z := Zemin.new()
+	z.position = Vector2(-200, Ayarlar.ZEMIN_Y)
+	z.genislik = 20000.0
+	kok.add_child(z)
+	var mesafeler := {}
+	for guc in [0.0, 90.0, -80.0]:
+		var o: Oyuncu = (load("res://scenes/oyuncu.tscn") as PackedScene).instantiate()
+		o.position = Vector2(0, Ayarlar.ZEMIN_Y - 2)
+		o.hiz = 300.0
+		o.iz_acik = false
+		kok.add_child(o)
+		o.ruzgar = guc
+		await _kareler(10)
+		dogrula(is_equal_approx(o.velocity.x, 300.0), "yerde rüzgâr koşu hızını değiştirmemeli (%.0f)" % o.velocity.x)
+		var bas := o.global_position.x
+		o.zipla_bas()
+		await _kareler(3)
+		dogrula(is_equal_approx(o.velocity.x, 300.0 + guc), "havada yatay hız = hız + rüzgâr (%.0f)" % o.velocity.x)
+		var kare := 0
+		while not o.is_on_floor() or kare < 5:
+			await physics_frame
+			kare += 1
+			if kare > 200:
+				break
+		mesafeler[guc] = o.global_position.x - bas
+		o.queue_free()
+		await process_frame
+	dogrula(mesafeler[90.0] > mesafeler[0.0] + 40.0 and mesafeler[-80.0] < mesafeler[0.0] - 40.0,
+		"arka rüzgâr zıplamayı uzatmalı, karşı rüzgâr kısaltmalı (%s)" % str(mesafeler))
+	kok.queue_free()
+	await process_frame
+	# Parça ve oyun: bölge aralığı, rüzgâr gücü, HUD etiketi
+	var parca: Parca = (load("res://scenes/parcalar/41_karsi_ruzgar.tscn") as PackedScene).instantiate()
+	var ra := parca.ruzgar_araliklari()
+	dogrula(ra.size() == 1 and is_equal_approx(float(ra[0][2]), -80.0), "rüzgâr aralığı okunmalı: %s" % str(ra))
+	parca.free()
+	var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+	oyun.bot_modu = true
+	oyun.sabit_hiz = 300.0
+	oyun.kayit_yap = false
+	oyun.tohum = 2
+	oyun.sira_bitince_duz = true
+	var sira: Array[String] = ["res://scenes/parcalar/41_karsi_ruzgar.tscn", "res://scenes/parcalar/42_arka_ruzgar.tscn", "res://scenes/parcalar/43_firtina.tscn"]
+	oyun.parca_sirasi = sira
+	root.add_child(oyun)
+	var goruldu_karsi := false
+	var goruldu_arka := false
+	var etiket_dogru := true
+	for i in 60 * 14:
+		await physics_frame
+		var r: float = oyun.oyuncu.ruzgar
+		var e: Label = oyun.get_node("%RuzgarEtiketi")
+		if r < 0.0:
+			goruldu_karsi = true
+			etiket_dogru = etiket_dogru and e.visible and e.text.contains("karşı")
+		elif r > 0.0:
+			goruldu_arka = true
+			etiket_dogru = etiket_dogru and e.visible and e.text.contains("arka")
+		else:
+			etiket_dogru = etiket_dogru and not e.visible
+	dogrula(goruldu_karsi and goruldu_arka, "koşuda iki yönlü rüzgâr görülmeli")
+	dogrula(etiket_dogru, "rüzgâr etiketi yalnız bölgede ve doğru yönle görünmeli")
+	dogrula(oyun.oyuncu.canli, "bot rüzgâr parçalarında yaşamalı")
+	var t := Ruzgar.new()
+	dogrula(Simgeler.YOL != "" and ThemeDB.fallback_font.has_char("←".unicode_at(0)), "rüzgâr etiketindeki ok yazı tipinde olmalı")
+	t.free()
+	oyun.queue_free()
+	await process_frame
+
+
+func _test_dikey_uyari() -> void:
+	print("[dikey uyarısı]")
+	dogrula(DikeyUyari.dikey_mi(Vector2(412, 915)) and not DikeyUyari.dikey_mi(Vector2(915, 412)) and not DikeyUyari.dikey_mi(Vector2(1280, 720)),
+		"dikey algılama boyuta göre doğru olmalı")
+	_kayit_temizle()
+	DikeyUyari.zorla = 0
+	var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+	oyun.kayit_yap = false
+	oyun.tohum = 4
+	root.add_child(oyun)
+	await _kareler(30)
+	var du: DikeyUyari = oyun.get_node("DikeyUyari")
+	dogrula(du != null and not du.perde.visible and not paused, "yatayda perde kapalı, oyun akıyor")
+	DikeyUyari.zorla = 1
+	du.denetle()
+	await _kareler(2)
+	dogrula(du.perde.visible and paused and oyun.duraklat_paneli.visible, "dikeyde perde açılmalı ve koşu duraklamalı")
+	DikeyUyari.zorla = 0
+	du.denetle()
+	await _kareler(2)
+	dogrula(not du.perde.visible and paused, "yataya dönünce perde kapanmalı, koşu Devam'ı beklemeli")
+	oyun.devam()
+	await _kareler(2)
+	dogrula(not paused, "Devam ile koşu sürmeli")
+	oyun.queue_free()
+	await process_frame
+	# Menüde de perde var, menü duraklamaz
+	DikeyUyari.zorla = 1
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _kareler(3)
+	var md: DikeyUyari = menu.get_node("DikeyUyari")
+	dogrula(md != null and md.perde.visible and not paused, "menüde dikey perdesi görünmeli")
+	menu.queue_free()
+	await process_frame
+	DikeyUyari.zorla = -1
+	_kayit_temizle()
 
 
 class YakinDinleyici extends Node:

@@ -8,6 +8,7 @@ var _basliyor := false
 
 func _ready() -> void:
 	Simgeler.kur()
+	add_child(DikeyUyari.new())
 	d = Kayit.yukle()
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
@@ -200,12 +201,24 @@ func _dugme_ustunde(konum: Vector2) -> bool:
 	return false
 
 
+## Web'de dokunmatik cihazda: tam ekran + yatay kilit dene (tarayıcı izin vermezse sessizce geçer).
+## Kullanıcı dokunuşunun hemen ardından çağrılmalı (tarayıcı kuralı).
+func _telefonda_tam_ekran() -> void:
+	if not OS.has_feature("web") or not DisplayServer.is_touchscreen_available():
+		return
+	var js := "(function(){var e=document.documentElement;if(document.fullscreenElement||!e.requestFullscreen){return;}" \
+		+ "e.requestFullscreen().then(function(){if(screen.orientation&&screen.orientation.lock){" \
+		+ "screen.orientation.lock('landscape').catch(function(){});}}).catch(function(){});})()"
+	JavaScriptBridge.eval(js, true)
+
+
 func basla(gunluk := false) -> void:
 	if _basliyor:
 		return
 	_basliyor = true
 	Gunluk.secili = gunluk
 	set_process_unhandled_input(false)
+	_telefonda_tam_ekran()
 	var tw := create_tween()
 	tw.tween_property(%Perde, "color:a", 1.0, 0.25)
 	tw.tween_callback(func() -> void: get_tree().change_scene_to_file("res://scenes/oyun.tscn"))

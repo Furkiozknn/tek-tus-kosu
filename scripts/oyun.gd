@@ -91,6 +91,9 @@ var _basarim_onbellek: Dictionary = {}
 func _ready() -> void:
 	Simgeler.kur()
 	add_to_group("oyun")
+	var du := DikeyUyari.new()
+	add_child(du)
+	du.dikey_oldu.connect(_dikey_oldu)
 	gunluk = gunluk or Gunluk.secili
 	for yol in ParcaListesi.YOLLAR:
 		_sahneler[yol] = load(yol)
@@ -190,6 +193,8 @@ func yeniden_baslat() -> void:
 
 	if bot_modu:
 		_bot = Bot.new(oyuncu, dunya_tehlike_araliklari, dunya_tavan_araliklari)
+		_bot.ruzgar = ruzgar_gucu
+	%RuzgarEtiketi.hide()
 	if not bot_modu:
 		Ses.muzik("muzik_oyun")
 	gecis.color.a = 1.0
@@ -212,6 +217,8 @@ func _physics_process(delta: float) -> void:
 		return
 	sure += delta
 	oyuncu.hiz = _hiz_hesapla()
+	oyuncu.ruzgar = ruzgar_gucu(oyuncu.global_position.x)
+	_ruzgar_etiketi_guncelle()
 	if _bot:
 		_bot.adim()
 	_parcalari_guncelle()
@@ -327,6 +334,17 @@ func iskele_coktu(iskele: Node2D) -> void:
 		_parcacik(iskele.global_position + Vector2(w * (0.2 + 0.3 * i), 4), Color("733e39"), 4, 40.0, 0.4)
 
 
+func _ruzgar_etiketi_guncelle() -> void:
+	var r := oyuncu.ruzgar
+	var e: Label = %RuzgarEtiketi
+	if absf(r) < 1.0:
+		e.hide()
+		return
+	e.text = "← karşı rüzgâr" if r < 0.0 else "arka rüzgâr →"
+	e.add_theme_color_override("font_color", Color("f6757a") if r < 0.0 else Color("2ce8f5"))
+	e.show()
+
+
 func _gorevleri_denetle() -> void:
 	for i in gorevler.size():
 		if _gorev_bildirildi[i]:
@@ -349,6 +367,25 @@ func dunya_tehlike_araliklari() -> Array:
 		for a in p.tehlike_araliklari():
 			sonuc.append(a + Vector2(p.position.x, p.position.x))
 	return sonuc
+
+
+func dunya_ruzgar_araliklari() -> Array:
+	var sonuc: Array = []
+	for p in parcalar:
+		for r in p.ruzgar_araliklari():
+			sonuc.append([r[0] + p.position.x, r[1] + p.position.x, r[2]])
+	return sonuc
+
+
+## x noktasındaki rüzgâr gücü (rahat modda hızla aynı oranda).
+func ruzgar_gucu(x: float) -> float:
+	for p in parcalar:
+		if x < p.position.x or x > p.position.x + p.uzunluk:
+			continue
+		for r in p.ruzgar_araliklari():
+			if x >= r[0] + p.position.x and x <= r[1] + p.position.x:
+				return float(r[2]) * (Ayarlar.RAHAT_MOD_CARPANI if rahat else 1.0)
+	return 0.0
 
 
 func dunya_tavan_araliklari() -> Array:
@@ -819,6 +856,12 @@ func _basarimlari_denetle() -> void:
 
 
 # ------------------------------------------------------------------ menüler
+## Telefon dikeye çevrildi: koşu sürüyorsa duraklat (yatay dönünce Devam'a basılır).
+func _dikey_oldu() -> void:
+	if not bitti and not get_tree().paused and not bot_modu:
+		duraklat()
+
+
 func duraklat() -> void:
 	if bitti:
 		return

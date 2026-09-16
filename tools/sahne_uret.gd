@@ -117,8 +117,8 @@ const PARCALAR := [
 		["zemin", 0, 640], ["zemin", 760, 1100], ["tavan", 260, 520],
 		["altin_dizi", 290, 262, 6, 40], ["altin_kavis", 700, 226, 3, 70]]},
 	{"ad": "35_cift_piston_cukur", "zorluk": 3, "uzunluk": 1100, "ogeler": [
-		["zemin", 0, 620], ["zemin", 780, 1100], ["piston", 160, 24, 24, 0.0], ["piston", 420, 24, 24, 0.5],
-		["altin_kavis", 172, 190, 3, 80], ["altin_kavis", 432, 190, 3, 80], ["altin_kavis", 700, 196, 3, 110]]},
+		["zemin", 0, 710], ["zemin", 850, 1100], ["piston", 160, 24, 24, 0.0], ["piston", 420, 24, 24, 0.5],
+		["altin_kavis", 172, 190, 3, 80], ["altin_kavis", 432, 190, 3, 80], ["altin_kavis", 780, 196, 3, 110]]},
 	{"ad": "36_nefes_kopru", "zorluk": 0, "uzunluk": 1000, "ogeler": [
 		["zemin", 0, 1000], ["platform", 300, 700, 236], ["hareketli", 780, 230, 64, 0, -30, 2.6],
 		["altin_dizi", 320, 222, 10, 38]]},
@@ -135,6 +135,17 @@ const PARCALAR := [
 	{"ad": "40_uzun_iskele", "zorluk": 3, "uzunluk": 1100, "ogeler": [
 		["zemin", 0, 300], ["iskele", 300, 450], ["iskele", 450, 600], ["iskele", 600, 750],
 		["zemin", 750, 1100], ["altin_dizi", 450, 214, 4, 50]]},
+	# v0.5: rüzgâr (yalnız havadayken yatay hıza eklenir; eksi = karşıdan)
+	{"ad": "41_karsi_ruzgar", "zorluk": 2, "uzunluk": 1000, "ogeler": [
+		["ruzgar", 160, 560, -80], ["zemin", 0, 320], ["zemin", 450, 1000],
+		["altin_kavis", 385, 196, 5, 110]]},
+	{"ad": "42_arka_ruzgar", "zorluk": 2, "uzunluk": 1100, "ogeler": [
+		["ruzgar", 200, 760, 90], ["zemin", 0, 320], ["zemin", 430, 1100],
+		["diken", 720, 24], ["altin_dizi", 480, 230, 5, 34]]},
+	{"ad": "43_firtina", "zorluk": 3, "uzunluk": 1300, "ogeler": [
+		["ruzgar", 120, 520, -90], ["zemin", 0, 300], ["zemin", 460, 760],
+		["ruzgar", 700, 1140, 100], ["zemin", 900, 1300], ["diken", 1080, 36],
+		["altin_kavis", 380, 190, 5, 120], ["altin_kavis", 830, 190, 5, 100]]},
 ]
 
 
@@ -158,7 +169,7 @@ func _initialize() -> void:
 func _parca(t: Dictionary) -> Node2D:
 	var kok := Node2D.new()
 	kok.name = "Parca"
-	kok.set_script(load("res://scripts/parca.gd"))
+	kok.set_script(_betik("res://scripts/parca.gd"))
 	kok.set("zorluk", t["zorluk"])
 	kok.set("uzunluk", float(t["uzunluk"]))
 	var giris := Marker2D.new()
@@ -177,16 +188,23 @@ func _parca(t: Dictionary) -> Node2D:
 				_ekle(kok, _zemin(o[1], o[2], ust, false), "Zemin", sayac)
 			"platform":
 				_ekle(kok, _zemin(o[1], o[2], o[3], true), "Platform", sayac)
+			"ruzgar":
+				var rz := Node2D.new()
+				rz.set_script(_betik("res://scripts/ruzgar.gd"))
+				rz.position = Vector2(o[1], ZY)
+				rz.set("genislik", float(o[2] - o[1]))
+				rz.set("guc", float(o[3]))
+				_ekle(kok, rz, "Ruzgar", sayac)
 			"iskele":
 				var isk := StaticBody2D.new()
-				isk.set_script(load("res://scripts/coken.gd"))
+				isk.set_script(_betik("res://scripts/coken.gd"))
 				isk.position = Vector2(o[1], ZY)
 				isk.set("genislik", float(o[2] - o[1]))
 				isk.set("yukseklik", 10.0)
 				_ekle(kok, isk, "Iskele", sayac)
 			"hareketli":
 				var h := AnimatableBody2D.new()
-				h.set_script(load("res://scripts/hareketli.gd"))
+				h.set_script(_betik("res://scripts/hareketli.gd"))
 				h.position = Vector2(o[1], o[2])
 				h.set("genislik", float(o[3]))
 				h.set("sapma", Vector2(o[4], o[5]))
@@ -221,6 +239,16 @@ func _parca(t: Dictionary) -> Node2D:
 	return kok
 
 
+## Betiği yükler; derlenmiyorsa (ör. yeni class_name henüz içe aktarılmadıysa) üretimi durdurur.
+## Aksi hâlde sahne betiksiz kaydedilir ve hata ancak testlerde "Parca değil" olarak görünür.
+func _betik(yol: String) -> Script:
+	var s: Script = load(yol)
+	if s == null or not s.can_instantiate():
+		push_error("Betik derlenmiyor: %s — önce 'godot --headless --import' çalıştır, sonra tekrar dene." % yol)
+		quit(1)
+	return s
+
+
 func _ekle(kok: Node, n: Node, ad: String, sayac: Dictionary) -> void:
 	sayac[ad] = sayac.get(ad, 0) + 1
 	n.name = "%s%d" % [ad, sayac[ad]]
@@ -229,7 +257,7 @@ func _ekle(kok: Node, n: Node, ad: String, sayac: Dictionary) -> void:
 
 func _zemin(x0: float, x1: float, ust: float, tek_yonlu: bool) -> Node2D:
 	var z := StaticBody2D.new()
-	z.set_script(load("res://scripts/zemin.gd"))
+	z.set_script(_betik("res://scripts/zemin.gd"))
 	z.position = Vector2(x0, ust)
 	z.set("genislik", x1 - x0)
 	z.set("yukseklik", 6.0 if tek_yonlu else 400.0 - ust)
@@ -239,7 +267,7 @@ func _zemin(x0: float, x1: float, ust: float, tek_yonlu: bool) -> Node2D:
 
 func _tehlike(tur: int, x: float, w: float, h: float) -> Node2D:
 	var t := Area2D.new()
-	t.set_script(load("res://scripts/tehlike.gd"))
+	t.set_script(_betik("res://scripts/tehlike.gd"))
 	t.position = Vector2(x, ZY)
 	t.set("tur", tur)
 	t.set("genislik", w)
@@ -249,7 +277,7 @@ func _tehlike(tur: int, x: float, w: float, h: float) -> Node2D:
 
 func _altin(x: float, y: float) -> Node2D:
 	var a := Area2D.new()
-	a.set_script(load("res://scripts/altin.gd"))
+	a.set_script(_betik("res://scripts/altin.gd"))
 	a.position = Vector2(x, y)
 	return a
 
@@ -274,7 +302,7 @@ func _liste_yaz(yollar: Array[String], zorluklar: Dictionary) -> void:
 func _oyuncu() -> Node:
 	var o := CharacterBody2D.new()
 	o.name = "Oyuncu"
-	o.set_script(load("res://scripts/oyuncu.gd"))
+	o.set_script(_betik("res://scripts/oyuncu.gd"))
 	var s := CollisionShape2D.new()
 	s.name = "Sekil"
 	var k := CapsuleShape2D.new()
@@ -330,7 +358,7 @@ func _arka_plan(kok: Node, oto: bool, ay_konum := Vector2(520, 34)) -> void:
 func _oyun() -> Node:
 	var kok := Node2D.new()
 	kok.name = "Oyun"
-	kok.set_script(load("res://scripts/oyun.gd"))
+	kok.set_script(_betik("res://scripts/oyun.gd"))
 	kok.process_mode = Node.PROCESS_MODE_ALWAYS
 	kok.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
@@ -416,6 +444,11 @@ func _oyun() -> Node:
 	ikon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ust.add_child(ikon)
 	ust.add_child(_etiket("AltinSayisi", "0", 22, Color("fee761")))
+	var rze := _etiket("RuzgarEtiketi", "", 13, Color("2ce8f5"))
+	rze.custom_minimum_size = Vector2(0, 30)
+	rze.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	rze.visible = false
+	ust.add_child(rze)
 	var bosluk := Control.new()
 	bosluk.name = "Bosluk"
 	bosluk.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -470,7 +503,7 @@ func _oyun() -> Node:
 	var harita := Control.new()
 	harita.name = "SonHarita"
 	harita.unique_name_in_owner = true
-	harita.set_script(load("res://scripts/mini_harita.gd"))
+	harita.set_script(_betik("res://scripts/mini_harita.gd"))
 	harita.custom_minimum_size = Vector2(340, 26)
 	harita.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	sk.add_child(harita)
@@ -563,7 +596,7 @@ func _ortala(kutu: Node) -> void:
 func _menu() -> Node:
 	var kok := Control.new()
 	kok.name = "Menu"
-	kok.set_script(load("res://scripts/menu.gd"))
+	kok.set_script(_betik("res://scripts/menu.gd"))
 	kok.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	# Boş yere dokunmak da oyunu başlatsın: kök dokunuşu yutmasın.
 	kok.mouse_filter = Control.MOUSE_FILTER_IGNORE

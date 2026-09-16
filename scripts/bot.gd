@@ -9,6 +9,8 @@ var oyuncu: Oyuncu
 var araliklar: Callable
 ## Dünya koordinatında tavan aralıkları [x0, x1, alt_y] döndüren fonksiyon (isteğe bağlı).
 var tavanlar: Callable
+## x -> rüzgâr gücü (isteğe bağlı). Havadaki yatay hız = oyuncu.hiz + rüzgâr.
+var ruzgar: Callable
 
 var _basili := false
 var _kisa := false
@@ -45,9 +47,10 @@ func adim() -> void:
 			_basili = false
 		if hedef == null:
 			return
-		var tam_menzil := p.hiz * Ayarlar.tam_ziplama_suresi()
-		var kisa_menzil := p.hiz * (Ayarlar.kisa_ziplama_suresi() + 0.03)
 		var orta: float = (hedef.x + hedef.y) / 2.0
+		var w := _ortalama_ruzgar(orta - p.hiz * 0.4, orta + p.hiz * 0.4)
+		var tam_menzil := (p.hiz + w) * Ayarlar.tam_ziplama_suresi()
+		var kisa_menzil := (p.hiz + w) * (Ayarlar.kisa_ziplama_suresi() + 0.03)
 		# Tam zıplamanın yayı bir tavanın altına giriyorsa kısa zıpla.
 		var tam_kalkis: float = minf(orta - tam_menzil / 2.0, hedef.x - 10.0)
 		var kisa_gerek := _tavan_var(tavan, tam_kalkis - 10.0, tam_kalkis + tam_menzil + 10.0, p)
@@ -95,4 +98,15 @@ func _inis_x(p: Oyuncu) -> float:
 	var g := Ayarlar.YERCEKIMI
 	var vy := p.velocity.y
 	var t := (-vy + sqrt(vy * vy + 2.0 * g * dy)) / g
-	return p.global_position.x + p.hiz * t
+	var w := _ortalama_ruzgar(p.global_position.x, p.global_position.x + p.hiz * t)
+	return p.global_position.x + (p.hiz + w) * t
+
+
+## [x0, x1] aralığındaki ortalama rüzgâr (5 örnek).
+func _ortalama_ruzgar(x0: float, x1: float) -> float:
+	if not ruzgar.is_valid():
+		return 0.0
+	var toplam := 0.0
+	for i in 5:
+		toplam += float(ruzgar.call(lerpf(x0, x1, i / 4.0)))
+	return toplam / 5.0

@@ -12,6 +12,8 @@ const BOY := 22.0
 const GECMIS_UZUNLUK := 120
 
 var hiz: float = Ayarlar.HIZ_BAS
+## Bulunulan rüzgâr bölgesinin gücü (oyun her kare yazar); yalnız havadayken uygulanır.
+var ruzgar := 0.0
 var canli := true
 ## Testlerde ölümsüzlük: ölüm sayılır ama koşu durmaz.
 var olumsuz := false
@@ -86,6 +88,7 @@ func sifirla(konum: Vector2) -> void:
 	velocity = Vector2.ZERO
 	canli = true
 	olum_nedeni = null
+	ruzgar = 0.0
 	gecmis.clear()
 	_kullanilan_ziplama = 0
 	_kojot = 0.0
@@ -101,7 +104,7 @@ func sifirla(konum: Vector2) -> void:
 func _physics_process(delta: float) -> void:
 	if not canli:
 		return
-	velocity.x = hiz
+	velocity.x = hiz + (ruzgar if not is_on_floor() else 0.0)
 	# Aynı karede zıplanmışsa (yukarı hız) "yerde" sayma: hak sayacı sıfırlanmasın.
 	if is_on_floor() and velocity.y >= 0.0:
 		_kojot = Ayarlar.KOJOT_SURESI

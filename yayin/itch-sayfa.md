@@ -27,8 +27,9 @@ jump, tap again in mid-air for a second jump. The city speeds up; how far can yo
 - Flags mark your record and your last fall; the end-of-run city strip shows how far you got and
   where you fell before.
 - 12 achievements.
-- 40 hand-designed rooftop sections: gaps, spikes, low ceilings you can only pass with a short
-  hop, pistons, moving platforms, rotten scaffolds that give way under your feet, and risky coin routes.
+- 43 hand-designed rooftop sections: gaps, spikes, low ceilings you can only pass with a short
+  hop, pistons, moving platforms, rotten scaffolds that give way under your feet, gusts of wind that
+  stretch or shorten your jumps, and risky coin routes.
 - Near-miss bonus: skim a hazard, earn a coin.
 - Three rotating missions with growing goals, and five cosmetic outfits to unlock with coins —
   the fancier ones leave a trail (cosmetic only — no ads, no real money).
@@ -37,6 +38,7 @@ jump, tap again in mid-air for a second jump. The city speeds up; how far can yo
   toggles, separate music and effects volume.
 
 **Controls:** Space / W / ↑, mouse click or touch · gamepad A · Esc / P to pause.
+On phones, play in landscape — the game goes fullscreen when you start.
 
 Made with Godot 4. All art, sound and music are generated in code.
 
@@ -60,8 +62,9 @@ Havada tekrar dokun: ikinci zıplama. Şehir hızlandıkça ne kadar uzağa gide
 - Rekorunun ve son düştüğün yerin üstünde bayrak; koşu sonunda nereye kadar gittiğini ve daha önce
   nerede düştüğünü gösteren şehir şeridi.
 - 12 başarım.
-- 40 çatı bölümü: boşluklar, dikenler, yalnızca kısa sıçramayla geçilen alçak tavanlar,
-  pistonlar, hareketli platformlar, basınca çöken çürük iskeleler ve riskli altın rotaları.
+- 43 çatı bölümü: boşluklar, dikenler, yalnızca kısa sıçramayla geçilen alçak tavanlar,
+  pistonlar, hareketli platformlar, basınca çöken çürük iskeleler, zıplamayı uzatan ya da kısaltan
+  rüzgâr ve riskli altın rotaları.
 - Kıl payı ödülü: engelin hemen üstünden geç, altın kazan.
 - Hedefleri büyüyen üç görev ve altınla açılan beş kostüm; gösterişli olanlar iz bırakır
   (yalnız görünüş — reklam yok, gerçek para yok).
@@ -70,5 +73,6 @@ Havada tekrar dokun: ikinci zıplama. Şehir hızlandıkça ne kadar uzağa gide
   ayrı müzik ve efekt ses düzeyi.
 
 **Kontroller:** Boşluk / W / ↑, fare tıklaması veya dokunma · gamepad A · duraklatmak için Esc / P.
+Telefonda yatay oyna — başlayınca oyun tam ekrana geçer.
 
 Godot 4 ile yapıldı. Tüm görseller, sesler ve müzik koddan üretildi.
