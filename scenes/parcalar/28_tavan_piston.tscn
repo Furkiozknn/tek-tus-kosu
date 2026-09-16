@@ -5,30 +5,30 @@
 [ext_resource type="Script" path="res://scripts/tehlike.gd" id="3_ej31j"]
 [ext_resource type="Script" path="res://scripts/altin.gd" id="4_wke0w"]
 
-[node name="Parca" type="Node2D" unique_id=935754547]
+[node name="Parca" type="Node2D" unique_id=823033580]
 script = ExtResource("1_inaw0")
 zorluk = 2
 uzunluk = 1100.0
 
-[node name="Giris" type="Marker2D" parent="." unique_id=1423816354]
+[node name="Giris" type="Marker2D" parent="." unique_id=257572736]
 position = Vector2(0, 280)
 
-[node name="Cikis" type="Marker2D" parent="." unique_id=348849434]
+[node name="Cikis" type="Marker2D" parent="." unique_id=252821429]
 position = Vector2(1100, 280)
 
-[node name="Zemin1" type="StaticBody2D" parent="." unique_id=437389079]
+[node name="Zemin1" type="StaticBody2D" parent="." unique_id=1799595766]
 position = Vector2(0, 280)
 script = ExtResource("2_q74i6")
 genislik = 1100.0
 
-[node name="Tavan1" type="Area2D" parent="." unique_id=49634917]
+[node name="Tavan1" type="Area2D" parent="." unique_id=1560354445]
 position = Vector2(260, 212)
 script = ExtResource("3_ej31j")
 tur = 2
 genislik = 340.0
 yukseklik = 20.0
 
-[node name="Piston1" type="Area2D" parent="." unique_id=1566535645]
+[node name="Piston1" type="Area2D" parent="." unique_id=966886416]
 position = Vector2(760, 280)
 script = ExtResource("3_ej31j")
 tur = 3
@@ -36,50 +36,50 @@ genislik = 24.0
 yukseklik = 24.0
 faz = 0.3
 
-[node name="Altin1" type="Area2D" parent="." unique_id=103646915]
+[node name="Altin1" type="Area2D" parent="." unique_id=829763947]
 position = Vector2(290, 262)
 script = ExtResource("4_wke0w")
 
-[node name="Altin2" type="Area2D" parent="." unique_id=1316844675]
+[node name="Altin2" type="Area2D" parent="." unique_id=829763948]
 position = Vector2(330, 262)
 script = ExtResource("4_wke0w")
 
-[node name="Altin3" type="Area2D" parent="." unique_id=1313315535]
+[node name="Altin3" type="Area2D" parent="." unique_id=829763949]
 position = Vector2(370, 262)
 script = ExtResource("4_wke0w")
 
-[node name="Altin4" type="Area2D" parent="." unique_id=1972406686]
+[node name="Altin4" type="Area2D" parent="." unique_id=829763950]
 position = Vector2(410, 262)
 script = ExtResource("4_wke0w")
 
-[node name="Altin5" type="Area2D" parent="." unique_id=164976825]
+[node name="Altin5" type="Area2D" parent="." unique_id=829763951]
 position = Vector2(450, 262)
 script = ExtResource("4_wke0w")
 
-[node name="Altin6" type="Area2D" parent="." unique_id=176824317]
+[node name="Altin6" type="Area2D" parent="." unique_id=829763952]
 position = Vector2(490, 262)
 script = ExtResource("4_wke0w")
 
-[node name="Altin7" type="Area2D" parent="." unique_id=555465270]
+[node name="Altin7" type="Area2D" parent="." unique_id=829763953]
 position = Vector2(530, 262)
 script = ExtResource("4_wke0w")
 
-[node name="Altin8" type="Area2D" parent="." unique_id=1261579019]
+[node name="Altin8" type="Area2D" parent="." unique_id=829763954]
 position = Vector2(717, 230)
 script = ExtResource("4_wke0w")
 
-[node name="Altin9" type="Area2D" parent="." unique_id=408394409]
+[node name="Altin9" type="Area2D" parent="." unique_id=829763955]
 position = Vector2(744.5, 200)
 script = ExtResource("4_wke0w")
 
-[node name="Altin10" type="Area2D" parent="." unique_id=1733169254]
+[node name="Altin10" type="Area2D" parent="." unique_id=1187897051]
 position = Vector2(772, 190)
 script = ExtResource("4_wke0w")
 
-[node name="Altin11" type="Area2D" parent="." unique_id=217480873]
+[node name="Altin11" type="Area2D" parent="." unique_id=1187897052]
 position = Vector2(799.5, 200)
 script = ExtResource("4_wke0w")
 
-[node name="Altin12" type="Area2D" parent="." unique_id=424992366]
+[node name="Altin12" type="Area2D" parent="." unique_id=1187897053]
 position = Vector2(827, 230)
 script = ExtResource("4_wke0w")

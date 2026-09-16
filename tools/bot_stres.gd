@@ -17,11 +17,16 @@ func _calistir() -> void:
 			sure = int(a[i + 1])
 	Kayit.yol = "user://stres_kayit.cfg"
 	var olumler := 0
+	var gorulen := {}
 	for t in tohumlar:
 		var oyun: Node2D = (load("res://scenes/oyun.tscn") as PackedScene).instantiate()
 		oyun.bot_modu = true
 		oyun.kayit_yap = false
 		oyun.tohum = t
+		oyun.get_node("Dunya").child_entered_tree.connect(func(n: Node) -> void:
+			if n is Parca:
+				var ad: String = n.scene_file_path.get_file().get_basename()
+				gorulen[ad] = int(gorulen.get(ad, 0)) + 1)
 		root.add_child(oyun)
 		await process_frame
 		for kare in 60 * sure:
@@ -39,5 +44,13 @@ func _calistir() -> void:
 		print(satir)
 		oyun.queue_free()
 		await process_frame
+	var eksik := []
+	for yol in ParcaListesi.YOLLAR:
+		if not gorulen.has(yol.get_file().get_basename()):
+			eksik.append(yol.get_file().get_basename())
+	var anahtarlar := gorulen.keys()
+	anahtarlar.sort()
+	print("parça kullanımı: " + ", ".join(anahtarlar.map(func(k: String) -> String: return "%s=%d" % [k.substr(0, 2), gorulen[k]])))
+	print("görülmeyen parça: %s" % ("yok" if eksik.is_empty() else ", ".join(eksik)))
 	print("STRES: %d koşu, %d ölüm" % [tohumlar.size(), olumler])
 	quit(1 if olumler > 0 else 0)

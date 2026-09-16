@@ -3,11 +3,11 @@ extends RefCounted
 ## Toplam altınla açılan karakter görünümleri.
 
 const LISTE := [
-	{"ad": "klasik", "isim": "Klasik", "fiyat": 0},
-	{"ad": "kizil", "isim": "Kızıl Bere", "fiyat": 60},
-	{"ad": "orman", "isim": "Orman", "fiyat": 150},
-	{"ad": "neon", "isim": "Neon", "fiyat": 300},
-	{"ad": "altin", "isim": "Altın Taç", "fiyat": 600},
+	{"ad": "klasik", "isim": "Klasik", "fiyat": 0, "iz": "", "iz_surekli": false},
+	{"ad": "kizil", "isim": "Kızıl Bere", "fiyat": 60, "iz": "e43b44", "iz_surekli": false},
+	{"ad": "orman", "isim": "Orman", "fiyat": 150, "iz": "63c74d", "iz_surekli": false},
+	{"ad": "neon", "isim": "Neon", "fiyat": 300, "iz": "2ce8f5", "iz_surekli": true},
+	{"ad": "altin", "isim": "Altın Taç", "fiyat": 600, "iz": "fee761", "iz_surekli": true},
 ]
 const KARE := Vector2i(20, 26)
 
@@ -19,6 +19,12 @@ static func bilgi(ad: String) -> Dictionary:
 		if k["ad"] == ad:
 			return k
 	return LISTE[0]
+
+
+## Zıplama/iniş tozunun rengi: kostümün iz rengine doğru karıştırılır (klasik: değişmez).
+static func toz_rengi(ad: String, temel: Color) -> Color:
+	var iz := str(bilgi(ad).get("iz", ""))
+	return temel if iz == "" else temel.lerp(Color(iz), 0.7)
 
 
 ## Kostüm şeridinden animasyonlar: kos, zipla, dus, takla, bekle, olum

@@ -7,6 +7,7 @@ var _basliyor := false
 
 
 func _ready() -> void:
+	Simgeler.kur()
 	d = Kayit.yukle()
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
@@ -91,7 +92,10 @@ func _yenile() -> void:
 	%AltinEtiketi.text = "Altın: %d" % int(d["toplam_altin"])
 	%KarakterAltin.text = "Altın: %d" % int(d["toplam_altin"])
 	var gun := Gunluk.durum(d)
+	var seri := Gunluk.seri(d)
 	%GunlukDugme.text = "Günlük koşu" if int(gun["deneme"]) == 0 else "Günlük · %d m" % int(gun["rekor"])
+	if seri >= 2:
+		%GunlukDugme.text += " · %d gün" % seri
 	%GunlukDugme.tooltip_text = "Bugün herkes aynı çatılarda koşar. Deneme: %d" % int(gun["deneme"])
 	%BasarimDugme.text = "Başarım %d/%d" % [(d["basarimlar"] as Array).size(), Basarimlar.LISTE.size()]
 	var satirlar := ["GÖREVLER  (seviye %d)" % int(d["gorev_seviyesi"])]

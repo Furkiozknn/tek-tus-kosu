@@ -51,6 +51,13 @@ const ISARET_EN_AZ_M := 30         ## Bundan kısa rekor/ölüm yeri için işar
 const BASARIM_ODULU := 25          ## Açılan her başarımın altın ödülü
 const TITRESIM_OLUM_MS := 90
 
+# --- v0.4 ---
+const ISKELE_COKME := 0.5          ## Çürük iskeleye basıldıktan kaç sn sonra çöker
+const ISKELE_GUVENLI := 60.0       ## İskelenin başında en düşük hızda bile güvenle koşulan uzunluk (px)
+const ISKELE_KALINLIK := 10.0
+const ISKELE_DUSUS := 1100.0       ## Çöken iskelenin düşüş yerçekimi
+const PAYLAS_SERIT := 10           ## Paylaşım metnindeki ilerleme şeridinin hücre sayısı
+
 
 ## Tam basılı zıplamanın havada kalma süresi (saniye)
 static func tam_ziplama_suresi() -> float:

@@ -122,6 +122,19 @@ const PARCALAR := [
 	{"ad": "36_nefes_kopru", "zorluk": 0, "uzunluk": 1000, "ogeler": [
 		["zemin", 0, 1000], ["platform", 300, 700, 236], ["hareketli", 780, 230, 64, 0, -30, 2.6],
 		["altin_dizi", 320, 222, 10, 38]]},
+	# v0.4: çürük iskele (basınca ISKELE_COKME sn sonra çöker)
+	{"ad": "37_curuk_iskele", "zorluk": 1, "uzunluk": 900, "ogeler": [
+		["zemin", 0, 320], ["iskele", 320, 470], ["zemin", 470, 900],
+		["altin_kavis", 395, 200, 5, 120]]},
+	{"ad": "38_iskele_zinciri", "zorluk": 2, "uzunluk": 1000, "ogeler": [
+		["zemin", 0, 280], ["iskele", 280, 430], ["iskele", 430, 580], ["zemin", 580, 1000],
+		["altin_kavis", 505, 196, 5, 130]]},
+	{"ad": "39_iskele_diken", "zorluk": 2, "uzunluk": 1000, "ogeler": [
+		["zemin", 0, 340], ["iskele", 340, 500], ["zemin", 500, 1000], ["diken", 760, 24],
+		["altin_kavis", 420, 204, 3, 70], ["altin_kavis", 772, 200, 3, 60]]},
+	{"ad": "40_uzun_iskele", "zorluk": 3, "uzunluk": 1100, "ogeler": [
+		["zemin", 0, 300], ["iskele", 300, 450], ["iskele", 450, 600], ["iskele", 600, 750],
+		["zemin", 750, 1100], ["altin_dizi", 450, 214, 4, 50]]},
 ]
 
 
@@ -164,6 +177,13 @@ func _parca(t: Dictionary) -> Node2D:
 				_ekle(kok, _zemin(o[1], o[2], ust, false), "Zemin", sayac)
 			"platform":
 				_ekle(kok, _zemin(o[1], o[2], o[3], true), "Platform", sayac)
+			"iskele":
+				var isk := StaticBody2D.new()
+				isk.set_script(load("res://scripts/coken.gd"))
+				isk.position = Vector2(o[1], ZY)
+				isk.set("genislik", float(o[2] - o[1]))
+				isk.set("yukseklik", 10.0)
+				_ekle(kok, isk, "Iskele", sayac)
 			"hareketli":
 				var h := AnimatableBody2D.new()
 				h.set_script(load("res://scripts/hareketli.gd"))
@@ -465,6 +485,9 @@ func _oyun() -> Node:
 	dugmeler.add_theme_constant_override("separation", 10)
 	sk.add_child(dugmeler)
 	dugmeler.add_child(_dugme("TekrarDugme", "Tekrar", Vector2(150, 36)))
+	var pd := _dugme("PaylasDugme", "Paylaş", Vector2(110, 36))
+	pd.visible = false
+	dugmeler.add_child(pd)
 	dugmeler.add_child(_dugme("SonMenuDugme", "Menü", Vector2(150, 36)))
 	sk.add_child(_etiket("SonIpucu", "Tekrar için dokun ya da Boşluk", 11, Color("8b9bb4")))
 	_ortala(dk)
@@ -727,7 +750,33 @@ func _kaydet(kok: Node, yol: String) -> void:
 	if e != OK:
 		push_error("Kaydedilemedi: %s (%d)" % [yol, e])
 		quit(1)
+	_kimlikleri_sabitle(yol)
 	kok.free()
+
+
+## Godot her kayıtta düğümlere rastgele unique_id verir; her üretimde bütün sahneler değişmiş
+## görünmesin diye kimliği dosya adı + düğüm yolundan türet (dosya içinde tekil kalır).
+func _kimlikleri_sabitle(yol: String) -> void:
+	var f := FileAccess.open(yol, FileAccess.READ)
+	var satirlar := f.get_as_text().split("\n")
+	f.close()
+	var dugum := RegEx.create_from_string('^\\[node name="([^"]*)"(.*) unique_id=(\\d+)\\]$')
+	var ebeveyn := RegEx.create_from_string('parent="([^"]*)"')
+	var kullanilan := {}
+	for i in satirlar.size():
+		var m := dugum.search(satirlar[i])
+		if m == null:
+			continue
+		var p := ebeveyn.search(m.get_string(2))
+		var dugum_yolu := m.get_string(1) if p == null else p.get_string(1) + "/" + m.get_string(1)
+		var k := absi((yol.get_file() + ":" + dugum_yolu).hash()) % 2000000000 + 1
+		while kullanilan.has(k):
+			k += 1
+		kullanilan[k] = true
+		satirlar[i] = satirlar[i].replace(" unique_id=" + m.get_string(3) + "]", " unique_id=%d]" % k)
+	f = FileAccess.open(yol, FileAccess.WRITE)
+	f.store_string("\n".join(satirlar))
+	f.close()
 
 
 func _sahiplen(n: Node, kok: Node) -> void:

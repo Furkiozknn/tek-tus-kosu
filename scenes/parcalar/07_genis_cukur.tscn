@@ -4,43 +4,43 @@
 [ext_resource type="Script" path="res://scripts/zemin.gd" id="2_152pw"]
 [ext_resource type="Script" path="res://scripts/altin.gd" id="3_iiypc"]
 
-[node name="Parca" type="Node2D" unique_id=1986598952]
+[node name="Parca" type="Node2D" unique_id=1892084306]
 script = ExtResource("1_ecse1")
 zorluk = 2
 uzunluk = 800.0
 
-[node name="Giris" type="Marker2D" parent="." unique_id=706079614]
+[node name="Giris" type="Marker2D" parent="." unique_id=674289766]
 position = Vector2(0, 280)
 
-[node name="Cikis" type="Marker2D" parent="." unique_id=1043612899]
+[node name="Cikis" type="Marker2D" parent="." unique_id=669538459]
 position = Vector2(800, 280)
 
-[node name="Zemin1" type="StaticBody2D" parent="." unique_id=1098208734]
+[node name="Zemin1" type="StaticBody2D" parent="." unique_id=1515374748]
 position = Vector2(0, 280)
 script = ExtResource("2_152pw")
 genislik = 300.0
 
-[node name="Zemin2" type="StaticBody2D" parent="." unique_id=1238199370]
+[node name="Zemin2" type="StaticBody2D" parent="." unique_id=1515374749]
 position = Vector2(460, 280)
 script = ExtResource("2_152pw")
 genislik = 340.0
 
-[node name="Altin1" type="Area2D" parent="." unique_id=1070011848]
+[node name="Altin1" type="Area2D" parent="." unique_id=545542929]
 position = Vector2(310, 230)
 script = ExtResource("3_iiypc")
 
-[node name="Altin2" type="Area2D" parent="." unique_id=1160433819]
+[node name="Altin2" type="Area2D" parent="." unique_id=545542930]
 position = Vector2(345, 200)
 script = ExtResource("3_iiypc")
 
-[node name="Altin3" type="Area2D" parent="." unique_id=1045232428]
+[node name="Altin3" type="Area2D" parent="." unique_id=545542931]
 position = Vector2(380, 190)
 script = ExtResource("3_iiypc")
 
-[node name="Altin4" type="Area2D" parent="." unique_id=531453514]
+[node name="Altin4" type="Area2D" parent="." unique_id=545542932]
 position = Vector2(415, 200)
 script = ExtResource("3_iiypc")
 
-[node name="Altin5" type="Area2D" parent="." unique_id=587093050]
+[node name="Altin5" type="Area2D" parent="." unique_id=545542933]
 position = Vector2(450, 230)
 script = ExtResource("3_iiypc")

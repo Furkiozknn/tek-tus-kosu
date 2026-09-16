@@ -21,6 +21,7 @@ func _calistir() -> void:
 	d["acik_kostumler"] = ["klasik", "kizil", "neon"]
 	d["olumler"] = [95, 140]
 	d["basarimlar"] = ["ilk_kosu", "m500", "altin50"]
+	d["gunluk_seri"] = {"son": "2026-09-15", "seri": 3, "en_iyi": 3}
 	Kayit.kaydet(d)
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(KONTROL))
 	Gunluk.tarih_ezme = "2026-09-16"
@@ -30,6 +31,7 @@ func _calistir() -> void:
 	await _oyun_yagis()
 	await _oyun_son()
 	await _gunluk_hayalet()
+	await _iskele()
 	await _menu_paneller()
 	await _kapak()
 	Gunluk.tarih_ezme = ""
@@ -163,8 +165,55 @@ func _gunluk_hayalet() -> void:
 	await _bekle(60 * 7)
 	await _kaydet("gunluk-hayalet.png", KONTROL)
 	await _kaydet("ekran-5-gunluk.png")
+	# Günlük sonuç paneli (Paylaş düğmesi) — denetim görüntüsü
+	oyun.olum_tekrari_acik = false
+	oyun.oyuncu.ol()
+	await _bekle(20)
+	(oyun.get_node("%PaylasDugme") as Button).pressed.emit()
+	await _bekle(5)
+	await _kaydet("gunluk-sonuc.png", KONTROL)
+	print("  paylaşım metni:\n" + oyun.paylasim_metni())
 	oyun.queue_free()
 	await _bekle(2)
+
+
+## v0.4: çürük iskele çökerken, neon kostümün iziyle.
+func _iskele() -> void:
+	var d := Kayit.yukle()
+	var eski_kostum: String = d["kostum"]
+	d["kostum"] = "neon"
+	Kayit.kaydet(d)
+	var sira: Array[String] = ["res://scenes/parcalar/13_nefes_altin.tscn", "res://scenes/parcalar/37_curuk_iskele.tscn",
+		"res://scenes/parcalar/38_iskele_zinciri.tscn"]
+	var oyun := await _oyun(sira, 250.0, 700, 4)
+	await _bekle(60 * 3)
+	var sinir := 60 * 20
+	while sinir > 0:
+		sinir -= 1
+		await process_frame
+		var coken := false
+		for p in oyun.parcalar:
+			for c in p.get_children():
+				# Çöktükten ~0,1-0,25 sn sonra: tahtalar düşerken görünür
+				if c is Coken and c.durum == Coken.Durum.COKTU and c.modulate.a > 0.6 and c.modulate.a < 0.85:
+					var dx: float = c.global_position.x - oyun.oyuncu.global_position.x
+					coken = coken or (dx > -240.0 and dx < 80.0)
+		if coken:
+			break
+	if sinir <= 0:
+		push_error("iskele görüntüsü için uygun an bulunamadı")
+	await _kaydet("ekran-6-iskele.png")
+	sinir = 60 * 5
+	while sinir > 0 and not oyun.oyuncu.is_on_floor():
+		sinir -= 1
+		await process_frame
+	await _bekle(20)
+	await _kaydet("iz-neon.png", KONTROL)
+	oyun.queue_free()
+	await _bekle(2)
+	d = Kayit.yukle()
+	d["kostum"] = eski_kostum
+	Kayit.kaydet(d)
 
 
 func _menu_paneller() -> void:
@@ -182,6 +231,9 @@ func _menu_paneller() -> void:
 	(menu.get_node("%KarakterDugme") as Button).pressed.emit()
 	await _bekle(10)
 	await _kaydet("menu-karakter.png", KONTROL)
+	(menu.get_node("%KarakterGeri") as Button).pressed.emit()
+	await _bekle(10)
+	await _kaydet("menu-gunluk-seri.png", KONTROL)
 	menu.queue_free()
 	await _bekle(2)
 

@@ -21,6 +21,8 @@ const EFEKTLER := {
 	"tik":    {"dalga": "kare", "duty": 0.5, "f": 880.0, "kayma": 1.0, "atak": 0.001, "surdur": 0.015, "sonum": 0.03, "ses": 0.35},
 	"satin":  {"dalga": "kare", "duty": 0.5, "f": 660.0, "kayma": 1.0, "atak": 0.002, "surdur": 0.06, "sonum": 0.2, "ses": 0.45, "arp": [[0.06, 1.5], [0.12, 1.335]]},
 	"hata":   {"dalga": "testere", "f": 180.0, "kayma": 0.8, "atak": 0.002, "surdur": 0.08, "sonum": 0.08, "ses": 0.4},
+	# v0.4 (sona eklenir: önceki seslerin gürültü dizisi değişmesin)
+	"catirti": {"dalga": "testere", "f": 150.0, "kayma": 0.55, "atak": 0.002, "surdur": 0.05, "sonum": 0.16, "ses": 0.42, "vib": [0.35, 38.0], "lp": 0.45},
 }
 
 var rng := RandomNumberGenerator.new()

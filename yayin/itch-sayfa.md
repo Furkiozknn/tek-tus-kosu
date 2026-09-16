@@ -5,7 +5,7 @@
 **Önerilen ayarlar:** Kind: HTML (tarayıcıda oyna) + Windows indirme · Viewport 1280×720,
 "Mobile friendly" açık, "Fullscreen button" açık · Genre: Action / Platformer ·
 Tags: endless-runner, one-button, pixel-art, casual, mobile, godot · Fiyat: ücretsiz ·
-Kapak: `kapak.png` (630×500) · Ekran görüntüleri: `ekran-1..5*.png` (+ isteğe bağlı `ekran-4a-tekrar.png`; hepsi `tools/ekran_goruntusu.gd` ile üretildi).
+Kapak: `kapak.png` (630×500) · Ekran görüntüleri: `ekran-1..6*.png` (+ isteğe bağlı `ekran-4a-tekrar.png`; hepsi `tools/ekran_goruntusu.gd` ile üretildi).
 
 ---
 
@@ -23,15 +23,15 @@ jump, tap again in mid-air for a second jump. The city speeds up; how far can yo
 
 **What's inside**
 - **Daily run:** everyone gets the same rooftops today. Beat your best attempt — it runs beside you
-  as a ghost.
+  as a ghost. Keep a daily streak and share your result with one tap.
 - Flags mark your record and your last fall; the end-of-run city strip shows how far you got and
   where you fell before.
-- 11 achievements.
-- 36 hand-designed rooftop sections: gaps, spikes, low ceilings you can only pass with a short
-  hop, pistons, moving platforms and risky coin routes.
+- 12 achievements.
+- 40 hand-designed rooftop sections: gaps, spikes, low ceilings you can only pass with a short
+  hop, pistons, moving platforms, rotten scaffolds that give way under your feet, and risky coin routes.
 - Near-miss bonus: skim a hazard, earn a coin.
-- Three rotating missions with growing goals, and five cosmetic outfits to unlock with coins
-  (cosmetic only — no ads, no real money).
+- Three rotating missions with growing goals, and five cosmetic outfits to unlock with coins —
+  the fancier ones leave a trail (cosmetic only — no ads, no real money).
 - Day-to-night theme cycle with rain and neon every 500 m.
 - Relaxed mode (80% speed, separate record), high-contrast hazards, screen-shake and vibration
   toggles, separate music and effects volume.
@@ -56,14 +56,15 @@ Havada tekrar dokun: ikinci zıplama. Şehir hızlandıkça ne kadar uzağa gide
 
 **İçerik**
 - **Günlük koşu:** bugün herkes aynı çatılarda. En iyi denemen hayalet olarak yanında koşar.
+  Günlük seriyi sürdür, sonucunu tek dokunuşla paylaş.
 - Rekorunun ve son düştüğün yerin üstünde bayrak; koşu sonunda nereye kadar gittiğini ve daha önce
   nerede düştüğünü gösteren şehir şeridi.
-- 11 başarım.
-- 36 çatı bölümü: boşluklar, dikenler, yalnızca kısa sıçramayla geçilen alçak tavanlar,
-  pistonlar, hareketli platformlar ve riskli altın rotaları.
+- 12 başarım.
+- 40 çatı bölümü: boşluklar, dikenler, yalnızca kısa sıçramayla geçilen alçak tavanlar,
+  pistonlar, hareketli platformlar, basınca çöken çürük iskeleler ve riskli altın rotaları.
 - Kıl payı ödülü: engelin hemen üstünden geç, altın kazan.
-- Hedefleri büyüyen üç görev ve altınla açılan beş kostüm (yalnız görünüş — reklam yok,
-  gerçek para yok).
+- Hedefleri büyüyen üç görev ve altınla açılan beş kostüm; gösterişli olanlar iz bırakır
+  (yalnız görünüş — reklam yok, gerçek para yok).
 - Her 500 m'de akşamdan geceye, yağıştan neona tema döngüsü.
 - Rahat mod (%80 hız, ayrı rekor), yüksek kontrastlı engeller, sarsıntı ve titreşim kapatma,
   ayrı müzik ve efekt ses düzeyi.

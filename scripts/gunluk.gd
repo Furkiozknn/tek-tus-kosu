@@ -44,3 +44,53 @@ static func kosu_isle(d: Dictionary, mesafe: int) -> bool:
 	if yeni:
 		g["rekor"] = mesafe
 	return yeni
+
+
+# ------------------------------------------------------------------ v0.4: seri ve paylaşım
+## Verilen tarihten ("YYYY-AA-GG") bir önceki gün. Saat dilimi kullanılmaz (UTC içinde gidip gelir).
+static func dun(tarih: String) -> String:
+	var t := Time.get_unix_time_from_datetime_string(tarih + "T12:00:00")
+	return Time.get_date_string_from_unix_time(t - 86400)
+
+
+## Bugün günlük koşu yapıldı: art arda gün serisini günceller. Dönüş: güncel seri.
+static func seri_isle(d: Dictionary) -> int:
+	var s: Dictionary = d.get("gunluk_seri", {})
+	var bugun_ := bugun()
+	var son := str(s.get("son", ""))
+	if son == bugun_:
+		s["seri"] = maxi(int(s.get("seri", 0)), 1)
+	elif son == dun(bugun_):
+		s["seri"] = int(s.get("seri", 0)) + 1
+	else:
+		s["seri"] = 1
+	s["son"] = bugun_
+	s["en_iyi"] = maxi(int(s.get("en_iyi", 0)), int(s["seri"]))
+	d["gunluk_seri"] = s
+	return int(s["seri"])
+
+
+## Süren seri (bugün ya da dün koşulduysa); koptuysa 0.
+static func seri(d: Dictionary) -> int:
+	var s: Dictionary = d.get("gunluk_seri", {})
+	var son := str(s.get("son", ""))
+	if son == bugun() or son == dun(bugun()):
+		return int(s.get("seri", 0))
+	return 0
+
+
+## Panoya/paylaşıma gidecek kısa sonuç metni. Şerit: bu koşunun günün rekoruna oranı.
+static func paylasim_metni(tarih: String, mesafe: int, deneme: int, rekor: int, yeni_rekor: bool, seri_: int) -> String:
+	var p := tarih.split("-")
+	var gun := "%s.%s.%s" % [p[2], p[1], p[0]] if p.size() == 3 else tarih
+	var en := maxi(rekor, mesafe)
+	var hucre := Ayarlar.PAYLAS_SERIT
+	var dolu := hucre
+	if en > 0:
+		dolu = clampi(int(round(float(hucre) * mesafe / en)), 0, hucre)
+	var satirlar: Array[String] = ["Tek Tuş Koşu · Günlük %s" % gun]
+	satirlar.append("%d m · %d. deneme%s" % [mesafe, deneme, "  · günün rekoru!" if yeni_rekor else ""])
+	satirlar.append("■".repeat(dolu) + "□".repeat(hucre - dolu) + ("" if yeni_rekor else "  rekor %d m" % en))
+	if seri_ >= 2:
+		satirlar.append("Seri: %d gün" % seri_)
+	return "\n".join(satirlar)

@@ -3,7 +3,7 @@ extends RefCounted
 ## Ses efektleri ve müzik. Sahne ağacında kendi düğümünü tembel olarak oluşturur;
 ## böylece otomatik yükleme (autoload) gerektirmez ve testlerde de çalışır.
 
-const EFEKTLER := ["zipla", "ikinci", "indi", "altin", "yakin", "olum", "rekor", "gorev", "tik", "satin", "hata"]
+const EFEKTLER := ["zipla", "ikinci", "indi", "altin", "yakin", "olum", "rekor", "gorev", "tik", "satin", "hata", "catirti"]
 const HAVUZ := 6
 
 static var _kok: Node

@@ -27,6 +27,9 @@ func tehlike_araliklari() -> Array[Vector2]:
 				ham.append(Vector2(c.position.x, c.position.x + c.genislik))
 		elif c is Zemin:
 			zeminler.append(c)
+			# Çürük iskele: başındaki güvenli bölümden sonrası çökebilir → üstünden atlanmalı
+			if c is Coken:
+				ham.append(Vector2(c.position.x + Ayarlar.ISKELE_GUVENLI, c.position.x + c.genislik))
 
 	# Çukurlar: hiçbir zeminin (platform dahil) desteklemediği yerler.
 	var destek: Array[Vector2] = []

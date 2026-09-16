@@ -6,9 +6,9 @@
 radius = 7.0
 height = 22.0
 
-[node name="Oyuncu" type="CharacterBody2D" unique_id=906153728]
+[node name="Oyuncu" type="CharacterBody2D" unique_id=1173728172]
 script = ExtResource("1_5h506")
 
-[node name="Sekil" type="CollisionShape2D" parent="." unique_id=1105689427]
+[node name="Sekil" type="CollisionShape2D" parent="." unique_id=1343356414]
 position = Vector2(0, -11)
 shape = SubResource("CapsuleShape2D_txe1j")

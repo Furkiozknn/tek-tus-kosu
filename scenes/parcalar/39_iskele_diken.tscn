@@ -1,0 +1,63 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/parca.gd" id="1_ncvpv"]
+[ext_resource type="Script" path="res://scripts/zemin.gd" id="2_1k8p4"]
+[ext_resource type="Script" path="res://scripts/coken.gd" id="3_4sfdw"]
+[ext_resource type="Script" path="res://scripts/tehlike.gd" id="4_oeacx"]
+[ext_resource type="Script" path="res://scripts/altin.gd" id="5_pkvqi"]
+
+[node name="Parca" type="Node2D" unique_id=1702684063]
+script = ExtResource("1_ncvpv")
+zorluk = 2
+uzunluk = 1000.0
+
+[node name="Giris" type="Marker2D" parent="." unique_id=575855347]
+position = Vector2(0, 280)
+
+[node name="Cikis" type="Marker2D" parent="." unique_id=571104040]
+position = Vector2(1000, 280)
+
+[node name="Zemin1" type="StaticBody2D" parent="." unique_id=562006217]
+position = Vector2(0, 280)
+script = ExtResource("2_1k8p4")
+genislik = 340.0
+
+[node name="Iskele1" type="StaticBody2D" parent="." unique_id=1007087011]
+position = Vector2(340, 280)
+script = ExtResource("3_4sfdw")
+genislik = 160.0
+yukseklik = 10.0
+
+[node name="Zemin2" type="StaticBody2D" parent="." unique_id=562006218]
+position = Vector2(500, 280)
+script = ExtResource("2_1k8p4")
+genislik = 500.0
+
+[node name="Diken1" type="Area2D" parent="." unique_id=1705695025]
+position = Vector2(760, 280)
+script = ExtResource("4_oeacx")
+genislik = 24.0
+
+[node name="Altin1" type="Area2D" parent="." unique_id=1592174398]
+position = Vector2(385, 244)
+script = ExtResource("5_pkvqi")
+
+[node name="Altin2" type="Area2D" parent="." unique_id=1592174399]
+position = Vector2(420, 204)
+script = ExtResource("5_pkvqi")
+
+[node name="Altin3" type="Area2D" parent="." unique_id=1592174400]
+position = Vector2(455, 244)
+script = ExtResource("5_pkvqi")
+
+[node name="Altin4" type="Area2D" parent="." unique_id=1592174401]
+position = Vector2(742, 240)
+script = ExtResource("5_pkvqi")
+
+[node name="Altin5" type="Area2D" parent="." unique_id=1592174402]
+position = Vector2(772, 200)
+script = ExtResource("5_pkvqi")
+
+[node name="Altin6" type="Area2D" parent="." unique_id=1592174403]
+position = Vector2(802, 240)
+script = ExtResource("5_pkvqi")

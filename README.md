@@ -3,8 +3,9 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v0.3 — geliştirme turu 2 (2026-09-16). Günlük koşu + hayalet rakip, rekor/ölüm
-işaretleri, koşu sonu şehir haritası, 11 başarım, 36 parça. (v0.2: pixel art, ses/müzik, görevler,
+**Durum:** v0.4 — geliştirme turu 3 (2026-09-16). Çürük iskele (yeni engel, 4 parça → 40),
+günlük seri ve paylaşılabilir sonuç, kostüm izleri, 12 başarım; web'de simge yazı tipi düzeltmesi.
+(v0.3: günlük koşu + hayalet, işaretler, şehir haritası. v0.2: pixel art, ses/müzik, görevler,
 kostümler, ölüm tekrarı, ayarlar.)
 
 ## Kontroller
@@ -26,10 +27,18 @@ kostümler, ölüm tekrarı, ayarlar.)
 - **İşaretler ve harita (v0.3):** koşu sırasında rekorun ("REKOR") ve son ölümün ("SON") yerinde
   bayrak; koşu sonunda geçilen yolu ışıklı pencerelerle, önceki ölüm yerlerini kırmızı çentikle
   gösteren şehir şeridi.
-- **Başarımlar (v0.3):** 11 başarım (her biri +25 altın), menüde liste, koşu sırasında duyuru.
-- **36 parça:** zorluk 0 "nefes" parçaları (3–8 tehlikeli parçada bir), zorluk 1–3 parçalar;
+- **Günlük seri ve paylaşım (v0.4):** art arda günlük koşu yapılan gün sayısı (menüde
+  "Günlük · X m · N gün"). Günlük sonuç panelinde **Paylaş**: telefonda tarayıcının paylaşım menüsü,
+  diğer cihazlarda panoya kopyalama. Metin: tarih, mesafe, deneme, günün rekoruna oranı gösteren
+  10 hücrelik şerit (■□), seri.
+- **Çürük iskele (v0.4):** iki çatı arasındaki tahta köprü. Üstüne basınca sallanıp çatırdar,
+  0,5 sn sonra çöker. Koşucu yavaşlayamadığı için iş, iskelenin başında zıplamak ya da dilimler
+  arasında sekmek. 4 parça: 37–40.
+- **Kostüm izleri (v0.4):** zıplama/iniş tozu kostüm renginde; Neon ve Altın Taç koşarken iz bırakır.
+- **Başarımlar (v0.3):** 12 başarım (her biri +25 altın), menüde liste, koşu sırasında duyuru.
+- **40 parça:** zorluk 0 "nefes" parçaları (3–8 tehlikeli parçada bir), zorluk 1–3 parçalar;
   öğeler: çukur, diken, blok, alçak tavan (yalnız kısa sıçramayla geçilir), piston (yükselip inen
-  diken), hareketli platform, riskli altın rotaları.
+  diken), hareketli platform, çürük iskele, riskli altın rotaları.
 - **Kıl payı kaçış:** engelin 14 px yakınından geçmek +1 altın, sesli/yazılı geri bildirim.
 - **Görevler:** her zaman 3 görev (kısa/orta/uzun); ödül 20/50/120 altın; her 3 görevde seviye artar,
   hedefler büyür.
@@ -69,15 +78,19 @@ scripts/hayalet.gd       günlük koşu hayaleti: örnekleme, kaydet/yükle, ger
 scripts/basarimlar.gd    başarım listesi ve denetimi
 scripts/isaret.gd        dünyadaki rekor / son ölüm / hayalet bayrakları
 scripts/mini_harita.gd   koşu sonu şehir ışıkları şeridi
+scripts/coken.gd         çürük iskele (basınca çöken tahta köprü)
+scripts/simgeler.gd      web'de eksik simgeler (★ ✓ ←…) için yedek yazı tipini bağlar
 scripts/bot.gd           test/demodaki otomatik oyuncu (kısa sıçrama dahil)
-scenes/parcalar/*.tscn   36 hazır parça (koddan üretilir)
+scenes/parcalar/*.tscn   40 hazır parça (koddan üretilir)
+assets/fonts/simgeler.ttf  DejaVu Sans Bold'dan 10 simgelik alt küme ("TTK Simgeler", lisans yanında)
 tools/varlik_uret.gd     tüm sprite'ları (PNG) koddan üretir
 tools/ses_uret.gd        ses efektlerini (WAV) koddan üretir
 tools/muzik_uret.gd      menü ve oyun müziğini (WAV döngü) üretir
 tools/sahne_uret.gd      parça, oyun ve menü sahnelerini koddan üretir
 tools/proje_ayarla.gd    project.godot ayarlarını + girdi haritasını yazar
 tools/ekran_goruntusu.gd itch ekran görüntüleri + kapak (pencere açar)
-tools/bot_stres.gd       farklı tohumlarla uzun bot koşuları (ölümleri parça adıyla raporlar)
+tools/bot_stres.gd       farklı tohumlarla uzun bot koşuları (ölümleri parça adıyla, parça kullanımını yazar)
+tools/simge_fontu.py     simge yazı tipini üretir (Python + fonttools; yalnız simge seti değişince)
 tests/testler.gd         otomatik testler
 yayin/                   itch.io sayfa metni, ekran görüntüleri, kapak, butler komutları
 ```
@@ -111,6 +124,11 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
   "hiç durmayan yoğunluk" en sık şikâyetti).
 - **Ölüm adil görünmeli:** ölüm tekrarı ve vurgulu engel, "neden öldüm?" sorusunu yanıtlar.
 - **Hızlı tekrar:** sahne yeniden yüklenmez; ölümden yeni koşuya < 1 sn.
+- **Çöken değil çürük:** yol haritasındaki "üstündeyken alçalan bina" denendi ve bırakıldı.
+  Koşucu yavaşlayamadığından alçalan zemin ya zemine yapışma sorununa ya da belirsiz bir
+  duvar ölümüne dönüşüyordu. Basınca belli bir sürede çöken iskele aynı gerilimi okunur bir
+  zamanlamayla veriyor (sallanma + çatırtı uyarısı).
+- **Paylaşımda bağlantı yok:** oyun henüz yayında değil; itch adresi belli olunca metne eklenir.
 - **Hayalet yalnız günlük koşuda:** rastgele koşuda çatılar farklı olduğundan hayalet yanıltıcı olurdu.
 - **Tek girdinin derinliği:** kısa dokunuş / basılı tutma / havada ikinci zıplama; alçak tavan
   kısa sıçramayı zorunlu kılar.
@@ -120,9 +138,9 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 
 ## Doğrulama
 
-Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.3, bulut, Godot 4.7.2 Linux headless):
-otomatik testler **558 geçti, 0 hata**; bot stres testi 24 tohum × 3 dk, 0 ölüm; web sürümünde
-günlük koşu başlatıldı. v0.2: web sürümü Chromium'da menü, karakter, ayarlar, oyun, ölüm tekrarı
+Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v0.4, bulut, Godot 4.7.2 Linux headless):
+otomatik testler **660 geçti, 0 hata**; bot stres testi 24 tohum × 3 dk, 0 ölüm, 40 parçanın hepsi
+koşuldu; web sürümünde günlük sonuç → Paylaş → pano metni doğrulandı. (v0.3: 558 test.) v0.2: web sürümü Chromium'da menü, karakter, ayarlar, oyun, ölüm tekrarı
 ve sonuç paneliyle denendi.
 
 Windows 11 (Godot 4.7.2, 2026-09-16): varlık/ses/müzik/sahne üretimi, içe aktarma, testler

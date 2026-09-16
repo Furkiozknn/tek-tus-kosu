@@ -17,6 +17,11 @@ Proje sahibi: Furki. İlgili kurallar: `D:\Claude Projeleri\oyun-terminalleri\GE
   `min/max`, üçlü ifade). Böyle yerlerde türü açık yaz (`var x: float = ...`). Derlenmeyen bir betik
   testlerde "Nonexistent function new" olarak görünür.
 - Fizik geri çağrısı içinde çarpışma nesnesini kapatma/ekleme: `set_deferred` kullan.
+- Godot'nun gömülü yazı tipinde (Open Sans) ★ ☆ ✓ ✗ ← ↑ → ↓ ■ □ yok. Masaüstünde sistem yazı tipi
+  örter, **web'de kutu çıkar**. Bu simgeler `assets/fonts/simgeler.ttf` yedeğinden gelir
+  (`Simgeler.kur()`, üretici `tools/simge_fontu.py`). Yeni bir simge kullanacaksan önce oraya ekle.
+- `JavaScriptBridge.eval` JS `true/false` değerini 1/0 (int) döndürebilir; sonucu `== true` ile
+  karşılaştırma (int == bool çalışma zamanı hatası, release yapıda sessizce işlevi keser).
 
 ## Komutlar
 
@@ -27,6 +32,7 @@ $G --headless --path . -s res://tools/varlik_uret.gd
 $G --headless --path . -s res://tools/ses_uret.gd
 $G --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_oyun.wav --ruh hizli --tohum 11
 $G --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_menu.wav --ruh sakin --tohum 4
+# (yalnız simge seti değişirse) python3 tools/simge_fontu.py   # fonttools gerekir
 $G --headless --path . --import
 $G --headless --path . -s res://tools/sahne_uret.gd
 $G --headless --path . --import
@@ -58,6 +64,11 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 - `Ses` statik; ilk çağrıda kök düğüme havuz ekler. Web'de ses ilk kullanıcı girdisinden sonra başlar
   (tarayıcı kuralı; konsoldaki AudioContext uyarısı normal).
 - Kayıt `[oyuncu]` bölümünde; `Kayit.yukle()` bozuk dosyada yedeğe döner.
+- Çürük iskele (`Coken`, `Zemin` alt sınıfı): `Oyuncu._zemine_bildir()` ayağın altını yoklar,
+  `basildi()` → `ISKELE_COKME` sn sonra çarpışma kapanır. Olaylar `call_group("oyun",
+  "iskele_catirdadi" | "iskele_coktu")`. Bot için tehlike aralığı iskelenin ilk `ISKELE_GUVENLI` px'inden sonra başlar.
+- Günlük seri kayıtta `gunluk_seri`; paylaşım metni `Gunluk.paylasim_metni()`. Web'de dokunmatik
+  cihazda `navigator.share`, diğerlerinde panoya kopyalama (`oyun._paylas`).
 
 ## Parça tasarım kuralları
 
@@ -65,10 +76,14 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 - Alçak tavan alt kenarı y=212: kısa sıçrama (≈35 px) sığar, tam zıplama (≈96 px) sığmaz.
 - Zorluk 0 = nefes parçası (tehlikesiz). Zorluk eşikleri: 2 → 280 px/sn, 3 → 360 px/sn.
 - Her yeni parça testte en düşük ve en yüksek hızda bot ile geçilmeli; ayrıca
-  `tools/bot_stres.gd -- --tohumlar 1,...,24` ile uzun koşularda ölüm olmamalı.
+  `--fixed-fps 60 ... tools/bot_stres.gd -- --tohumlar 1,...,24` ile uzun koşularda ölüm olmamalı
+  (`--fixed-fps` olmadan gerçek zamanda koşar: 24 tohum 72 dk sürer).
 - Botun iniş noktası (hız × 0,743 sn / 2) bir sonraki tehlikenin üstüne düşmemeli: art arda
   tehlikeler arasında en az ~260 px ya da birleşik tek tehlike bırak.
 - Hareketli ve tek yönlü kirişlerin yan yüzü öldürmez (`Oyuncu._duvara_carpti`).
+- Çatı hizasının altında duvara çarpmak "çukur" ölümü sayılır (boşluğa düşülmüştür).
+- Çürük iskele parçaları 150 px'lik dilimlerdir (her dilim ayrı tetiklenir). Dilimin ilk 60 px'i
+  en düşük hızda bile çökmeden koşulur; dilim sonrası katı zemin ya da başka dilim olmalı.
 
 ## Doğrulama
 
@@ -77,8 +92,12 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   menü, karakter paneli, ayarlar paneli, fareyle başlatma, oyun, ölüm tekrarı, sonuç paneli.
 - v0.3 (bulut): 558 test geçti; bot stresi 24 tohum × 3 dk, 0 ölüm; web'de günlük koşu açıldı.
 - v0.2 (Windows 11): aynı akış + `tools/ekran_goruntusu.gd`; 388 test geçti, dışa aktarmalar tamam.
+- v0.4 (bulut): 660 test geçti; bot stresi 24 tohum × 3 dk, 0 ölüm, 40 parçanın hepsi görüldü
+  (`bot_stres` artık parça kullanımını yazar). Web'de (Chromium) günlük sonuç → Paylaş → pano
+  metni doğrulandı; ★ ve ✓ simgeleri web'de görünüyor.
 - v0.3 (Windows 11): 558 test geçti; bot stresi 8 tohum × 3 dk, 0 ölüm; ekran görüntüleri ve iki dışa
   aktarma tamam. Ekran görüntüleri buluttakinden yalnız GPU gürültüsü kadar farklı (kanal farkı ≤ 30).
   PNG/WAV üreticileri deterministik (bulut ve Windows çıktıları aynı hash). Sahne dosyalarındaki
-  `uid` değerleri makineye göre değişir; bu normal.
+  `uid` değerleri makineye göre değişir; bu normal. Düğüm `unique_id` değerleri v0.4'ten beri
+  `sahne_uret` tarafından düğüm yolundan türetilir (yeniden üretim gereksiz fark yaratmaz).
 - Web testinde bilinen durum: Chromium'un AudioContext otomatik oynatma uyarısı (zararsız).

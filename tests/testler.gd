@@ -27,6 +27,9 @@ func _calistir() -> void:
 	await _test_gunluk_ve_hayalet()
 	await _test_basarimlar_ve_isaretler()
 	await _test_menu_v03()
+	await _test_iskele()
+	await _test_seri_ve_paylasim()
+	await _test_kostum_izi()
 	print("\n=== SONUÇ: %d geçti, %d hata ===" % [gecen, hatalar])
 	quit(1 if hatalar > 0 else 0)
 
@@ -728,6 +731,220 @@ func _test_menu_v03() -> void:
 	await process_frame
 	Gunluk.secili = false
 	_kayit_temizle()
+
+
+# ------------------------------------------------------------------ v0.4
+func _test_iskele() -> void:
+	print("[çürük iskele]")
+	dogrula(Ayarlar.ISKELE_GUVENLI + Oyuncu.YARIM_GENISLIK + 6.0 < Ayarlar.HIZ_BAS * Ayarlar.RAHAT_MOD_CARPANI * Ayarlar.ISKELE_COKME,
+		"iskele güvenli bölümü en yavaş hızda çökme süresinden kısa olmalı")
+	var kok := Node2D.new()
+	root.add_child(kok)
+	var z := Zemin.new()
+	z.position = Vector2(-600, Ayarlar.ZEMIN_Y)
+	z.genislik = 800.0
+	kok.add_child(z)
+	var isk := Coken.new()
+	isk.position = Vector2(200, Ayarlar.ZEMIN_Y)
+	isk.genislik = 150.0
+	isk.yukseklik = Ayarlar.ISKELE_KALINLIK
+	kok.add_child(isk)
+	var z2 := Zemin.new()
+	z2.position = Vector2(350, Ayarlar.ZEMIN_Y)
+	z2.genislik = 450.0
+	kok.add_child(z2)
+	# Havada, iskelenin üstünden atlayan oyuncu onu tetiklememeli
+	await _kareler(5)
+	dogrula(isk.durum == Coken.Durum.SAGLAM, "dokunulmayan iskele sağlam kalmalı")
+	# Zıplamadan koşan oyuncu: iskele çatırdar, çöker, oyuncu düşer
+	var o: Oyuncu = (load("res://scenes/oyuncu.tscn") as PackedScene).instantiate()
+	o.position = Vector2(100, Ayarlar.ZEMIN_Y - 2)
+	o.hiz = Ayarlar.HIZ_BAS
+	kok.add_child(o)
+	var kare := 0
+	while isk.durum == Coken.Durum.SAGLAM and kare < 120:
+		await physics_frame
+		kare += 1
+	dogrula(isk.durum == Coken.Durum.CATIRDIYOR, "üstüne basılan iskele çatırdamalı")
+	dogrula(o.global_position.x < isk.position.x + 10.0, "iskele ilk temasta tetiklenmeli (x=%.0f)" % o.global_position.x)
+	await _kareler(int(Ayarlar.ISKELE_COKME * 60.0) + 3)
+	dogrula(isk.durum == Coken.Durum.COKTU, "iskele %.1f sn sonra çökmeli" % Ayarlar.ISKELE_COKME)
+	await _kareler(60)
+	dogrula(not o.canli and str(o.olum_nedeni) == "cukur", "iskeleyle düşen oyuncu çukurdan ölmeli (%s)" % str(o.olum_nedeni))
+	o.queue_free()
+	# Güvenli bölümde zıplayan oyuncu yaşar
+	var isk2 := Coken.new()
+	isk2.position = Vector2(1200, Ayarlar.ZEMIN_Y)
+	isk2.genislik = 150.0
+	isk2.yukseklik = Ayarlar.ISKELE_KALINLIK
+	kok.add_child(isk2)
+	var z3 := Zemin.new()
+	z3.position = Vector2(900, Ayarlar.ZEMIN_Y)
+	z3.genislik = 300.0
+	kok.add_child(z3)
+	var z4 := Zemin.new()
+	z4.position = Vector2(1350, Ayarlar.ZEMIN_Y)
+	z4.genislik = 2000.0
+	kok.add_child(z4)
+	var o2: Oyuncu = (load("res://scenes/oyuncu.tscn") as PackedScene).instantiate()
+	o2.position = Vector2(1000, Ayarlar.ZEMIN_Y - 2)
+	o2.hiz = Ayarlar.HIZ_BAS
+	kok.add_child(o2)
+	kare = 0
+	while o2.global_position.x < isk2.position.x + Ayarlar.ISKELE_GUVENLI - 10.0 and kare < 300:
+		await physics_frame
+		kare += 1
+	o2.zipla_bas()
+	await _kareler(90)
+	dogrula(o2.canli and o2.global_position.x > isk2.position.x + isk2.genislik and o2.is_on_floor(), "güvenli bölümde zıplayan oyuncu iskeleyi geçmeli")
+	dogrula(isk2.durum != Coken.Durum.SAGLAM, "koşulan iskele tetiklenmiş olmalı")
+	kok.queue_free()
+	await process_frame
+	# Parça tehlike aralığı iskelenin güvenli bölümünden sonra başlar
+	var parca: Parca = (load("res://scenes/parcalar/37_curuk_iskele.tscn") as PackedScene).instantiate()
+	var ar := parca.tehlike_araliklari()
+	dogrula(ar.size() == 1 and is_equal_approx(ar[0].x, 320.0 + Ayarlar.ISKELE_GUVENLI) and is_equal_approx(ar[0].y, 470.0),
+		"iskele tehlike aralığı yanlış: %s" % str(ar))
+	parca.free()
+	# Oyun içinde: bot iskeleleri geçer, sayaç artar, başarım tanımı çalışır
+	var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+	oyun.bot_modu = true
+	oyun.sabit_hiz = 380.0
+	oyun.kayit_yap = false
+	oyun.tohum = 3
+	oyun.sira_bitince_duz = true
+	var sira: Array[String] = ["res://scenes/parcalar/40_uzun_iskele.tscn", "res://scenes/parcalar/38_iskele_zinciri.tscn"]
+	oyun.parca_sirasi = sira
+	root.add_child(oyun)
+	await _kareler(60 * 9)
+	dogrula(oyun.oyuncu.canli, "bot iskele parçalarında yaşamalı")
+	dogrula(int(oyun.istatistik["iskele"]) >= 5, "geçilen iskeleler sayılmalı (%d)" % int(oyun.istatistik["iskele"]))
+	oyun.queue_free()
+	await process_frame
+	dogrula(Basarimlar.saglandi_mi("iskele8", {}, {"iskele": 8}, false) and not Basarimlar.saglandi_mi("iskele8", {}, {"iskele": 7}, false),
+		"iskele başarımı 8'de açılmalı")
+
+
+func _test_seri_ve_paylasim() -> void:
+	print("[günlük seri ve paylaşım]")
+	dogrula(Gunluk.dun("2026-03-01") == "2026-02-28" and Gunluk.dun("2027-01-01") == "2026-12-31" and Gunluk.dun("2028-03-01") == "2028-02-29",
+		"dün hesabı ay/yıl/artık yıl sınırlarında doğru olmalı")
+	_kayit_temizle()
+	var d := Kayit.yukle()
+	Gunluk.tarih_ezme = "2026-05-30"
+	dogrula(Gunluk.seri(d) == 0, "hiç koşulmamışsa seri 0")
+	dogrula(Gunluk.seri_isle(d) == 1, "ilk gün seri 1")
+	dogrula(Gunluk.seri_isle(d) == 1, "aynı gün ikinci koşu seriyi artırmamalı")
+	Gunluk.tarih_ezme = "2026-05-31"
+	dogrula(Gunluk.seri(d) == 1, "dün koşulduysa seri sürer")
+	Gunluk.seri_isle(d)
+	Gunluk.tarih_ezme = "2026-06-01"
+	dogrula(Gunluk.seri_isle(d) == 3, "art arda üç gün seri 3")
+	Gunluk.tarih_ezme = "2026-06-03"
+	dogrula(Gunluk.seri(d) == 0, "bir gün atlanınca seri kopmalı")
+	dogrula(Gunluk.seri_isle(d) == 1 and int(d["gunluk_seri"]["en_iyi"]) == 3, "kopan seri 1'den başlamalı, en iyi seri kalmalı")
+	Kayit.kaydet(d)
+	dogrula(int(Kayit.yukle()["gunluk_seri"]["en_iyi"]) == 3, "seri kaydedilmeli")
+	# Paylaşım metni
+	var m := Gunluk.paylasim_metni("2026-09-16", 475, 3, 950, false, 4)
+	var satir := m.split("\n")
+	dogrula(satir.size() == 4 and satir[0] == "Tek Tuş Koşu · Günlük 16.09.2026", "paylaşım başlığı: %s" % satir[0])
+	dogrula(satir[1] == "475 m · 3. deneme", "paylaşım mesafe satırı: %s" % satir[1])
+	dogrula(satir[2] == "■■■■■□□□□□  rekor 950 m", "paylaşım şeridi: %s" % satir[2])
+	dogrula(satir[3] == "Seri: 4 gün", "paylaşım seri satırı")
+	var m2 := Gunluk.paylasim_metni("2026-09-16", 1200, 1, 0, true, 1)
+	dogrula(m2.split("\n").size() == 3 and m2.contains("günün rekoru!") and m2.contains("■■■■■■■■■■") and not m2.contains("□"), "rekor koşusunun metni: %s" % m2)
+	# Oyun içinde günlük sonuç paneli: Paylaş düğmesi, sığma, kopyalama
+	_kayit_temizle()
+	Gunluk.tarih_ezme = "2026-07-01"
+	var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+	oyun.bot_modu = true
+	oyun.gunluk = true
+	oyun.olum_tekrari_acik = false
+	root.add_child(oyun)
+	await _kareler(120)
+	oyun.oyuncu.ol()
+	await _kareler(3)
+	var ekran: Rect2 = oyun.get_viewport().get_visible_rect()
+	var pd: Button = oyun.get_node("%PaylasDugme")
+	dogrula(oyun.son_paneli.visible and pd.visible, "günlük sonuç panelinde Paylaş düğmesi görünmeli")
+	dogrula(ekran.encloses(oyun.son_paneli.get_global_rect()), "üç düğmeli sonuç paneli ekrana sığmalı (%s)" % oyun.son_paneli.get_global_rect())
+	dogrula(int(oyun.son_sonuc["seri"]) == 1, "günlük koşu seriyi başlatmalı")
+	var metin: String = oyun.paylasim_metni()
+	dogrula(metin.begins_with("Tek Tuş Koşu · Günlük 01.07.2026") and metin.contains("1. deneme"), "oyun paylaşım metni: %s" % metin)
+	pd.pressed.emit()
+	await _kareler(1)
+	dogrula(pd.text == "Kopyalandı ✓", "paylaş düğmesi geri bildirim vermeli (%s)" % pd.text)
+	# Normal koşuda düğme gizli
+	oyun.gunluk = false
+	Gunluk.secili = false
+	oyun.yeniden_baslat()
+	await _kareler(30)
+	oyun.oyuncu.ol()
+	await _kareler(3)
+	dogrula(not pd.visible, "normal koşuda Paylaş düğmesi gizli olmalı")
+	oyun.queue_free()
+	await process_frame
+	# Menüde seri
+	var dk := Kayit.yukle()
+	Gunluk.tarih_ezme = "2026-07-02"
+	Gunluk.seri_isle(dk)
+	Gunluk.kosu_isle(dk, 1234)
+	Kayit.kaydet(dk)
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _kareler(3)
+	var gd: Button = menu.get_node("%GunlukDugme")
+	dogrula(gd.text == "Günlük · 1234 m · 2 gün", "menü günlük düğmesi seriyi göstermeli (%s)" % gd.text)
+	var yazi := gd.get_theme_font("font").get_string_size(gd.text, HORIZONTAL_ALIGNMENT_LEFT, -1, gd.get_theme_font_size("font_size"))
+	dogrula(yazi.x <= gd.size.x - 4.0, "günlük düğmesi yazısı sığmalı (%.0f / %.0f)" % [yazi.x, gd.size.x])
+	menu.queue_free()
+	await process_frame
+	Gunluk.tarih_ezme = ""
+	_kayit_temizle()
+
+
+func _test_kostum_izi() -> void:
+	print("[kostüm izi ve simge yazı tipi]")
+	Simgeler.kur()
+	Simgeler.kur()
+	var yt := ThemeDB.fallback_font
+	for ch in "★☆✓←→↓■□":
+		dogrula(yt.has_char(ch.unicode_at(0)), "yazı tipi zinciri '%s' simgesini içermeli (web'de kutu çıkmasın)" % ch)
+	var adet := 0
+	for f in yt.fallbacks:
+		if f.resource_path == Simgeler.YOL:
+			adet += 1
+	dogrula(adet == 1, "simge yazı tipi bir kez eklenmeli (%d)" % adet)
+	var gri := Color("8b9bb4")
+	dogrula(Kostumler.toz_rengi("klasik", gri) == gri, "klasik kostüm tozu değişmemeli")
+	dogrula(Kostumler.toz_rengi("kizil", gri) != gri, "kızıl kostüm tozu renkli olmalı")
+	for k in Kostumler.LISTE:
+		dogrula(k.has("iz") and k.has("iz_surekli"), "kostümün iz bilgisi olmalı: " + str(k["ad"]))
+	var kok := Node2D.new()
+	root.add_child(kok)
+	var z := Zemin.new()
+	z.position = Vector2(-100, Ayarlar.ZEMIN_Y)
+	z.genislik = 5000.0
+	kok.add_child(z)
+	var o: Oyuncu = (load("res://scenes/oyuncu.tscn") as PackedScene).instantiate()
+	o.position = Vector2(0, Ayarlar.ZEMIN_Y - 2)
+	kok.add_child(o)
+	o.kostum_uygula("neon")
+	await _kareler(10)
+	var iz: CPUParticles2D = o.get_node_or_null("Iz")
+	dogrula(iz != null and iz.emitting, "neon kostüm koşarken iz bırakmalı")
+	o.zipla_bas()
+	await _kareler(8)
+	dogrula(iz != null and not iz.emitting, "havadayken iz durmalı")
+	o.kostum_uygula("klasik")
+	await _kareler(2)
+	dogrula(o.get_node_or_null("Iz") == null, "klasik kostümde iz olmamalı")
+	o.iz_acik = false
+	o.kostum_uygula("altin")
+	dogrula(o.get_node_or_null("Iz") == null, "iz kapalıyken (bot) iz düğümü kurulmamalı")
+	kok.queue_free()
+	await process_frame
 
 
 class YakinDinleyici extends Node:

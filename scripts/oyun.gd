@@ -89,6 +89,7 @@ var _basarim_onbellek: Dictionary = {}
 
 
 func _ready() -> void:
+	Simgeler.kur()
 	add_to_group("oyun")
 	gunluk = gunluk or Gunluk.secili
 	for yol in ParcaListesi.YOLLAR:
@@ -109,6 +110,7 @@ func _ready() -> void:
 	%MenuDugme.pressed.connect(menuye_don)
 	%TekrarDugme.pressed.connect(yeniden_baslat)
 	%SonMenuDugme.pressed.connect(menuye_don)
+	%PaylasDugme.pressed.connect(_paylas)
 	yeniden_baslat()
 
 
@@ -163,6 +165,7 @@ func yeniden_baslat() -> void:
 	dunya.process_mode = Node.PROCESS_MODE_INHERIT
 	oyuncu.process_mode = Node.PROCESS_MODE_PAUSABLE
 	oyuncu.visible = true
+	oyuncu.iz_acik = not bot_modu
 	oyuncu.kostum_uygula(str(d["kostum"]))
 	oyuncu.sifirla(Vector2(100.0, Ayarlar.ZEMIN_Y))
 	oyuncu.hiz = _hiz_hesapla()
@@ -299,15 +302,29 @@ func _ziplandi(ikinci: bool) -> void:
 	if ikinci:
 		istatistik["ikinci"] = int(istatistik["ikinci"]) + 1
 		Ses.cal("ikinci")
-		_parcacik(oyuncu.global_position, Color("c0cbdc"), 6, 70.0, 0.25)
+		_parcacik(oyuncu.global_position, Kostumler.toz_rengi(oyuncu.kostum, Color("c0cbdc")), 6, 70.0, 0.25)
 	else:
 		Ses.cal("zipla")
-		_parcacik(oyuncu.global_position, Color("8b9bb4"), 5, 40.0, 0.25)
+		_parcacik(oyuncu.global_position, Kostumler.toz_rengi(oyuncu.kostum, Color("8b9bb4")), 5, 40.0, 0.25)
 
 
 func _indi() -> void:
 	Ses.cal("indi")
-	_parcacik(oyuncu.global_position, Color("8b9bb4"), 6, 45.0, 0.3)
+	_parcacik(oyuncu.global_position, Kostumler.toz_rengi(oyuncu.kostum, Color("8b9bb4")), 6, 45.0, 0.3)
+
+
+func iskele_catirdadi(iskele: Node2D) -> void:
+	if bitti:
+		return
+	Ses.cal("catirti")
+	_parcacik(Vector2(oyuncu.global_position.x, iskele.global_position.y), Color("b86f50"), 4, 30.0, 0.3)
+
+
+func iskele_coktu(iskele: Node2D) -> void:
+	Ses.cal("indi", 0.55)
+	var w: float = iskele.get("genislik")
+	for i in 3:
+		_parcacik(iskele.global_position + Vector2(w * (0.2 + 0.3 * i), 4), Color("733e39"), 4, 40.0, 0.4)
 
 
 func _gorevleri_denetle() -> void:
@@ -395,7 +412,7 @@ func _parca_ekle(yol: String) -> void:
 	parcalar.append(p)
 	sonraki_x += p.uzunluk
 	for c in p.get_children():
-		if c is Tehlike and (c.tur == Tehlike.Tur.TAVAN or c.tur == Tehlike.Tur.PISTON):
+		if c is Coken or (c is Tehlike and (c.tur == Tehlike.Tur.TAVAN or c.tur == Tehlike.Tur.PISTON)):
 			_tehlike_sirasi.append(c)
 
 
@@ -520,6 +537,7 @@ func _kosu_sonucunu_isle() -> void:
 		d["toplam_mesafe"] = int(d["toplam_mesafe"]) + m
 		if gunluk:
 			Gunluk.kosu_isle(d, m)
+			Gunluk.seri_isle(d)
 			if yeni_rekor and _hayalet_kayit:
 				_hayalet_kayit.tarih = Gunluk.bugun()
 				_hayalet_kayit.mesafe = m
@@ -534,7 +552,8 @@ func _kosu_sonucunu_isle() -> void:
 		Kayit.kaydet(d)
 	son_sonuc = {"mesafe": m, "yeni_rekor": yeni_rekor, "rekor": maxi(onceki_rekor, m), "gorev": gorev_sonuc,
 		"gorevler": d["gorevler"], "seviye": int(d["gorev_seviyesi"]), "olumler": onceki_olumler,
-		"basarimlar": basarimlar, "deneme": int(Gunluk.durum(d)["deneme"]) if gunluk else 0}
+		"basarimlar": basarimlar, "deneme": int(Gunluk.durum(d)["deneme"]) if gunluk else 0,
+		"seri": Gunluk.seri(d) if gunluk else 0}
 	kosu_bitti.emit(m, altin)
 
 
@@ -636,10 +655,41 @@ func _son_paneli_goster() -> void:
 	son_gorevler.text = "\n".join(satirlar.slice(1))
 	# Kalabalık panelde alt ipucu yer kaplamasın (dokunma/boşluk yine çalışır).
 	%SonIpucu.visible = satirlar.size() <= 6
+	# Günlük koşuda üç düğme: Tekrar | Paylaş | Menü
+	%PaylasDugme.visible = gunluk
+	%PaylasDugme.text = "Paylaş"
+	var genislik := 110.0 if gunluk else 150.0
+	%TekrarDugme.custom_minimum_size.x = genislik
+	%SonMenuDugme.custom_minimum_size.x = genislik
 	son_paneli.reset_size()
 	son_paneli.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 	son_paneli.show()
 	%TekrarDugme.grab_focus()
+
+
+# ------------------------------------------------------------------ v0.4: paylaşım
+func paylasim_metni() -> String:
+	var s := son_sonuc
+	return Gunluk.paylasim_metni(Gunluk.bugun(), int(s.get("mesafe", 0)), int(s.get("deneme", 0)),
+			int(s.get("rekor", 0)), bool(s.get("yeni_rekor", false)), int(s.get("seri", 0)))
+
+
+## Telefonda tarayıcının paylaşım menüsü, diğer durumlarda panoya kopyalama.
+func _paylas() -> void:
+	var metin := paylasim_metni()
+	var paylasildi := false
+	if OS.has_feature("web"):
+		var js := "(navigator.share && navigator.maxTouchPoints > 0) ? (navigator.share({text: %s}).catch(function(){}), true) : false" % JSON.stringify(metin)
+		# JS true/false web'de 1/0 (int) olarak dönebiliyor; int == bool çalışma zamanı hatası verir.
+		paylasildi = str(JavaScriptBridge.eval(js, true)) in ["true", "1"]
+	if not paylasildi:
+		DisplayServer.clipboard_set(metin)
+	Ses.cal("tik")
+	var dg: Button = %PaylasDugme
+	dg.text = "Paylaşıldı ✓" if paylasildi else "Kopyalandı ✓"
+	var tw := create_tween()
+	tw.tween_interval(1.6)
+	tw.tween_callback(func() -> void: dg.text = "Paylaş")
 
 
 # ------------------------------------------------------------------ v0.3: kip, işaretler, hayalet, başarımlar
@@ -743,10 +793,11 @@ func _gecisleri_say() -> void:
 		if not is_instance_valid(t):
 			_tehlike_sirasi.pop_front()
 			continue
-		if (t as Tehlike).global_position.x + (t as Tehlike).genislik >= arka:
+		var son_x: float = (t as Node2D).global_position.x + float(t.get("genislik"))
+		if son_x >= arka:
 			break
 		_tehlike_sirasi.pop_front()
-		var anahtar := "tavan" if t.tur == Tehlike.Tur.TAVAN else "piston"
+		var anahtar := "iskele" if t is Coken else ("tavan" if t.tur == Tehlike.Tur.TAVAN else "piston")
 		istatistik[anahtar] = int(istatistik[anahtar]) + 1
 
 

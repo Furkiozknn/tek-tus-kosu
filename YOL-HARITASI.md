@@ -39,12 +39,22 @@
 - [x] Titreşim ayarı (ölümde); tek yönlü kirişlerin yanına çarpmak artık öldürmüyor
 - [x] Bot stres aracı (`tools/bot_stres.gd`)
 
-## Sonraki tur (v0.4)
+## Bitti — geliştirme turu 3 (v0.4, 2026-09-16)
+
+- [x] Yeni öğe: çürük iskele (basınca 0,5 sn sonra çöker), 4 parça (37–40), bot desteği
+      ("alçalan bina" yerine — gerekçe README'de)
+- [x] Kostüm izi: toz rengi kostüme göre, Neon/Altın Taç'ta sürekli iz
+- [x] Günlük koşu paylaşım metni (telefonda paylaşım menüsü, diğerlerinde pano) + günlük seri
+- [x] 12. başarım (Hafif adımlar: tek koşuda 8 çürük iskele); iskele geçiş sayacı
+- [x] Web düzeltmesi: ★ ☆ ✓ simgeleri web'de kutu çıkıyordu → yedek simge yazı tipi
+- [x] Boşluğa düşüp karşı duvara çarpmak artık "çukur" ölümü (tekrar yazısı doğru)
+- [x] `bot_stres` parça kullanım özeti
+
+## Sonraki tur (v0.5)
 
 - [ ] Çatı ritmi: müzik vuruşuna hizalı parça dizileri (isteğe bağlı mod)
-- [ ] Yeni öğeler: çöken bina (üstündeyken alçalır), rüzgâr; bot desteğiyle
-- [ ] Kostüm başına küçük görsel iz (parçacık rengi)
-- [ ] Günlük koşu için paylaşılabilir sonuç metni (ör. "Tek Tuş Koşu 16.09 — 812 m, 3. deneme")
+- [ ] Rüzgâr öğesi (zıplama mesafesini değiştirir); bot desteğiyle
+- [ ] Paylaşım metnine itch adresi (yayından sonra)
 - [ ] Mobil: dikey yerleşim denemesi, gerçek cihazda dokunma testi
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] itch.io web yayını (Furki'nin onayıyla)

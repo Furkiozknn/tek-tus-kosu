@@ -31,7 +31,7 @@ const ODUL := {"kisa": 20, "orta": 50, "uzun": 120}
 
 
 static func bos_istatistik() -> Dictionary:
-	return {"mesafe": 0, "altin": 0, "ikinci": 0, "yakin": 0, "kosu": 0, "tavan": 0, "piston": 0}
+	return {"mesafe": 0, "altin": 0, "ikinci": 0, "yakin": 0, "kosu": 0, "tavan": 0, "piston": 0, "iskele": 0}
 
 
 static func yeni_gorev(sure: String, seviye: int, haric: Array, rng: RandomNumberGenerator) -> Dictionary:
