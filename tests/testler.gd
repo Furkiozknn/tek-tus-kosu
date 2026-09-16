@@ -23,6 +23,10 @@ func _calistir() -> void:
 	await _test_menu()
 	await _test_yeniden_baslat_ve_tekrar()
 	await _test_tavan_ve_piston()
+	await _test_hiz_egrisi_ve_belirlenimcilik()
+	await _test_gunluk_ve_hayalet()
+	await _test_basarimlar_ve_isaretler()
+	await _test_menu_v03()
 	print("\n=== SONUÇ: %d geçti, %d hata ===" % [gecen, hatalar])
 	quit(1 if hatalar > 0 else 0)
 
@@ -300,6 +304,10 @@ func _test_hiz_ve_sizinti() -> void:
 	var mesafe: int = oyun.mesafe()
 	print("  koşulan: %d m, ölüm: %s, son hız: %.0f, en çok parça: %d, en çok düğüm: %d, altın: %d" % [
 		mesafe, "yok" if oyun.oyuncu.canli else "VAR", onceki_hiz, en_cok_parca, en_cok_dugum, oyun.altin])
+	if not oyun.oyuncu.canli:
+		for p in oyun.parcalar:
+			if oyun.oyuncu.global_position.x >= p.position.x and oyun.oyuncu.global_position.x <= p.position.x + p.uzunluk:
+				print("  ölüm parçası: %s (yerel x=%.0f, hız=%.0f, neden=%s)" % [p.scene_file_path.get_file(), oyun.oyuncu.global_position.x - p.position.x, oyun.oyuncu.hiz, str(oyun.oyuncu.olum_nedeni)])
 	dogrula(oyun.oyuncu.canli, "bot 3 dakika boyunca hiç ölmemeli (rastgele parça sırası)")
 	dogrula(hiz_azalmadi, "hız hiç azalmamalı")
 	dogrula(sinir_asilmadi, "hız üst sınırı aşılmamalı")
@@ -490,6 +498,236 @@ func _test_tavan_ve_piston() -> void:
 	dogrula(dinleyici.sayi == 1, "kıl payı kaçış bir kez sayılmalı (sayı: %d)" % dinleyici.sayi)
 	kok.queue_free()
 	await process_frame
+
+
+# ------------------------------------------------------------------ v0.3
+func _test_hiz_egrisi_ve_belirlenimcilik() -> void:
+	print("[hız eğrisi ve parça dizisi belirlenimciliği]")
+	dogrula(is_equal_approx(Ayarlar.hiz_mesafede(0.0), Ayarlar.HIZ_BAS), "başlangıç hızı HIZ_BAS olmalı")
+	dogrula(is_equal_approx(Ayarlar.hiz_mesafede(1e9), Ayarlar.HIZ_AZAMI), "uzakta hız HIZ_AZAMI olmalı")
+	# Sayısal tümlevle karşılaştır: t saniyede alınan yol -> o andaki hız
+	var t := 0.0
+	var d := 0.0
+	var en_buyuk_fark := 0.0
+	var tekdüze := true
+	var onceki := 0.0
+	while t < 70.0:
+		var v := minf(Ayarlar.HIZ_BAS + Ayarlar.HIZ_ARTIS * t, Ayarlar.HIZ_AZAMI)
+		var tahmin := Ayarlar.hiz_mesafede(d)
+		en_buyuk_fark = maxf(en_buyuk_fark, absf(tahmin - v))
+		if tahmin < onceki - 0.0001:
+			tekdüze = false
+		onceki = tahmin
+		d += v / 60.0
+		t += 1.0 / 60.0
+	dogrula(en_buyuk_fark < 0.5, "mesafeye göre hız, zamana göre hızla uyuşmalı (fark %.3f)" % en_buyuk_fark)
+	dogrula(tekdüze, "mesafeye göre hız azalmamalı")
+	# Aynı tohum, farklı oyuncu davranışı (bot / botsuz) -> aynı parça dizisi
+	var diziler := []
+	for bot in [true, false]:
+		var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+		oyun.bot_modu = bot
+		oyun.kayit_yap = false
+		oyun.olum_tekrari_acik = false
+		oyun.tohum = 42
+		root.add_child(oyun)
+		oyun.oyuncu.olumsuz = true
+		var adlar := []
+		for i in 12:
+			adlar.append(oyun._parca_sec())
+			oyun.sonraki_x += 900.0
+		diziler.append(adlar)
+		oyun.queue_free()
+		await process_frame
+	dogrula(diziler[0] == diziler[1], "aynı tohum aynı parça dizisini vermeli")
+	var farkli := false
+	for i in diziler[0].size():
+		if diziler[0][i] != ParcaListesi.DUZ:
+			farkli = true
+	dogrula(farkli, "parça dizisi yalnız düz parçalardan oluşmamalı")
+
+
+func _test_gunluk_ve_hayalet() -> void:
+	print("[günlük koşu ve hayalet]")
+	_kayit_temizle()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Hayalet.dosya_yolu()))
+	dogrula(Gunluk.tohum("2026-01-02") == Gunluk.tohum("2026-01-02"), "aynı tarih aynı tohum")
+	dogrula(Gunluk.tohum("2026-01-02") != Gunluk.tohum("2026-01-03"), "farklı tarih farklı tohum")
+	Gunluk.tarih_ezme = "2026-01-02"
+	var d := Kayit.yukle()
+	dogrula(Gunluk.kosu_isle(d, 120), "ilk günlük koşu rekor olmalı")
+	dogrula(not Gunluk.kosu_isle(d, 80), "daha kısa koşu rekor değil")
+	var g := Gunluk.durum(d)
+	dogrula(int(g["rekor"]) == 120 and int(g["deneme"]) == 2 and (g["olumler"] as Array) == [120, 80], "günlük rekor/deneme/ölümler tutulmalı")
+	for i in 20:
+		Gunluk.kosu_isle(d, i)
+	dogrula((Gunluk.durum(d)["olumler"] as Array).size() == Ayarlar.OLUM_ISARETI_SAYISI, "ölüm listesi sınırlı olmalı")
+	Gunluk.tarih_ezme = "2026-01-03"
+	dogrula(int(Gunluk.durum(d)["deneme"]) == 0 and int(Gunluk.durum(d)["rekor"]) == 0, "gün değişince günlük sıfırlanmalı")
+	# Hayalet: ekle / ara değer / kaydet / yükle
+	var h := Hayalet.new()
+	h.tarih = "2026-01-03"
+	h.mesafe = 5
+	h.ekle(Vector2(0, 280), "kos")
+	h.ekle(Vector2(20, 260), "zipla")
+	h.ekle(Vector2(40, 280), "dus")
+	dogrula(h.konum(0.5 / Ayarlar.HAYALET_HZ).is_equal_approx(Vector2(10, 270)), "hayalet örnekler arası ara değer vermeli")
+	dogrula(h.anim_adi(1.0 / Ayarlar.HAYALET_HZ) == "zipla", "hayalet animasyonu örnekten okunmalı")
+	dogrula(h.kaydet() == OK, "hayalet kaydedilmeli")
+	var h2 := Hayalet.yukle("2026-01-03")
+	dogrula(h2 != null and h2.sayi() == 3 and h2.mesafe == 5 and h2.konum(2.0 / Ayarlar.HAYALET_HZ).is_equal_approx(Vector2(40, 280)), "hayalet geri yüklenmeli")
+	dogrula(Hayalet.yukle("2026-01-04") == null, "başka günün hayaleti yüklenmemeli")
+	# Oyun içinde günlük koşu
+	_kayit_temizle()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Hayalet.dosya_yolu()))
+	Gunluk.tarih_ezme = "2026-02-10"
+	var kayit_ilk := Kayit.yukle()
+	kayit_ilk["ayarlar"]["rahat"] = true
+	Kayit.kaydet(kayit_ilk)
+	var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+	oyun.bot_modu = true
+	oyun.gunluk = true
+	oyun.olum_tekrari_acik = false
+	root.add_child(oyun)
+	await process_frame
+	dogrula(not oyun.rahat, "günlük koşuda rahat mod kapalı olmalı")
+	var dizi1 := []
+	for p in oyun.parcalar:
+		dizi1.append(p.scene_file_path)
+	await _kareler(300)
+	dogrula(oyun.oyuncu.canli, "bot günlük koşuda 5 sn yaşamalı")
+	oyun.oyuncu.ol()
+	await _kareler(2)
+	var kd := Kayit.yukle()
+	var gd := Gunluk.durum(kd)
+	dogrula(int(gd["deneme"]) == 1 and int(gd["rekor"]) == oyun.son_sonuc["mesafe"] and int(gd["rekor"]) > 0, "günlük sonuç kayda işlenmeli")
+	dogrula(int(kd["rekor"]) == int(gd["rekor"]), "günlük koşu genel rekoru da güncellemeli")
+	dogrula((kd["olumler"] as Array).is_empty(), "günlük ölüm normal ölüm listesine yazılmamalı")
+	var kayitli := Hayalet.yukle("2026-02-10")
+	dogrula(kayitli != null and kayitli.sayi() >= 5 * Ayarlar.HAYALET_HZ, "günün rekoru hayalet olarak kaydedilmeli")
+	dogrula(oyun.son_rekor.text.begins_with("GÜNÜN REKORU"), "sonuç panelinde günlük rekor yazmalı")
+	oyun.yeniden_baslat()
+	await _kareler(2)
+	var dizi2 := []
+	for p in oyun.parcalar:
+		dizi2.append(p.scene_file_path)
+	dogrula(dizi1 == dizi2, "günlük koşu her denemede aynı parçalarla başlamalı")
+	var hs: AnimatedSprite2D = oyun.get_node_or_null("HayaletRakip")
+	dogrula(hs != null and hs.visible, "ikinci denemede hayalet rakip görünmeli")
+	await _kareler(60)
+	if hs:
+		var fark: float = absf(hs.global_position.x - oyun.oyuncu.global_position.x)
+		dogrula(fark < 40.0, "aynı hızda koşan hayalet oyuncuyla yan yana olmalı (fark %.1f)" % fark)
+	await _kareler(300)
+	dogrula(oyun._hayalet_bitti and not hs.visible, "hayalet kaydı bitince hayalet kaybolmalı")
+	var isaret_var := false
+	for c in oyun.get_children():
+		if c is Isaret and c.metin == "HAYALET":
+			isaret_var = true
+	dogrula(isaret_var, "hayaletin bittiği yere işaret konmalı")
+	oyun.queue_free()
+	await process_frame
+	Gunluk.tarih_ezme = ""
+	_kayit_temizle()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Hayalet.dosya_yolu()))
+
+
+func _test_basarimlar_ve_isaretler() -> void:
+	print("[başarımlar, geçiş sayacı, işaretler, sonuç haritası]")
+	_kayit_temizle()
+	var d := Kayit.yukle()
+	var ist := Gorevler.bos_istatistik()
+	ist["mesafe"] = 600
+	var acilan := Basarimlar.denetle(d, ist, false)
+	var idler := acilan.map(func(b: Dictionary) -> String: return b["id"])
+	dogrula(idler.has("m500") and not idler.has("m1000") and not idler.has("ilk_kosu"), "yalnız sağlanan başarımlar açılmalı (%s)" % str(idler))
+	dogrula(int(d["toplam_altin"]) == Ayarlar.BASARIM_ODULU * acilan.size(), "başarım ödülü verilmeli")
+	dogrula(Basarimlar.denetle(d, ist, false).is_empty(), "başarım iki kez açılmamalı")
+	ist["mesafe"] = 350
+	dogrula(not Basarimlar.saglandi_mi("gunluk300", d, ist, false) and Basarimlar.saglandi_mi("gunluk300", d, ist, true), "günlük başarımı yalnız günlük koşuda")
+	d["acik_kostumler"] = Kostumler.LISTE.map(func(k: Dictionary) -> String: return k["ad"])
+	dogrula(Basarimlar.saglandi_mi("dolap", d, ist, false), "tüm kostümler açılınca gardırop başarımı")
+	var ids := {}
+	for b in Basarimlar.LISTE:
+		ids[b["id"]] = true
+	dogrula(ids.size() == Basarimlar.LISTE.size() and Basarimlar.LISTE.size() >= 10, "en az 10 benzersiz başarım olmalı")
+	# Geçiş sayacı: alçak geçit + piston
+	var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+	oyun.bot_modu = true
+	oyun.kayit_yap = false
+	oyun.olum_tekrari_acik = false
+	oyun.sabit_hiz = 300.0
+	oyun.parca_sirasi = ["res://scenes/parcalar/16_alcak_gecit.tscn", "res://scenes/parcalar/17_piston.tscn"] as Array[String]
+	oyun.sira_bitince_duz = true
+	root.add_child(oyun)
+	await _kareler(60 * 9)
+	dogrula(oyun.oyuncu.canli, "bot tavan ve pistonu geçmeli")
+	dogrula(int(oyun.istatistik["tavan"]) == 1 and int(oyun.istatistik["piston"]) == 1, "tavan ve piston geçişleri sayılmalı (%d, %d)" % [oyun.istatistik["tavan"], oyun.istatistik["piston"]])
+	oyun.queue_free()
+	await process_frame
+	# İşaretler: rekor + son ölüm
+	_kayit_temizle()
+	var k := Kayit.yukle()
+	k["rekor"] = 100
+	k["olumler"] = [20, 55]
+	Kayit.kaydet(k)
+	oyun = (load(OYUN) as PackedScene).instantiate()
+	oyun.kayit_yap = true
+	oyun.olum_tekrari_acik = false
+	root.add_child(oyun)
+	await process_frame
+	var isaretler := {}
+	for c in oyun.get_children():
+		if c is Isaret:
+			isaretler[c.metin] = c.position.x
+	dogrula(isaretler.has("REKOR") and is_equal_approx(isaretler["REKOR"], oyun.baslangic_x + 100 * Ayarlar.PIKSEL_METRE), "rekor işareti doğru yerde olmalı")
+	dogrula(isaretler.has("SON") and is_equal_approx(isaretler["SON"], oyun.baslangic_x + 55 * Ayarlar.PIKSEL_METRE), "son ölüm işareti doğru yerde olmalı")
+	await _kareler(30)
+	oyun.oyuncu.ol()
+	await _kareler(2)
+	var k2 := Kayit.yukle()
+	dogrula((k2["olumler"] as Array).size() == 3 and int(k2["olumler"][-1]) == oyun.son_sonuc["mesafe"], "ölüm yeri kayda eklenmeli")
+	dogrula(oyun.son_sonuc["olumler"] == [20, 55], "sonuç haritası önceki ölümleri almalı")
+	var harita: MiniHarita = oyun.get_node("%SonHarita")
+	dogrula(harita.rekor == 100 and harita.olumler == [20, 55], "sonuç haritası doldurulmalı")
+	# Kalabalık sonuç paneli ekrana sığmalı
+	oyun.son_sonuc["basarimlar"] = [Basarimlar.LISTE[1], Basarimlar.LISTE[2]]
+	oyun.son_sonuc["gorev"] = {"tamamlanan": [{"metin": "Tek koşuda 120 m koş"}, {"metin": "Toplam 60 altın topla"}], "odul": 70, "seviye_atladi": true}
+	oyun._son_paneli_goster()
+	await _kareler(2)
+	var ekran: Rect2 = oyun.get_viewport().get_visible_rect()
+	var sp: Control = oyun.get_node("%SonPaneli")
+	dogrula(ekran.encloses(sp.get_global_rect()), "kalabalık sonuç paneli ekrana sığmalı (%s)" % sp.get_global_rect())
+	oyun.queue_free()
+	await process_frame
+	_kayit_temizle()
+
+
+func _test_menu_v03() -> void:
+	print("[menü: günlük, başarımlar, titreşim]")
+	_kayit_temizle()
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _kareler(3)
+	var ekran: Rect2 = menu.get_viewport().get_visible_rect()
+	dogrula(menu.get_node("%GunlukDugme").text == "Günlük koşu", "günlük düğmesi görünmeli")
+	dogrula(menu.get_node("%BasarimDugme").text.contains("/%d" % Basarimlar.LISTE.size()), "başarım düğmesi sayıyı göstermeli")
+	(menu.get_node("%BasarimDugme") as Button).pressed.emit()
+	await _kareler(3)
+	var bp: Control = menu.get_node("%BasarimPaneli")
+	dogrula(bp.visible and menu.get_node("%BasarimListesi").get_child_count() == Basarimlar.LISTE.size(), "başarım paneli listeyi göstermeli")
+	dogrula(ekran.encloses(bp.get_global_rect()), "başarım paneli ekrana sığmalı (%s)" % bp.get_global_rect())
+	(menu.get_node("%BasarimGeri") as Button).pressed.emit()
+	(menu.get_node("%AyarlarDugme") as Button).pressed.emit()
+	await _kareler(3)
+	dogrula(ekran.encloses(menu.get_node("%AyarlarPaneli").get_global_rect()), "titreşimli ayarlar paneli ekrana sığmalı")
+	(menu.get_node("%TitresimKutu") as CheckButton).button_pressed = false
+	await _kareler(1)
+	dogrula(not bool(Kayit.yukle()["ayarlar"]["titresim"]), "titreşim ayarı kaydedilmeli")
+	menu.queue_free()
+	await process_frame
+	Gunluk.secili = false
+	_kayit_temizle()
 
 
 class YakinDinleyici extends Node:

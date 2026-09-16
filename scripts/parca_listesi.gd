@@ -31,6 +31,16 @@ const YOLLAR: Array[String] = [
 	"res://scenes/parcalar/24_piston_cukur.tscn",
 	"res://scenes/parcalar/25_uzun_gecit.tscn",
 	"res://scenes/parcalar/26_merdiven_blok.tscn",
+	"res://scenes/parcalar/27_zincir_kiris.tscn",
+	"res://scenes/parcalar/28_tavan_piston.tscn",
+	"res://scenes/parcalar/29_nefes_merdiven.tscn",
+	"res://scenes/parcalar/30_nefes_yildiz.tscn",
+	"res://scenes/parcalar/31_blok_cukur.tscn",
+	"res://scenes/parcalar/32_uclu_diken.tscn",
+	"res://scenes/parcalar/33_asansor_cukur.tscn",
+	"res://scenes/parcalar/34_tavan_cukur.tscn",
+	"res://scenes/parcalar/35_cift_piston_cukur.tscn",
+	"res://scenes/parcalar/36_nefes_kopru.tscn",
 ]
 
 const ZORLUK := {
@@ -60,4 +70,14 @@ const ZORLUK := {
 	"res://scenes/parcalar/24_piston_cukur.tscn": 3,
 	"res://scenes/parcalar/25_uzun_gecit.tscn": 3,
 	"res://scenes/parcalar/26_merdiven_blok.tscn": 3,
+	"res://scenes/parcalar/27_zincir_kiris.tscn": 2,
+	"res://scenes/parcalar/28_tavan_piston.tscn": 2,
+	"res://scenes/parcalar/29_nefes_merdiven.tscn": 0,
+	"res://scenes/parcalar/30_nefes_yildiz.tscn": 0,
+	"res://scenes/parcalar/31_blok_cukur.tscn": 3,
+	"res://scenes/parcalar/32_uclu_diken.tscn": 2,
+	"res://scenes/parcalar/33_asansor_cukur.tscn": 3,
+	"res://scenes/parcalar/34_tavan_cukur.tscn": 3,
+	"res://scenes/parcalar/35_cift_piston_cukur.tscn": 3,
+	"res://scenes/parcalar/36_nefes_kopru.tscn": 0,
 }

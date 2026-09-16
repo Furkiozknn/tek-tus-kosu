@@ -17,10 +17,13 @@ func _ready() -> void:
 	Ses.muzik("muzik_menu")
 
 	%BaslaDugme.pressed.connect(basla)
+	%GunlukDugme.pressed.connect(basla.bind(true))
 	%KarakterDugme.pressed.connect(func() -> void: _panel_ac(%KarakterPaneli))
+	%BasarimDugme.pressed.connect(func() -> void: _panel_ac(%BasarimPaneli))
 	%AyarlarDugme.pressed.connect(func() -> void: _panel_ac(%AyarlarPaneli))
 	%CikisDugme.pressed.connect(func() -> void: get_tree().quit())
 	%KarakterGeri.pressed.connect(func() -> void: _panel_ac(%AnaPanel))
+	%BasarimGeri.pressed.connect(func() -> void: _panel_ac(%AnaPanel))
 	%AyarlarGeri.pressed.connect(func() -> void: _panel_ac(%AnaPanel))
 	# Web ve mobilde "Çıkış" ve tam ekran anlamsız.
 	var masaustu := not (OS.has_feature("web") or OS.has_feature("mobile"))
@@ -32,18 +35,21 @@ func _ready() -> void:
 	%EfektKaydirici.value = float(a["efekt"]) * 100.0
 	%TamEkranKutu.button_pressed = bool(a["tam_ekran"])
 	%SarsintiKutu.button_pressed = bool(a["sarsinti"])
+	%TitresimKutu.button_pressed = bool(a.get("titresim", true))
 	%KontrastKutu.button_pressed = bool(a["kontrast"])
 	%RahatKutu.button_pressed = bool(a["rahat"])
 	%MuzikKaydirici.value_changed.connect(func(v: float) -> void: _ayar("muzik", v / 100.0))
 	%EfektKaydirici.value_changed.connect(func(v: float) -> void: _ayar("efekt", v / 100.0); Ses.cal("tik"))
 	%TamEkranKutu.toggled.connect(func(v: bool) -> void: _ayar("tam_ekran", v); _tam_ekran_uygula(v))
 	%SarsintiKutu.toggled.connect(func(v: bool) -> void: _ayar("sarsinti", v))
+	%TitresimKutu.toggled.connect(func(v: bool) -> void: _ayar("titresim", v); if v: Input.vibrate_handheld(40))
 	%KontrastKutu.toggled.connect(func(v: bool) -> void: _ayar("kontrast", v))
 	%RahatKutu.toggled.connect(func(v: bool) -> void: _ayar("rahat", v); _yenile())
 
 	%Onizleme.sprite_frames = Kostumler.kareler(str(d["kostum"]))
 	%Onizleme.play("kos")
 	_kostum_listesi()
+	_basarim_listesi()
 	_yenile()
 	_panel_ac(%AnaPanel)
 	%Perde.color.a = 1.0
@@ -64,7 +70,7 @@ func _tam_ekran_uygula(acik: bool) -> void:
 
 
 func _panel_ac(panel: Control) -> void:
-	for p in [%AnaPanel, %KarakterPaneli, %AyarlarPaneli]:
+	for p in [%AnaPanel, %KarakterPaneli, %AyarlarPaneli, %BasarimPaneli]:
 		p.visible = p == panel
 	_aktif_panel = panel
 	%Ipucu.visible = panel == %AnaPanel
@@ -72,6 +78,8 @@ func _panel_ac(panel: Control) -> void:
 		%BaslaDugme.grab_focus()
 	elif panel == %KarakterPaneli:
 		%KarakterGeri.grab_focus()
+	elif panel == %BasarimPaneli:
+		%BasarimGeri.grab_focus()
 	else:
 		%AyarlarGeri.grab_focus()
 	Ses.cal("tik")
@@ -82,6 +90,10 @@ func _yenile() -> void:
 	%RekorEtiketi.text = ("Rahat rekor: %d m" % int(d["rekor_rahat"])) if rahat else ("Rekor: %d m" % int(d["rekor"]))
 	%AltinEtiketi.text = "Altın: %d" % int(d["toplam_altin"])
 	%KarakterAltin.text = "Altın: %d" % int(d["toplam_altin"])
+	var gun := Gunluk.durum(d)
+	%GunlukDugme.text = "Günlük koşu" if int(gun["deneme"]) == 0 else "Günlük · %d m" % int(gun["rekor"])
+	%GunlukDugme.tooltip_text = "Bugün herkes aynı çatılarda koşar. Deneme: %d" % int(gun["deneme"])
+	%BasarimDugme.text = "Başarım %d/%d" % [(d["basarimlar"] as Array).size(), Basarimlar.LISTE.size()]
 	var satirlar := ["GÖREVLER  (seviye %d)" % int(d["gorev_seviyesi"])]
 	for g in d["gorevler"]:
 		satirlar.append("• " + Gorevler.metin(g) + "  +%d" % int(g["odul"]))
@@ -128,6 +140,21 @@ func _kostum_listesi() -> void:
 		liste.add_child(satir)
 
 
+func _basarim_listesi() -> void:
+	var liste: VBoxContainer = %BasarimListesi
+	for c in liste.get_children():
+		c.queue_free()
+	var acik: Array = d["basarimlar"]
+	for b in Basarimlar.LISTE:
+		var l := Label.new()
+		var tamam := acik.has(b["id"])
+		l.text = ("★ " if tamam else "☆ ") + "%s — %s" % [b["ad"], b["metin"]]
+		l.add_theme_font_size_override("font_size", 12)
+		l.add_theme_color_override("font_color", Color("fee761") if tamam else Color("8b9bb4"))
+		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		liste.add_child(l)
+
+
 func _kostum_sec(ad: String) -> void:
 	var acik_mi := (d["acik_kostumler"] as Array).has(ad)
 	if not Kostumler.satin_al(d, ad):
@@ -135,7 +162,9 @@ func _kostum_sec(ad: String) -> void:
 		return
 	Ses.cal("tik" if acik_mi else "satin")
 	d["kostum"] = ad
+	Basarimlar.denetle(d, Gorevler.bos_istatistik(), false)
 	Kayit.kaydet(d)
+	_basarim_listesi()
 	%Onizleme.sprite_frames = Kostumler.kareler(ad)
 	%Onizleme.play("kos")
 	_kostum_listesi()
@@ -161,16 +190,17 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _dugme_ustunde(konum: Vector2) -> bool:
-	for b in [%BaslaDugme, %KarakterDugme, %AyarlarDugme, %CikisDugme]:
+	for b in [%BaslaDugme, %GunlukDugme, %KarakterDugme, %BasarimDugme, %AyarlarDugme, %CikisDugme]:
 		if b.visible and b.get_global_rect().has_point(konum):
 			return true
 	return false
 
 
-func basla() -> void:
+func basla(gunluk := false) -> void:
 	if _basliyor:
 		return
 	_basliyor = true
+	Gunluk.secili = gunluk
 	set_process_unhandled_input(false)
 	var tw := create_tween()
 	tw.tween_property(%Perde, "color:a", 1.0, 0.25)

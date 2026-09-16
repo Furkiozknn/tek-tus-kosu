@@ -43,6 +43,14 @@ const SARSINTI_OLUM := 7.0
 const OLUM_TEKRARI_KARE := 90   ## Ölüm tekrarında gösterilen son kare sayısı (1,5 sn)
 const OLUM_TEKRARI_HIZ := 0.4   ## Ölüm tekrarının oynatma hızı
 
+# --- v0.3 ---
+const HAYALET_HZ := 20             ## Günlük koşu hayaletinin saniyedeki örnek sayısı
+const HAYALET_SAYDAMLIK := 0.55
+const OLUM_ISARETI_SAYISI := 12    ## Saklanan son ölüm mesafesi (mod başına)
+const ISARET_EN_AZ_M := 30         ## Bundan kısa rekor/ölüm yeri için işaret konmaz
+const BASARIM_ODULU := 25          ## Açılan her başarımın altın ödülü
+const TITRESIM_OLUM_MS := 90
+
 
 ## Tam basılı zıplamanın havada kalma süresi (saniye)
 static func tam_ziplama_suresi() -> float:
@@ -57,6 +65,19 @@ static func kisa_ziplama_suresi() -> float:
 static func kisa_ziplama_yuksekligi() -> float:
 	var v := -ZIPLAMA_HIZI * KISA_ZIPLAMA_CARPANI
 	return v * v / (2.0 * YERCEKIMI)
+
+
+## Sabit hız artışında (v = HIZ_BAS + HIZ_ARTIS * t) başlangıçtan d piksel sonraki hız.
+## Parça seçimi bunu kullanır: böylece parça dizisi kare hızından bağımsız, tohumla belirlenir.
+static func hiz_mesafede(d: float) -> float:
+	var a := HIZ_ARTIS
+	var b := HIZ_BAS
+	var t_azami := (HIZ_AZAMI - b) / a
+	var d_azami := b * t_azami + 0.5 * a * t_azami * t_azami
+	if d >= d_azami:
+		return HIZ_AZAMI
+	var t := (-b + sqrt(b * b + 2.0 * a * maxf(d, 0.0))) / a
+	return b + a * t
 
 
 ## Verilen zorluktaki parçanın çıkabilmesi için gereken en düşük hız

@@ -5,40 +5,40 @@
 [ext_resource type="Script" path="res://scripts/tehlike.gd" id="3_81nfv"]
 [ext_resource type="Script" path="res://scripts/altin.gd" id="4_xk2lb"]
 
-[node name="Parca" type="Node2D" unique_id=1472691709]
+[node name="Parca" type="Node2D" unique_id=2049405722]
 script = ExtResource("1_qann6")
 
-[node name="Giris" type="Marker2D" parent="." unique_id=1181098710]
+[node name="Giris" type="Marker2D" parent="." unique_id=1397509706]
 position = Vector2(0, 280)
 
-[node name="Cikis" type="Marker2D" parent="." unique_id=1454284064]
+[node name="Cikis" type="Marker2D" parent="." unique_id=458920525]
 position = Vector2(640, 280)
 
-[node name="Zemin1" type="StaticBody2D" parent="." unique_id=799258777]
+[node name="Zemin1" type="StaticBody2D" parent="." unique_id=190024215]
 position = Vector2(0, 280)
 script = ExtResource("2_cys02")
 genislik = 640.0
 
-[node name="Diken1" type="Area2D" parent="." unique_id=813139073]
+[node name="Diken1" type="Area2D" parent="." unique_id=1695756000]
 position = Vector2(300, 280)
 script = ExtResource("3_81nfv")
 
-[node name="Altin1" type="Area2D" parent="." unique_id=1293578777]
+[node name="Altin1" type="Area2D" parent="." unique_id=548899303]
 position = Vector2(258, 236)
 script = ExtResource("4_xk2lb")
 
-[node name="Altin2" type="Area2D" parent="." unique_id=1965693108]
+[node name="Altin2" type="Area2D" parent="." unique_id=1202329896]
 position = Vector2(288, 206)
 script = ExtResource("4_xk2lb")
 
-[node name="Altin3" type="Area2D" parent="." unique_id=286860276]
+[node name="Altin3" type="Area2D" parent="." unique_id=1033598941]
 position = Vector2(318, 196)
 script = ExtResource("4_xk2lb")
 
-[node name="Altin4" type="Area2D" parent="." unique_id=733920649]
+[node name="Altin4" type="Area2D" parent="." unique_id=2103624160]
 position = Vector2(348, 206)
 script = ExtResource("4_xk2lb")
 
-[node name="Altin5" type="Area2D" parent="." unique_id=1251182639]
+[node name="Altin5" type="Area2D" parent="." unique_id=1841205828]
 position = Vector2(378, 236)
 script = ExtResource("4_xk2lb")

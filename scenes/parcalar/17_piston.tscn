@@ -5,44 +5,44 @@
 [ext_resource type="Script" path="res://scripts/tehlike.gd" id="3_mr56p"]
 [ext_resource type="Script" path="res://scripts/altin.gd" id="4_atpif"]
 
-[node name="Parca" type="Node2D" unique_id=748097839]
+[node name="Parca" type="Node2D" unique_id=815370860]
 script = ExtResource("1_vqrd0")
 uzunluk = 760.0
 
-[node name="Giris" type="Marker2D" parent="." unique_id=1245685523]
+[node name="Giris" type="Marker2D" parent="." unique_id=1730668507]
 position = Vector2(0, 280)
 
-[node name="Cikis" type="Marker2D" parent="." unique_id=1368078122]
+[node name="Cikis" type="Marker2D" parent="." unique_id=1675300822]
 position = Vector2(760, 280)
 
-[node name="Zemin1" type="StaticBody2D" parent="." unique_id=911966184]
+[node name="Zemin1" type="StaticBody2D" parent="." unique_id=813797840]
 position = Vector2(0, 280)
 script = ExtResource("2_ycoll")
 genislik = 760.0
 
-[node name="Piston1" type="Area2D" parent="." unique_id=338041851]
+[node name="Piston1" type="Area2D" parent="." unique_id=901237260]
 position = Vector2(360, 280)
 script = ExtResource("3_mr56p")
 tur = 3
 genislik = 24.0
 yukseklik = 24.0
 
-[node name="Altin1" type="Area2D" parent="." unique_id=872594647]
+[node name="Altin1" type="Area2D" parent="." unique_id=1058526805]
 position = Vector2(317, 230)
 script = ExtResource("4_atpif")
 
-[node name="Altin2" type="Area2D" parent="." unique_id=1021697940]
+[node name="Altin2" type="Area2D" parent="." unique_id=709430904]
 position = Vector2(344.5, 200)
 script = ExtResource("4_atpif")
 
-[node name="Altin3" type="Area2D" parent="." unique_id=41519220]
+[node name="Altin3" type="Area2D" parent="." unique_id=1681185876]
 position = Vector2(372, 190)
 script = ExtResource("4_atpif")
 
-[node name="Altin4" type="Area2D" parent="." unique_id=1211532398]
+[node name="Altin4" type="Area2D" parent="." unique_id=802119344]
 position = Vector2(399.5, 200)
 script = ExtResource("4_atpif")
 
-[node name="Altin5" type="Area2D" parent="." unique_id=909085982]
+[node name="Altin5" type="Area2D" parent="." unique_id=494216762]
 position = Vector2(427, 230)
 script = ExtResource("4_atpif")

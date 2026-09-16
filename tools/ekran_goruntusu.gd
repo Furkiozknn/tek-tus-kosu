@@ -6,6 +6,7 @@ extends SceneTree
 ## Windows'ta aynı komut xvfb-run olmadan çalışır.
 
 const CIKTI := "res://yayin/"
+const KONTROL := "res://build/kontrol/"  ## yayına girmeyen denetim görüntüleri
 
 
 func _initialize() -> void:
@@ -18,12 +19,21 @@ func _calistir() -> void:
 	d["rekor"] = 180
 	d["toplam_altin"] = 240
 	d["acik_kostumler"] = ["klasik", "kizil", "neon"]
+	d["olumler"] = [95, 140]
+	d["basarimlar"] = ["ilk_kosu", "m500", "altin50"]
 	Kayit.kaydet(d)
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(KONTROL))
+	Gunluk.tarih_ezme = "2026-09-16"
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Hayalet.dosya_yolu()))
 	await _menu()
 	await _oyun_tavan()
 	await _oyun_yagis()
 	await _oyun_son()
+	await _gunluk_hayalet()
+	await _menu_paneller()
 	await _kapak()
+	Gunluk.tarih_ezme = ""
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Hayalet.dosya_yolu()))
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(Kayit.yol))
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(Kayit.yedek_yolu()))
 	print("ekran görüntüleri hazır")
@@ -35,22 +45,25 @@ func _bekle(n: int) -> void:
 		await process_frame
 
 
-func _kaydet(ad: String) -> void:
+func _kaydet(ad: String, klasor := CIKTI) -> void:
 	await RenderingServer.frame_post_draw
 	var img := root.get_texture().get_image()
-	img.save_png(ProjectSettings.globalize_path(CIKTI + ad))
+	img.save_png(ProjectSettings.globalize_path(klasor + ad))
 	print("  ", ad, " ", img.get_size())
 
 
-func _oyun(sira: Array[String], hiz: float, ileri_m: int, tohum: int) -> Node2D:
+func _oyun(sira: Array[String], hiz: float, ileri_m: int, tohum: int, gunluk := false) -> Node2D:
 	var oyun: Node2D = (load("res://scenes/oyun.tscn") as PackedScene).instantiate()
 	oyun.parca_sirasi = sira
 	oyun.sabit_hiz = hiz
 	oyun.tohum = tohum
 	oyun.kayit_yap = true
+	oyun.gunluk = gunluk
 	root.add_child(oyun)
 	await _bekle(2)
-	oyun.baslangic_x -= ileri_m * Ayarlar.PIKSEL_METRE
+	if ileri_m != 0:
+		oyun.baslangic_x -= ileri_m * Ayarlar.PIKSEL_METRE
+		oyun._isaretleri_kur(Kayit.yukle())
 	oyun.ipucu.hide()
 	oyun._bot = Bot.new(oyun.oyuncu, oyun.dunya_tehlike_araliklari, oyun.dunya_tavan_araliklari)
 	return oyun
@@ -133,6 +146,43 @@ func _oyun_son() -> void:
 	await _bekle(30)
 	await _kaydet("ekran-4.png")
 	oyun.queue_free()
+	await _bekle(2)
+
+
+## Günlük koşu: önce hızlı bir deneme hayalet olarak kaydedilir, sonra normal hızda
+## ikinci denemede hayalet önde koşar.
+func _gunluk_hayalet() -> void:
+	var ilk := await _oyun([], 250.0, 0, -1, true)
+	ilk.ipucu.hide()
+	await _bekle(60 * 12)
+	ilk.oyuncu.ol()
+	await _bekle(3)
+	ilk.queue_free()
+	await _bekle(2)
+	var oyun := await _oyun([], -1.0, 0, -1, true)
+	await _bekle(60 * 7)
+	await _kaydet("gunluk-hayalet.png", KONTROL)
+	await _kaydet("ekran-5-gunluk.png")
+	oyun.queue_free()
+	await _bekle(2)
+
+
+func _menu_paneller() -> void:
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _bekle(20)
+	(menu.get_node("%BasarimDugme") as Button).pressed.emit()
+	await _bekle(10)
+	await _kaydet("menu-basarim.png", KONTROL)
+	(menu.get_node("%BasarimGeri") as Button).pressed.emit()
+	(menu.get_node("%AyarlarDugme") as Button).pressed.emit()
+	await _bekle(10)
+	await _kaydet("menu-ayarlar.png", KONTROL)
+	(menu.get_node("%AyarlarGeri") as Button).pressed.emit()
+	(menu.get_node("%KarakterDugme") as Button).pressed.emit()
+	await _bekle(10)
+	await _kaydet("menu-karakter.png", KONTROL)
+	menu.queue_free()
 	await _bekle(2)
 
 

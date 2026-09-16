@@ -90,6 +90,38 @@ const PARCALAR := [
 	{"ad": "26_merdiven_blok", "zorluk": 3, "uzunluk": 1200, "ogeler": [
 		["zemin", 0, 300], ["zemin", 300, 600, 240], ["zemin", 600, 1200], ["blok", 820, 30, 48],
 		["altin_dizi", 340, 210, 5, 40], ["altin_kavis", 835, 170, 3, 90]]},
+	# --- v0.3 ---
+	{"ad": "27_zincir_kiris", "zorluk": 2, "uzunluk": 1100, "ogeler": [
+		["zemin", 0, 280], ["zemin", 440, 620], ["zemin", 780, 1100],
+		["hareketli", 300, 232, 64, 40, 0, 2.0], ["hareketli", 640, 232, 64, -40, 0, 2.0],
+		["altin_dizi", 316, 212, 3, 16], ["altin_dizi", 656, 212, 3, 16]]},
+	{"ad": "28_tavan_piston", "zorluk": 2, "uzunluk": 1100, "ogeler": [
+		["zemin", 0, 1100], ["tavan", 260, 600], ["piston", 760, 24, 24, 0.3],
+		["altin_dizi", 290, 262, 7, 40], ["altin_kavis", 772, 190, 5, 110]]},
+	{"ad": "29_nefes_merdiven", "zorluk": 0, "uzunluk": 1000, "ogeler": [
+		["zemin", 0, 1000], ["platform", 280, 400, 244], ["platform", 440, 560, 208], ["platform", 600, 720, 172],
+		["altin_dizi", 300, 230, 3, 36], ["altin_dizi", 460, 194, 3, 36], ["altin_dizi", 620, 158, 3, 36]]},
+	{"ad": "30_nefes_yildiz", "zorluk": 0, "uzunluk": 900, "ogeler": [
+		["zemin", 0, 900], ["altin_kavis", 330, 200, 7, 220], ["altin_dizi", 290, 250, 3, 40],
+		["altin_dizi", 610, 250, 3, 40]]},
+	{"ad": "31_blok_cukur", "zorluk": 3, "uzunluk": 1100, "ogeler": [
+		["zemin", 0, 620], ["zemin", 800, 1100], ["blok", 360, 28, 48],
+		["altin_kavis", 374, 176, 3, 100], ["altin_kavis", 710, 190, 5, 150]]},
+	{"ad": "32_uclu_diken", "zorluk": 2, "uzunluk": 1100, "ogeler": [
+		["zemin", 0, 1100], ["diken", 280, 24], ["diken", 520, 24], ["diken", 760, 24],
+		["altin_kavis", 292, 196, 3, 80], ["altin_kavis", 532, 196, 3, 80], ["altin_kavis", 772, 196, 3, 80]]},
+	{"ad": "33_asansor_cukur", "zorluk": 3, "uzunluk": 1000, "ogeler": [
+		["zemin", 0, 300], ["zemin", 500, 1000], ["hareketli", 368, 250, 64, 0, -40, 2.4],
+		["altin_kavis", 400, 180, 5, 160]]},
+	{"ad": "34_tavan_cukur", "zorluk": 3, "uzunluk": 1100, "ogeler": [
+		["zemin", 0, 640], ["zemin", 760, 1100], ["tavan", 260, 520],
+		["altin_dizi", 290, 262, 6, 40], ["altin_kavis", 700, 226, 3, 70]]},
+	{"ad": "35_cift_piston_cukur", "zorluk": 3, "uzunluk": 1100, "ogeler": [
+		["zemin", 0, 620], ["zemin", 780, 1100], ["piston", 160, 24, 24, 0.0], ["piston", 420, 24, 24, 0.5],
+		["altin_kavis", 172, 190, 3, 80], ["altin_kavis", 432, 190, 3, 80], ["altin_kavis", 700, 196, 3, 110]]},
+	{"ad": "36_nefes_kopru", "zorluk": 0, "uzunluk": 1000, "ogeler": [
+		["zemin", 0, 1000], ["platform", 300, 700, 236], ["hareketli", 780, 230, 64, 0, -30, 2.6],
+		["altin_dizi", 320, 222, 10, 38]]},
 ]
 
 
@@ -412,9 +444,17 @@ func _oyun() -> Node:
 	ui.add_child(sp)
 	var sk: VBoxContainer = sp.get_child(0)
 	sk.add_theme_constant_override("separation", 4)
-	sk.add_child(_etiket("SonBaslik", "Koşu bitti", 24))
-	sk.add_child(_etiket("SonSkor", "Mesafe: 0 m", 20))
-	sk.add_child(_etiket("SonRekor", "Rekor: 0 m", 16, Color("fee761")))
+	sk.add_theme_constant_override("separation", 3)
+	sk.add_child(_etiket("SonBaslik", "Koşu bitti", 20))
+	sk.add_child(_etiket("SonSkor", "Mesafe: 0 m", 18))
+	var harita := Control.new()
+	harita.name = "SonHarita"
+	harita.unique_name_in_owner = true
+	harita.set_script(load("res://scripts/mini_harita.gd"))
+	harita.custom_minimum_size = Vector2(340, 26)
+	harita.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sk.add_child(harita)
+	sk.add_child(_etiket("SonRekor", "Rekor: 0 m", 15, Color("fee761")))
 	sk.add_child(_etiket("SonAltin", "Altın: 0", 14))
 	var sg := _etiket("SonGorevler", "", 11, Color("c0cbdc"))
 	sg.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -424,8 +464,8 @@ func _oyun() -> Node:
 	dugmeler.alignment = BoxContainer.ALIGNMENT_CENTER
 	dugmeler.add_theme_constant_override("separation", 10)
 	sk.add_child(dugmeler)
-	dugmeler.add_child(_dugme("TekrarDugme", "Tekrar", Vector2(150, 42)))
-	dugmeler.add_child(_dugme("SonMenuDugme", "Menü", Vector2(150, 42)))
+	dugmeler.add_child(_dugme("TekrarDugme", "Tekrar", Vector2(150, 36)))
+	dugmeler.add_child(_dugme("SonMenuDugme", "Menü", Vector2(150, 36)))
 	sk.add_child(_etiket("SonIpucu", "Tekrar için dokun ya da Boşluk", 11, Color("8b9bb4")))
 	_ortala(dk)
 	for ad in ["SonBaslik", "SonSkor", "SonRekor", "SonAltin", "SonIpucu"]:
@@ -564,9 +604,20 @@ func _menu() -> Node:
 	sol.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ana.add_child(sol)
 	sol.add_child(_dugme("BaslaDugme", "Başla", Vector2(190, 40)))
-	sol.add_child(_dugme("KarakterDugme", "Karakter", Vector2(190, 30)))
-	sol.add_child(_dugme("AyarlarDugme", "Ayarlar", Vector2(190, 30)))
-	sol.add_child(_dugme("CikisDugme", "Çıkış", Vector2(190, 30)))
+	var gd := _dugme("GunlukDugme", "Günlük koşu", Vector2(190, 30))
+	gd.add_theme_font_size_override("font_size", 15)
+	sol.add_child(gd)
+	for cift in [["KarakterDugme", "Karakter", "BasarimDugme", "Başarımlar"], ["AyarlarDugme", "Ayarlar", "CikisDugme", "Çıkış"]]:
+		var satir := HBoxContainer.new()
+		satir.name = cift[0] + "Satir"
+		satir.add_theme_constant_override("separation", 6)
+		satir.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		for i in [0, 2]:
+			var b := _dugme(cift[i], cift[i + 1], Vector2(92, 30))
+			b.add_theme_font_size_override("font_size", 14)
+			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			satir.add_child(b)
+		sol.add_child(satir)
 	sol.add_child(_etiket("RekorEtiketi", "Rekor: 0 m", 16, Color("fee761")))
 	sol.add_child(_etiket("AltinEtiketi", "Altın: 0", 14))
 	var gorev := _panel("GorevPaneli")
@@ -627,7 +678,7 @@ func _menu() -> Node:
 		k.custom_minimum_size = Vector2(220, 28)
 		satir.add_child(k)
 		av.add_child(satir)
-	for cift in [["TamEkranKutu", "Tam ekran"], ["SarsintiKutu", "Ekran sarsıntısı"], ["KontrastKutu", "Yüksek kontrast (tehlike çerçevesi)"], ["RahatKutu", "Rahat mod (%80 hız, ayrı rekor)"]]:
+	for cift in [["TamEkranKutu", "Tam ekran"], ["SarsintiKutu", "Ekran sarsıntısı"], ["TitresimKutu", "Titreşim (telefon)"], ["KontrastKutu", "Yüksek kontrast (tehlike çerçevesi)"], ["RahatKutu", "Rahat mod (%80 hız, ayrı rekor)"]]:
 		var cb := CheckButton.new()
 		cb.name = cift[0]
 		cb.unique_name_in_owner = true
@@ -636,6 +687,23 @@ func _menu() -> Node:
 		av.add_child(cb)
 	av.add_child(_dugme("AyarlarGeri", "Geri", Vector2(160, 36)))
 	av.get_node("AyarlarBaslik").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	# --- Başarımlar paneli ---
+	var bp := _panel("BasarimPaneli")
+	bp.custom_minimum_size = Vector2(400, 0)
+	kok.add_child(bp)
+	var bv: VBoxContainer = bp.get_child(0)
+	bv.add_theme_constant_override("separation", 3)
+	var bb := _etiket("BasarimBaslik", "Başarımlar", 20)
+	bb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	bv.add_child(bb)
+	var bl := VBoxContainer.new()
+	bl.name = "BasarimListesi"
+	bl.unique_name_in_owner = true
+	bl.add_theme_constant_override("separation", 1)
+	bv.add_child(bl)
+	bv.add_child(_dugme("BasarimGeri", "Geri", Vector2(160, 32)))
+	_ortala(bv)
 
 	var perde := ColorRect.new()
 	perde.name = "Perde"

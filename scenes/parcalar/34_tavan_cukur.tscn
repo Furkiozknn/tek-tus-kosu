@@ -1,0 +1,70 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/parca.gd" id="1_7nmji"]
+[ext_resource type="Script" path="res://scripts/zemin.gd" id="2_4pei3"]
+[ext_resource type="Script" path="res://scripts/tehlike.gd" id="3_mmrue"]
+[ext_resource type="Script" path="res://scripts/altin.gd" id="4_wsgrt"]
+
+[node name="Parca" type="Node2D" unique_id=1998437660]
+script = ExtResource("1_7nmji")
+zorluk = 3
+uzunluk = 1100.0
+
+[node name="Giris" type="Marker2D" parent="." unique_id=1545411448]
+position = Vector2(0, 280)
+
+[node name="Cikis" type="Marker2D" parent="." unique_id=1987731924]
+position = Vector2(1100, 280)
+
+[node name="Zemin1" type="StaticBody2D" parent="." unique_id=2111877469]
+position = Vector2(0, 280)
+script = ExtResource("2_4pei3")
+genislik = 640.0
+
+[node name="Zemin2" type="StaticBody2D" parent="." unique_id=1781454579]
+position = Vector2(760, 280)
+script = ExtResource("2_4pei3")
+genislik = 340.0
+
+[node name="Tavan1" type="Area2D" parent="." unique_id=1244128432]
+position = Vector2(260, 212)
+script = ExtResource("3_mmrue")
+tur = 2
+genislik = 260.0
+yukseklik = 20.0
+
+[node name="Altin1" type="Area2D" parent="." unique_id=1216347721]
+position = Vector2(290, 262)
+script = ExtResource("4_wsgrt")
+
+[node name="Altin2" type="Area2D" parent="." unique_id=568825985]
+position = Vector2(330, 262)
+script = ExtResource("4_wsgrt")
+
+[node name="Altin3" type="Area2D" parent="." unique_id=460950800]
+position = Vector2(370, 262)
+script = ExtResource("4_wsgrt")
+
+[node name="Altin4" type="Area2D" parent="." unique_id=245351465]
+position = Vector2(410, 262)
+script = ExtResource("4_wsgrt")
+
+[node name="Altin5" type="Area2D" parent="." unique_id=557603523]
+position = Vector2(450, 262)
+script = ExtResource("4_wsgrt")
+
+[node name="Altin6" type="Area2D" parent="." unique_id=1700988531]
+position = Vector2(490, 262)
+script = ExtResource("4_wsgrt")
+
+[node name="Altin7" type="Area2D" parent="." unique_id=883172930]
+position = Vector2(665, 266)
+script = ExtResource("4_wsgrt")
+
+[node name="Altin8" type="Area2D" parent="." unique_id=719188903]
+position = Vector2(700, 226)
+script = ExtResource("4_wsgrt")
+
+[node name="Altin9" type="Area2D" parent="." unique_id=427444799]
+position = Vector2(735, 266)
+script = ExtResource("4_wsgrt")

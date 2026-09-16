@@ -28,14 +28,23 @@
 - [x] Juice: ezilme/uzama, toz, altın serisi perde yükselişi, sarsıntı, rekor efekti
 - [x] itch.io paket taslağı (`yayin/`) — yükleme yapılmadı
 
-## Sonraki tur (v0.3) — rakip analizinden kalanlar
+## Bitti — geliştirme turu 2 (v0.3, 2026-09-16)
 
-- [ ] Günlük tohum koşusu (herkes aynı parça dizisi) + günlük rekor
-- [ ] Hayalet rakip: kendi en iyi koşunun hayaleti ekranda
+- [x] Günlük tohum koşusu (tarihten tohum), günün rekoru ve deneme sayısı
+- [x] Hayalet rakip: günün en iyi denemesi sonraki denemelerde yanında koşar
+- [x] Parça seçimi mesafeye bağlı hızla → parça dizisi kare hızından bağımsız, belirlenimci
+- [x] Rekor / son ölüm / hayalet bayrakları; koşu sonu şehir ışıkları haritası (önceki ölümler)
+- [x] 11 başarım (+25 altın), menü paneli, koşu içi duyuru; tavan/piston geçiş sayacı
+- [x] 36 parça (zincirleme kiriş, tavan+piston, kiriş merdiveni, asansör çukuru…)
+- [x] Titreşim ayarı (ölümde); tek yönlü kirişlerin yanına çarpmak artık öldürmüyor
+- [x] Bot stres aracı (`tools/bot_stres.gd`)
+
+## Sonraki tur (v0.4)
+
 - [ ] Çatı ritmi: müzik vuruşuna hizalı parça dizileri (isteğe bağlı mod)
-- [ ] Şehir ışıkları haritası: koşu sonunda gidilen yolun mini haritası, ölüm noktaları
-- [ ] 35+ parça; yeni öğeler: kırılan çatı, rüzgâr, zincirleme platform
-- [ ] Başarımlar ve kostüm başına küçük görsel iz (parçacık rengi)
-- [ ] Mobil: güvenli alan (çentik) payı, titreşim, dikey yerleşim denemesi
+- [ ] Yeni öğeler: çöken bina (üstündeyken alçalır), rüzgâr; bot desteğiyle
+- [ ] Kostüm başına küçük görsel iz (parçacık rengi)
+- [ ] Günlük koşu için paylaşılabilir sonuç metni (ör. "Tek Tuş Koşu 16.09 — 812 m, 3. deneme")
+- [ ] Mobil: dikey yerleşim denemesi, gerçek cihazda dokunma testi
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] itch.io web yayını (Furki'nin onayıyla)

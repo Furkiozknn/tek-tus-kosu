@@ -12,6 +12,7 @@ var tohum := -1                       ## >= 0 ise rastgelelik sabit
 var sira_bitince_duz := false         ## Test: sıra bitince yalnız düz zemin gelsin
 var kayit_yap := true
 var olum_tekrari_acik := true         ## Testlerde kapatılabilir
+var gunluk := false                   ## Günlük koşu (menüden Gunluk.secili ile gelir)
 
 const TEMALAR := [
 	{"ad": "Akşam", "ust": Color("68386c"), "alt": Color("f77622"), "uzak": Color(1, 0.85, 0.8), "yakin": Color(1, 0.9, 0.9), "yildiz": 0.3, "yagis": false},
@@ -43,7 +44,8 @@ const TEMALAR := [
 @onready var son_altin: Label = %SonAltin
 @onready var son_gorevler: Label = %SonGorevler
 
-var rng := RandomNumberGenerator.new()
+var rng := RandomNumberGenerator.new()          ## görevler vb.
+var parca_rng := RandomNumberGenerator.new()    ## yalnız parça dizisi (günlük koşuda sabit tohum)
 var parcalar: Array[Parca] = []
 var sonraki_x := 0.0
 var baslangic_x := 0.0
@@ -74,10 +76,21 @@ var _tekrar_hayalet: AnimatedSprite2D
 var _tekrar_vurgu: Line2D
 var _tema_tween: Tween
 var _gok_gradyan := Gradient.new()
+var _tehlike_sirasi: Array = []        ## henüz geçilmemiş tehlikeler (x'e göre)
+var _basarim_bildirilen: Array = []
+var _basarim_sayac := 0
+var _hayalet_kayit: Hayalet             ## bu koşunun örnekleri (günlük)
+var _hayalet_rakip: Hayalet             ## günün en iyi denemesi
+var _hayalet_sprite: AnimatedSprite2D
+var _hayalet_bitti := false
+var _isaretler: Array = []
+var _titresim := true
+var _basarim_onbellek: Dictionary = {}
 
 
 func _ready() -> void:
 	add_to_group("oyun")
+	gunluk = gunluk or Gunluk.secili
 	for yol in ParcaListesi.YOLLAR:
 		_sahneler[yol] = load(yol)
 	var gt := GradientTexture2D.new()
@@ -104,13 +117,18 @@ func yeniden_baslat() -> void:
 	get_tree().paused = false
 	var d := Kayit.yukle()
 	var ayar: Dictionary = d["ayarlar"]
-	rahat = bool(ayar["rahat"]) and not bot_modu
+	rahat = bool(ayar["rahat"]) and not bot_modu and not gunluk
 	sarsinti_acik = bool(ayar["sarsinti"])
+	_titresim = bool(ayar.get("titresim", true))
 	Tehlike.kontrast = bool(ayar["kontrast"])
 	if tohum >= 0:
 		rng.seed = tohum
+		parca_rng.seed = tohum
 	else:
 		rng.randomize()
+		parca_rng.randomize()
+	if gunluk:
+		parca_rng.seed = Gunluk.tohum(Gunluk.bugun())
 	Gorevler.hazirla(d, rng)
 	if kayit_yap:
 		Kayit.kaydet(d)
@@ -118,8 +136,8 @@ func yeniden_baslat() -> void:
 	_gorev_bildirildi = [false, false, false]
 	for i in gorevler.size():
 		_gorev_bildirildi[i] = Gorevler.tamam_mi(gorevler[i], Gorevler.bos_istatistik())
-	_rekor = int(d["rekor_rahat"] if rahat else d["rekor"])
-	rekor_etiketi.text = ("Rahat rekor: %d m" if rahat else "Rekor: %d m") % _rekor
+	_rekor = _mod_rekoru(d)
+	rekor_etiketi.text = _rekor_metni(_rekor)
 
 	for p in parcalar:
 		if is_instance_valid(p):
@@ -137,7 +155,10 @@ func yeniden_baslat() -> void:
 	son_sonuc = {}
 	_son_parca = ""
 	_nefes_sayac = 0
-	_nefes_hedef = rng.randi_range(Ayarlar.NEFES_ARALIGI.x, Ayarlar.NEFES_ARALIGI.y)
+	_nefes_hedef = parca_rng.randi_range(Ayarlar.NEFES_ARALIGI.x, Ayarlar.NEFES_ARALIGI.y)
+	_tehlike_sirasi.clear()
+	_basarim_bildirilen.clear()
+	_basarim_sayac = 0
 	_sarsinti = 0.0
 	dunya.process_mode = Node.PROCESS_MODE_INHERIT
 	oyuncu.process_mode = Node.PROCESS_MODE_PAUSABLE
@@ -157,6 +178,8 @@ func yeniden_baslat() -> void:
 	# Başlangıçta iki düz parça: ısınma alanı.
 	_parca_ekle(ParcaListesi.DUZ)
 	_parca_ekle(ParcaListesi.DUZ)
+	_isaretleri_kur(d)
+	_hayalet_kur()
 	_kamera_guncelle()
 	_parcalari_guncelle()
 	tema = -1
@@ -196,7 +219,10 @@ func _physics_process(delta: float) -> void:
 	if ipucu.visible and sure > 4.0:
 		ipucu.hide()
 	_altin_seri = maxf(_altin_seri - delta, 0.0)
+	_gecisleri_say()
 	_gorevleri_denetle()
+	_basarimlari_denetle()
+	_hayalet_adim()
 	_tema_guncelle(false)
 
 
@@ -331,12 +357,12 @@ func _parca_sec() -> String:
 		return parca_sirasi.pop_front()
 	if sira_bitince_duz:
 		return ParcaListesi.DUZ
-	var hiz := oyuncu.hiz / (Ayarlar.RAHAT_MOD_CARPANI if rahat else 1.0)
+	var hiz := _secim_hizi()
 	_nefes_sayac += 1
 	var nefes := _nefes_sayac > _nefes_hedef
 	if nefes:
 		_nefes_sayac = 0
-		_nefes_hedef = rng.randi_range(Ayarlar.NEFES_ARALIGI.x, Ayarlar.NEFES_ARALIGI.y)
+		_nefes_hedef = parca_rng.randi_range(Ayarlar.NEFES_ARALIGI.x, Ayarlar.NEFES_ARALIGI.y)
 	var adaylar: Array[String] = []
 	var agirliklar: Array[float] = []
 	for yol in ParcaListesi.YOLLAR:
@@ -348,9 +374,18 @@ func _parca_sec() -> String:
 		agirliklar.append(1.0 + maxi(z - 1, 0) * clampf((hiz - Ayarlar.HIZ_BAS) / 120.0, 0.0, 2.0))
 	if adaylar.is_empty():
 		return ParcaListesi.DUZ
-	var secim := adaylar[rng.rand_weighted(PackedFloat32Array(agirliklar))]
+	var secim := adaylar[parca_rng.rand_weighted(PackedFloat32Array(agirliklar))]
 	_son_parca = secim
 	return secim
+
+
+## Parçanın başladığı yerde oyuncunun (rahat mod çarpanı olmadan) sahip olacağı hız.
+## Kare hızından bağımsızdır; aynı tohum her makinede aynı parça dizisini verir.
+func _secim_hizi() -> float:
+	if sabit_hiz >= 0.0:
+		return sabit_hiz
+	var d := (sonraki_x - baslangic_x) / (Ayarlar.RAHAT_MOD_CARPANI if rahat else 1.0)
+	return Ayarlar.hiz_mesafede(d)
 
 
 func _parca_ekle(yol: String) -> void:
@@ -359,6 +394,9 @@ func _parca_ekle(yol: String) -> void:
 	dunya.add_child(p)
 	parcalar.append(p)
 	sonraki_x += p.uzunluk
+	for c in p.get_children():
+		if c is Tehlike and (c.tur == Tehlike.Tur.TAVAN or c.tur == Tehlike.Tur.PISTON):
+			_tehlike_sirasi.append(c)
 
 
 func _kamera_guncelle() -> void:
@@ -454,6 +492,8 @@ func _oyuncu_oldu() -> void:
 	_yeniden_baslat_izni = 0.5
 	Ses.cal("olum")
 	sars(Ayarlar.SARSINTI_OLUM)
+	if _titresim and not bot_modu:
+		Input.vibrate_handheld(Ayarlar.TITRESIM_OLUM_MS)
 	_parcacik(oyuncu.global_position + Vector2(0, -10), Color("0099db"), 18, 110.0, 0.6)
 	_kosu_sonucunu_isle()
 	if olum_tekrari_acik and oyuncu.gecmis.size() > 10:
@@ -468,17 +508,33 @@ func _kosu_sonucunu_isle() -> void:
 	istatistik["kosu"] = 1
 	var d := Kayit.yukle()
 	var anahtar := "rekor_rahat" if rahat else "rekor"
-	var yeni_rekor: bool = m > int(d[anahtar])
+	var onceki_olumler := _olum_listesi(d).duplicate()
+	var onceki_rekor := _mod_rekoru(d)
+	var yeni_rekor: bool = m > onceki_rekor
 	var gorev_sonuc := {"tamamlanan": [], "odul": 0, "seviye_atladi": false}
+	var basarimlar: Array = []
 	if kayit_yap:
 		d[anahtar] = maxi(int(d[anahtar]), m)
 		d["toplam_altin"] = int(d["toplam_altin"]) + altin
 		d["kosu_sayisi"] = int(d["kosu_sayisi"]) + 1
 		d["toplam_mesafe"] = int(d["toplam_mesafe"]) + m
+		if gunluk:
+			Gunluk.kosu_isle(d, m)
+			if yeni_rekor and _hayalet_kayit:
+				_hayalet_kayit.tarih = Gunluk.bugun()
+				_hayalet_kayit.mesafe = m
+				_hayalet_kayit.kaydet()
+		else:
+			var liste: Array = d["olumler_rahat" if rahat else "olumler"]
+			liste.append(m)
+			while liste.size() > Ayarlar.OLUM_ISARETI_SAYISI:
+				liste.pop_front()
 		gorev_sonuc = Gorevler.kosu_sonu(d, istatistik, rng)
+		basarimlar = Basarimlar.denetle(d, istatistik, gunluk)
 		Kayit.kaydet(d)
-	son_sonuc = {"mesafe": m, "yeni_rekor": yeni_rekor, "rekor": maxi(int(d[anahtar]), m), "gorev": gorev_sonuc,
-		"gorevler": d["gorevler"], "seviye": int(d["gorev_seviyesi"])}
+	son_sonuc = {"mesafe": m, "yeni_rekor": yeni_rekor, "rekor": maxi(onceki_rekor, m), "gorev": gorev_sonuc,
+		"gorevler": d["gorevler"], "seviye": int(d["gorev_seviyesi"]), "olumler": onceki_olumler,
+		"basarimlar": basarimlar, "deneme": int(Gunluk.durum(d)["deneme"]) if gunluk else 0}
 	kosu_bitti.emit(m, altin)
 
 
@@ -552,15 +608,24 @@ func _son_paneli_goster() -> void:
 	_yeniden_baslat_izni = maxf(_yeniden_baslat_izni, 0.35)
 	var s := son_sonuc
 	son_skor.text = "Mesafe: %d m" % int(s.get("mesafe", mesafe()))
-	son_rekor.text = ("YENİ REKOR!" if s.get("yeni_rekor", false) else "Rekor: %d m" % int(s.get("rekor", _rekor)))
+	if gunluk:
+		son_rekor.text = ("GÜNÜN REKORU!" if s.get("yeni_rekor", false) else "Bugünün rekoru: %d m" % int(s.get("rekor", _rekor))) \
+				+ "   (deneme %d)" % int(s.get("deneme", 0))
+	else:
+		son_rekor.text = ("YENİ REKOR!" if s.get("yeni_rekor", false) else "Rekor: %d m" % int(s.get("rekor", _rekor)))
+	%SonHarita.ayarla(int(s.get("mesafe", mesafe())), int(s.get("rekor", _rekor)), s.get("olumler", []))
 	if s.get("yeni_rekor", false):
 		_rekor = int(s.get("rekor", _rekor))
-		rekor_etiketi.text = ("Rahat rekor: %d m" if rahat else "Rekor: %d m") % _rekor
+		rekor_etiketi.text = _rekor_metni(_rekor)
 		Ses.cal("rekor")
 		_parcacik(kamera.global_position + Vector2(0, -60), Color("fee761"), 24, 150.0, 0.9)
 	var g: Dictionary = s.get("gorev", {})
 	var satirlar := []
-	satirlar.append("Altın: %d" % altin + ("   Görev ödülü: +%d" % int(g["odul"]) if int(g.get("odul", 0)) > 0 else ""))
+	var ek_odul := int(g.get("odul", 0)) + Ayarlar.BASARIM_ODULU * (s.get("basarimlar", []) as Array).size()
+	satirlar.append("Altın: %d" % altin + ("   Ödül: +%d" % ek_odul if ek_odul > 0 else ""))
+	var yeni_basarimlar: Array = s.get("basarimlar", [])
+	if not yeni_basarimlar.is_empty():
+		satirlar.append("★ " + ", ".join(yeni_basarimlar.map(func(b: Dictionary) -> String: return str(b["ad"]))))
 	for tamam in g.get("tamamlanan", []):
 		satirlar.append("✓ " + str(tamam["metin"]))
 	for gv in s.get("gorevler", gorevler):
@@ -569,8 +634,137 @@ func _son_paneli_goster() -> void:
 		satirlar.append("Görev seviyesi %d!" % int(s.get("seviye", 1)))
 	son_altin.text = satirlar[0]
 	son_gorevler.text = "\n".join(satirlar.slice(1))
+	# Kalabalık panelde alt ipucu yer kaplamasın (dokunma/boşluk yine çalışır).
+	%SonIpucu.visible = satirlar.size() <= 6
+	son_paneli.reset_size()
+	son_paneli.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 	son_paneli.show()
 	%TekrarDugme.grab_focus()
+
+
+# ------------------------------------------------------------------ v0.3: kip, işaretler, hayalet, başarımlar
+func _mod_rekoru(d: Dictionary) -> int:
+	if gunluk:
+		return int(Gunluk.durum(d)["rekor"])
+	return int(d["rekor_rahat"] if rahat else d["rekor"])
+
+
+func _rekor_metni(r: int) -> String:
+	if gunluk:
+		return "Günlük rekor: %d m" % r
+	return ("Rahat rekor: %d m" if rahat else "Rekor: %d m") % r
+
+
+func _olum_listesi(d: Dictionary) -> Array:
+	if gunluk:
+		return Gunluk.durum(d).get("olumler", [])
+	return d["olumler_rahat" if rahat else "olumler"]
+
+
+## Rekor ve son ölüm yerine dünyada işaret koyar.
+func _isaretleri_kur(d: Dictionary) -> void:
+	for i in _isaretler:
+		if is_instance_valid(i):
+			i.queue_free()
+	_isaretler.clear()
+	if bot_modu:
+		return
+	var olumler := _olum_listesi(d)
+	var son := int(olumler[-1]) if not olumler.is_empty() else 0
+	if _rekor >= Ayarlar.ISARET_EN_AZ_M:
+		_isaret_ekle(_rekor, "REKOR", Color("fee761"), 44.0)
+	if son >= Ayarlar.ISARET_EN_AZ_M and absi(son - _rekor) > 3:
+		_isaret_ekle(son, "SON", Color("e43b44"), 64.0)
+
+
+func _isaret_ekle(m: int, metin: String, renk: Color, ust_y: float) -> Isaret:
+	var i := Isaret.new()
+	i.metin = metin
+	i.renk = renk
+	i.ust_y = ust_y
+	i.position = Vector2(baslangic_x + m * Ayarlar.PIKSEL_METRE, 0.0)
+	add_child(i)
+	_isaretler.append(i)
+	return i
+
+
+func _hayalet_kur() -> void:
+	if is_instance_valid(_hayalet_sprite):
+		_hayalet_sprite.queue_free()
+	_hayalet_sprite = null
+	_hayalet_rakip = null
+	_hayalet_kayit = null
+	_hayalet_bitti = false
+	if not gunluk:
+		return
+	_hayalet_kayit = Hayalet.new()
+	_hayalet_rakip = Hayalet.yukle(Gunluk.bugun())
+	if _hayalet_rakip == null or _hayalet_rakip.sayi() < 2:
+		_hayalet_rakip = null
+		return
+	_hayalet_sprite = AnimatedSprite2D.new()
+	_hayalet_sprite.name = "HayaletRakip"
+	_hayalet_sprite.sprite_frames = oyuncu.gorsel.sprite_frames
+	_hayalet_sprite.centered = false
+	_hayalet_sprite.offset = oyuncu.gorsel.offset
+	_hayalet_sprite.modulate = Color(1.3, 1.7, 2.0, Ayarlar.HAYALET_SAYDAMLIK)
+	add_child(_hayalet_sprite)
+	# Paralaks arka planın önünde, oyuncunun arkasında çizilsin.
+	move_child(_hayalet_sprite, oyuncu.get_index())
+	_hayalet_sprite.play("kos")
+	_hayalet_adim()
+
+
+func _hayalet_adim() -> void:
+	if _hayalet_kayit:
+		var basla := Vector2(baslangic_x, 0.0)
+		while _hayalet_kayit.sayi() <= int(sure * Ayarlar.HAYALET_HZ):
+			_hayalet_kayit.ekle(oyuncu.global_position - basla, str(oyuncu.gorsel.animation))
+	if _hayalet_rakip == null or _hayalet_bitti or not is_instance_valid(_hayalet_sprite):
+		return
+	if sure > _hayalet_rakip.sure():
+		_hayalet_bitti = true
+		_hayalet_sprite.visible = false
+		var son := _hayalet_rakip.konum(_hayalet_rakip.sure())
+		var i := _isaret_ekle(int(son.x / Ayarlar.PIKSEL_METRE), "HAYALET", Color(0.6, 0.9, 1.0), 84.0)
+		i.position.x = baslangic_x + son.x
+		return
+	_hayalet_sprite.global_position = Vector2(baslangic_x, 0.0) + _hayalet_rakip.konum(sure)
+	var a := _hayalet_rakip.anim_adi(sure)
+	if _hayalet_sprite.animation != a:
+		_hayalet_sprite.play(a)
+
+
+## Alçak tavan ve pistonların arkasında kalanları sayar (başarımlar için).
+func _gecisleri_say() -> void:
+	var arka := oyuncu.global_position.x - Oyuncu.YARIM_GENISLIK
+	while not _tehlike_sirasi.is_empty():
+		var t = _tehlike_sirasi[0]
+		if not is_instance_valid(t):
+			_tehlike_sirasi.pop_front()
+			continue
+		if (t as Tehlike).global_position.x + (t as Tehlike).genislik >= arka:
+			break
+		_tehlike_sirasi.pop_front()
+		var anahtar := "tavan" if t.tur == Tehlike.Tur.TAVAN else "piston"
+		istatistik[anahtar] = int(istatistik[anahtar]) + 1
+
+
+func _basarimlari_denetle() -> void:
+	_basarim_sayac += 1
+	if _basarim_sayac % 20 != 0 or bot_modu:
+		return
+	var d := Kayit.yukle() if _basarim_sayac == 20 or _basarim_onbellek.is_empty() else _basarim_onbellek
+	_basarim_onbellek = d
+	for b in Basarimlar.anlik(d, istatistik, gunluk, _basarim_bildirilen):
+		_basarim_bildirilen.append(b["id"])
+		Ses.cal("gorev", 1.2)
+		gorev_bildirimi.text = "★ Başarım: %s  +%d altın" % [b["ad"], Ayarlar.BASARIM_ODULU]
+		gorev_bildirimi.show()
+		gorev_bildirimi.modulate.a = 1.0
+		var tw := create_tween()
+		tw.tween_interval(1.8)
+		tw.tween_property(gorev_bildirimi, "modulate:a", 0.0, 0.5)
 
 
 # ------------------------------------------------------------------ menüler

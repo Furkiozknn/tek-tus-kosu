@@ -169,7 +169,11 @@ func _duvara_carpti() -> Object:
 	for i in get_slide_collision_count():
 		var c := get_slide_collision(i)
 		if c.get_normal().x < -0.7 and c.get_position().y < global_position.y - 4.0:
-			return c.get_collider()
+			var o := c.get_collider()
+			# Tek yönlü (hareketli ya da sabit) kirişlerin yanına çarpmak öldürmez.
+			if o is Hareketli or (o is Zemin and (o as Zemin).tek_yonlu):
+				continue
+			return o
 	return null
 
 

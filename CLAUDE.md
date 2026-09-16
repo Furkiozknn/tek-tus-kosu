@@ -48,6 +48,13 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 - Olaylar grup çağrısıyla gelir: `call_group("oyun", "altin_toplandi" | "yakin_kacis", ...)`.
 - `parca.gd` her parçanın tehlike ve tavan aralıklarını verir; `bot.gd` bunlara bakarak zıplar
   (tavan altında kısa sıçrama, ikinci zıplama yok).
+- Parça seçimi `parca_rng` ile ve `Ayarlar.hiz_mesafede(parça başlangıcı)` hızına göre yapılır; parça
+  dizisi yalnız tohuma bağlı (kare hızına, oyuncunun davranışına bağlı değil). Görevler ayrı `rng`.
+  Parça seçimine yeni rastgelelik eklerken `parca_rng` kullan, yoksa günlük koşu bozulur.
+- Günlük koşu: `Gunluk.secili` (menü) → `oyun.gunluk`. Tohum `Gunluk.tohum(tarih)`. Kayıtta
+  `gunluk` sözlüğü; hayalet ayrı dosyada (`Hayalet.dosya_yolu()`), yalnız günün rekorunda yazılır.
+  Testler tarihi `Gunluk.tarih_ezme` ile sabitler.
+- İşaretler (`Isaret`) ve hayalet sprite'ı oyun kök düğümünün çocuğu; `yeniden_baslat` yeniden kurar.
 - `Ses` statik; ilk çağrıda kök düğüme havuz ekler. Web'de ses ilk kullanıcı girdisinden sonra başlar
   (tarayıcı kuralı; konsoldaki AudioContext uyarısı normal).
 - Kayıt `[oyuncu]` bölümünde; `Kayit.yukle()` bozuk dosyada yedeğe döner.
@@ -57,14 +64,21 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 - Uçlarda 60 px güvenli zemin; yüksek bloklar parça başından ≥ 360 px içeride.
 - Alçak tavan alt kenarı y=212: kısa sıçrama (≈35 px) sığar, tam zıplama (≈96 px) sığmaz.
 - Zorluk 0 = nefes parçası (tehlikesiz). Zorluk eşikleri: 2 → 280 px/sn, 3 → 360 px/sn.
-- Her yeni parça testte en düşük ve en yüksek hızda bot ile geçilmeli.
+- Her yeni parça testte en düşük ve en yüksek hızda bot ile geçilmeli; ayrıca
+  `tools/bot_stres.gd -- --tohumlar 1,...,24` ile uzun koşularda ölüm olmamalı.
+- Botun iniş noktası (hız × 0,743 sn / 2) bir sonraki tehlikenin üstüne düşmemeli: art arda
+  tehlikeler arasında en az ~260 px ya da birleşik tek tehlike bırak.
+- Hareketli ve tek yönlü kirişlerin yan yüzü öldürmez (`Oyuncu._duvara_carpti`).
 
 ## Doğrulama
 
 - v0.1 (bulut + Windows): 171 test geçti; Windows ve Web dışa aktarma çalıştı.
 - v0.2 (bulut, Linux headless): 388 test geçti, 0 hata. Web sürümü Playwright/Chromium ile:
   menü, karakter paneli, ayarlar paneli, fareyle başlatma, oyun, ölüm tekrarı, sonuç paneli.
+- v0.3 (bulut): 558 test geçti; bot stresi 24 tohum × 3 dk, 0 ölüm; web'de günlük koşu açıldı.
 - v0.2 (Windows 11): aynı akış + `tools/ekran_goruntusu.gd`; 388 test geçti, dışa aktarmalar tamam.
+- v0.3 (Windows 11): 558 test geçti; bot stresi 8 tohum × 3 dk, 0 ölüm; ekran görüntüleri ve iki dışa
+  aktarma tamam. Ekran görüntüleri buluttakinden yalnız GPU gürültüsü kadar farklı (kanal farkı ≤ 30).
   PNG/WAV üreticileri deterministik (bulut ve Windows çıktıları aynı hash). Sahne dosyalarındaki
   `uid` değerleri makineye göre değişir; bu normal.
 - Web testinde bilinen durum: Chromium'un AudioContext otomatik oynatma uyarısı (zararsız).
