@@ -1,7 +1,7 @@
 extends SceneTree
 ## Bot stres testi: farklı tohumlarla uzun koşular; ölümleri parça adıyla raporlar.
 ##   godot --headless --fixed-fps 60 --path . -s res://tools/bot_stres.gd -- --tohumlar 1,2,3 --sure 180
-## Ritim koşusu:  ... -- --ritim [--sarki 1]      (bot oynar; şarkı 0: 150 BPM, 1: 128 BPM)
+## Ritim koşusu:  ... -- --ritim [--sarki 2]      (bot oynar; şarkı 0: 150 BPM, 1: 128 BPM, 2: 140 BPM)
 ##                ... -- --ritim --vurus 60      (bot yerine her olay vuruşunda 60 ms geç zıplayan oyuncu;
 ##                                                 eksi değer erken; alçak tavanda dokunur, diğerlerinde basılı tutar)
 

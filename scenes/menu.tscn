@@ -56,10 +56,10 @@ corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7jp70"]
-content_margin_left = 16.0
-content_margin_top = 16.0
-content_margin_right = 16.0
-content_margin_bottom = 16.0
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
 bg_color = Color(0.24705882, 0.24705882, 0.45490196, 0.96)
 border_width_left = 2
 border_width_top = 2
@@ -498,7 +498,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_7jp70")
 
 [node name="Kutu" type="VBoxContainer" parent="RitimPaneli" unique_id=1165364273]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 5
 alignment = 1
 
 [node name="RitimBaslik" type="Label" parent="RitimPaneli/Kutu" unique_id=1500355739]
@@ -523,17 +523,24 @@ horizontal_alignment = 1
 
 [node name="SarkiDugme0" type="Button" parent="RitimPaneli/Kutu" unique_id=149926876]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 34)
+custom_minimum_size = Vector2(300, 30)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = "Şarkı 1"
 
 [node name="SarkiDugme1" type="Button" parent="RitimPaneli/Kutu" unique_id=149926877]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(300, 34)
+custom_minimum_size = Vector2(300, 30)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = "Şarkı 2"
+
+[node name="SarkiDugme2" type="Button" parent="RitimPaneli/Kutu" unique_id=149926878]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 30)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Şarkı 3"
 
 [node name="GunlukRitimDugme" type="Button" parent="RitimPaneli/Kutu" unique_id=1053447917]
 unique_name_in_owner = true

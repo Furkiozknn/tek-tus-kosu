@@ -1,7 +1,7 @@
 class_name Ritim
 extends RefCounted
 ## Ritim koşusu. Hız sabit 300 px/sn; vuruş aralığı şarkının temposundan gelir
-## (150 BPM → 120 px, 128 BPM → 140,6 px). Engel geometrisi yalnız hıza bağlı, tempoya değil.
+## (150 BPM → 120 px, 128 BPM → 140,6 px, 140 BPM → 128,6 px). Engel geometrisi yalnız hıza bağlı, tempoya değil.
 ## Parçalar ölçü ölçü koddan üretilir: her engelde ideal zıplama anı bir vuruşa denk gelir.
 ## Vuruş ızgarası: x_k = izgara0 + k × adım (izgara0 ses gecikmesi + oyuncu ayarı kadar kaydırılır).
 
@@ -12,12 +12,15 @@ const ADIM := HIZ * VURUS_SN     ## ilk şarkının vuruş aralığı (px)
 
 ## Şarkılar. bpm, üretilen WAV'ın örnek düzeyindeki gerçek temposu (muzik_uret: 22050 Hz, onaltılık = round(22050·15/bpm)).
 ## agirlik: desen türüne göre seçim çarpanı (şarkının karakteri): Çatı Neşesi'nde alçak tavan (kısa sıçrama) daha sık,
-## çukur daha seyrek — geniş vuruş aralığında (140 px) kısa sıçramalar daha rahat sığar.
+## çukur daha seyrek — geniş vuruş aralığında (140 px) kısa sıçramalar daha rahat sığar. Fırtına Hattı'nda (140 BPM,
+## 128,6 px) diken ×1,5: iki dikenli ölçüler (ikili, arka_vurus) ×2,25 — daha sık çift zıplama, daha az tavan.
 const SARKILAR := [
 	{"ad": "Gece Koşusu", "muzik": "muzik_oyun", "bpm": 150.0, "rekor": "rekor_ritim", "olumler": "olumler_ritim",
 		"agirlik": {}, "aciklama": "150 BPM · dengeli"},
 	{"ad": "Çatı Neşesi", "muzik": "muzik_ritim2", "bpm": 22050.0 * 15.0 / 2584.0, "rekor": "rekor_ritim2", "olumler": "olumler_ritim2",
 		"agirlik": {"kisa": 2.2, "cukur": 0.7}, "aciklama": "128 BPM · daha çok alçak tavan"},
+	{"ad": "Fırtına Hattı", "muzik": "muzik_ritim3", "bpm": 22050.0 * 15.0 / 2363.0, "rekor": "rekor_ritim3", "olumler": "olumler_ritim3",
+		"agirlik": {"diken": 1.5, "kisa": 0.6, "cukur": 0.8}, "aciklama": "140 BPM · sık ikili diken"},
 ]
 const GECIKME_ARALIK := Vector2i(-150, 300)   ## oyuncu ses gecikmesi ayarı (ms)
 const ONERI_ESIK_MS := 25.0                    ## ortalama sapma bundan büyükse ayar önerilir

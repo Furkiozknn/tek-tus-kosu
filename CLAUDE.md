@@ -36,6 +36,7 @@ $G --headless --path . -s res://tools/ses_uret.gd
 $G --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_oyun.wav --ruh hizli --tohum 11
 $G --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_menu.wav --ruh sakin --tohum 4
 $G --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_ritim2.wav --ruh neseli --tohum 7
+$G --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_ritim3.wav --ruh gergin --tohum 5
 # (yalnız simge seti değişirse) python3 tools/simge_fontu.py   # fonttools gerekir
 $G --headless --path . --import
 $G --headless --path . -s res://tools/sahne_uret.gd
@@ -120,6 +121,9 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
+- v1.3 (bulut): 804 test geçti; Fırtına Hattı (140 BPM, diken ×1,5) bot 16 tohum × 3 dk 0 ölüm; kaydırmalı oyuncu
+  −175/−150/+150 ms 4 tohum × 2 dk 0 ölüm, −200/+175/+200 ms'de alçak tavan dikeninde ölüm (pencere −175…+150 ms, öncekilerle aynı).
+  Ritim paneli 3 şarkıyla 360 px'lik temel çözünürlüğe sığıyor (kenar 12, aralık 5, düğme 30).
 - v1.2 (bulut): 793 test geçti; Çatı Neşesi ağırlıklarıyla bot 16 tohum × 3 dk 0 ölüm, −175/+150 ms 8 tohum 0 ölüm.
 - v1.0 (bulut): 791 test geçti (tık sesi ayarı ve sayacı, ritim paneli sığıyor).
 - v0.9 (bulut): 788 test geçti. 13 desenle iki şarkıda bot 12 tohum × 3 dk 0 ölüm (bütün desenler görüldü);

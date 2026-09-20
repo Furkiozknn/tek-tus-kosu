@@ -3,8 +3,10 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v1.2 — geliştirme turu 10 (2026-09-16). Şarkıya özel desen ağırlığı: Çatı Neşesi'nde alçak tavan daha
-sık, çukur daha seyrek; şarkı düğmelerinde karakter ipucu; paylaşım metni için `Ayarlar.ITCH_ADRESI`. (v1.0: ritimde
+**Durum:** v1.3 — geliştirme turu 11 (2026-09-20). Üçüncü şarkı **Fırtına Hattı** (140 BPM, "gergin" ruh): diken ağırlığı
+×1,5 ile çift dikenli ölçüler (ikili, arka vuruş) ×2,25 sıklıkta, alçak tavan daha seyrek; ritim paneli üç şarkıyla temel
+çözünürlüğe sığacak biçimde sıkılaştırıldı. (v1.2: şarkıya özel desen ağırlığı: Çatı Neşesi'nde alçak tavan daha
+sık, çukur daha seyrek; şarkı düğmelerinde karakter ipucu; paylaşım metni için `Ayarlar.ITCH_ADRESI`. v1.0: ritimde
 **vuruş ipucu sesi**: zıplama vuruşundan bir vuruş
 önce tık (sayım gibi; ritim panelinden kapatılır). (v0.9: Günün ritminde **hayalet rakip** (günün en iyi denemesi,
 vuruş ızgarasına hizalı) ve **arka vuruş desenleri** (1. ve 3. vuruşta diken; 13 desen). (v0.8: günün ritmi —
@@ -35,6 +37,9 @@ kostümler, ölüm tekrarı, ayarlar.)
   ve ölüm listesi; sonuç panelinde tam vuruş sayısı; 13. başarım "Vuruşu yakala" (tek koşuda 20 tam vuruş).
   Duraklatınca müzik de durur; müzik oyun zamanından 60 ms'den fazla kayarsa (sekme gizlendi,
   uzun takılma) müzik oyuna göre yeniden sarılır.
+- **Üçüncü şarkı (v1.3):** "Fırtına Hattı · 140 BPM" (`muzik_ritim3.wav`, `muzik_uret --ruh gergin --tohum 5`, 13,7 sn
+  döngü; gerçek tempo 22050·15/2363 = 139,97 BPM → vuruş 128,6 px). `agirlik: {diken 1,5, kisa 0,6, cukur 0,8}`;
+  ayrı rekor/ölüm anahtarları (`rekor_ritim3`, `olumler_ritim3`); günün ritmi artık üç şarkıdan seçer.
 - **Şarkı karakteri (v1.2):** `Ritim.SARKILAR[i].agirlik` desen türlerine seçim çarpanı verir (Çatı Neşesi: kısa ×2,2,
   çukur ×0,7 — geniş vuruş aralığında kısa sıçramalar daha rahat sığar). Zorluk ve boşluk kuralları aynı; bot 16 tohum × 3 dk
   ve zamanlama penceresi −175/+150 ms yeniden ölçüldü, 0 ölüm.
@@ -198,8 +203,8 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 
 ## Doğrulama
 
-Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v1.2, bulut, Godot 4.7.2 Linux headless):
-otomatik testler **793 geçti, 0 hata**; (v1.0: 791 test; (v0.9: 788 test, 13 desenle iki şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere −175…+150 ms
+Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v1.3, bulut, Godot 4.7.2 Linux headless):
+otomatik testler **804 geçti, 0 hata**; Fırtına Hattı'nda bot 16 tohum × 3 dk 0 ölüm, pencere −175…+150 ms (v1.2: 793 test; v1.0: 791 test; (v0.9: 788 test, 13 desenle iki şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere −175…+150 ms
 yeniden ölçüldü. (v0.8: 782 test, web'de günün ritmi ve paylaşım; v0.7: 765 test; 128 BPM şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere yine
 −175…+150 ms. (v0.6: 740 test; ritim koşusunda bot 12 tohum × 3 dk, 0 ölüm, 10 desenin hepsi
 görüldü; vuruşta zıplayan oyuncu −175…+150 ms kaydırmayla 8 tohum × 3 dk, 0 ölüm. (v0.5: 714 test,

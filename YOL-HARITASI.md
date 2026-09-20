@@ -92,9 +92,14 @@
 - [x] `Ayarlar.ITCH_ADRESI` (yayından sonra paylaşım metnine adres)
 - [x] Ritim: şarkıya özel desen ağırlığı (Çatı Neşesi: daha sık alçak tavan, daha seyrek çukur), şarkı düğmesi ipucu
 
-## Sonraki tur (v1.3)
+## Bitti — v1.3 (2026-09-20)
 
-- [ ] Üçüncü şarkı (ör. 140 BPM "gergin": daha sık ikili diken) — `agirlik` + stres + pencere ölçümü
+- [x] Üçüncü şarkı: Fırtına Hattı, 140 BPM "gergin" — `agirlik` diken ×1,5 (çift diken ×2,25), 16 tohum stres 0 ölüm, pencere −175…+150 ms
+
+## Sonraki tur (v1.4)
+
+- [ ] Ritim: şarkıya özel görsel tema (Fırtına Hattı'nda yağmur/şimşek parçacığı) — yalnız görsel, geometri aynı
+- [ ] Web kabuğu: özel yükleme ekranı (`html/custom_html_shell`) — başlık, ilerleme çubuğu, tek tuş ipucu
 - [ ] Gerçek telefonda deneme (dokunma gecikmesi, tam ekran, paylaşım menüsü)
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] Paylaşım metnine itch adresi (yayından sonra `Ayarlar.ITCH_ADRESI` doldurulur — kod hazır)

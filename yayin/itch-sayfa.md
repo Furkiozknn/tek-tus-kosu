@@ -24,8 +24,8 @@ jump, tap again in mid-air for a second jump. The city speeds up; how far can yo
 **What's inside**
 - **Rhythm run:** a separate mode where every rooftop is built to the beat of the music. Glowing
   lamps pulse with the track and mark where to jump; land jumps on the beat to build a "Tam vuruş ×N" (perfect beat)
-  streak. Off by a little? You still make it — timing is a reward, not a wall. Two tracks (150 and
-  128 BPM), each with its own record, and an audio-delay setting the game suggests from your own jumps
+  streak. Off by a little? You still make it — timing is a reward, not a wall. Three tracks (150, 128 and
+  140 BPM), each with its own record and character (the 140 BPM one loves double spikes), and an audio-delay setting the game suggests from your own jumps
   (handy with Bluetooth headphones). A "Beat of the Day" gives everyone the same track and rooftops today, with your best run as a ghost.
 - **Daily run:** everyone gets the same rooftops today. Beat your best attempt — it runs beside you
   as a ghost. Keep a daily streak and share your result with one tap.
@@ -64,7 +64,7 @@ Havada tekrar dokun: ikinci zıplama. Şehir hızlandıkça ne kadar uzağa gide
 **İçerik**
 - **Ritim koşusu:** her çatının müziğin vuruşuna göre kurulduğu ayrı kip. Lambalar müzikle nabız
   atar ve nerede zıplanacağını gösterir; vuruşta zıplayıp "Tam vuruş ×N" serisi yap. Biraz kaçırsan
-  da geçersin — zamanlama ödüldür, duvar değil. İki şarkı (150 ve 128 BPM), her birinin ayrı rekoru;
+  da geçersin — zamanlama ödüldür, duvar değil. Üç şarkı (150, 128 ve 140 BPM), her birinin ayrı rekoru ve karakteri;
   zıplamalarından ölçülen ses gecikmesi önerisi (bluetooth kulaklık için). "Günün ritmi"nde bugün herkes aynı
   şarkıda aynı çatılarda koşar; en iyi denemen hayalet olarak yanında.
 - **Günlük koşu:** bugün herkes aynı çatılarda. En iyi denemen hayalet olarak yanında koşar.

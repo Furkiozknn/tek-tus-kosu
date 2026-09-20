@@ -1105,16 +1105,28 @@ func _test_ritim() -> void:
 	dogrula(kural, "ısınma ölçüleri boş; olaylar arası ≥ 2 vuruş, alçak tavana ≥ 3; 3. vuruşta yalnız diken")
 	dogrula(gorulen_desen.size() == Ritim.DESENLER.size(), "bütün desenler seçilebilmeli (%d/%d)" % [gorulen_desen.size(), Ritim.DESENLER.size()])
 	# Şarkı karakteri: Çatı Neşesi'nde alçak tavan desenleri belirgin biçimde daha sık, çukur daha seyrek
-	var sayim := {0: {"kisa": 0, "cukur": 0}, 1: {"kisa": 0, "cukur": 0}}
-	for sarki in [0, 1]:
+	var sayim := {0: {"kisa": 0, "cukur": 0, "ikili": 0}, 1: {"kisa": 0, "cukur": 0, "ikili": 0}, 2: {"kisa": 0, "cukur": 0, "ikili": 0}}
+	for sarki in [0, 1, 2]:
 		var r2 := RandomNumberGenerator.new()
 		r2.seed = 42
 		for i in 1500:
 			var d2 := Ritim.desen_sec(r2, 12 + i % 20, [-1, 0, 2][i % 3], sarki)
+			var diken_sayisi := 0
 			for o in d2["olaylar"]:
 				if sayim[sarki].has(o[1]):
 					sayim[sarki][o[1]] += 1
+				if str(o[1]) == "diken":
+					diken_sayisi += 1
+			if diken_sayisi == 2:
+				sayim[sarki]["ikili"] += 1
 	dogrula(sayim[1]["kisa"] > sayim[0]["kisa"] * 1.5 and sayim[1]["cukur"] < sayim[0]["cukur"], "şarkı ağırlıkları desen dağılımını değiştirmeli (%s)" % str(sayim))
+	# v1.3 Fırtına Hattı: iki dikenli ölçüler (ikili, arka_vurus) belirgin biçimde daha sık, alçak tavan daha seyrek
+	dogrula(Ritim.SARKILAR.size() == 3 and sayim[2]["ikili"] > sayim[0]["ikili"] * 1.5 and sayim[2]["kisa"] < sayim[0]["kisa"], "3. şarkıda çift diken daha sık, alçak tavan daha seyrek (%s)" % str(sayim))
+	var anahtarlar := {}
+	for sk in Ritim.SARKILAR:
+		anahtarlar[sk["rekor"]] = true
+		dogrula(Kayit.VARSAYILAN.has(sk["rekor"]) and Kayit.VARSAYILAN.has(sk["olumler"]) and ResourceLoader.exists("res://assets/audio/%s.wav" % sk["muzik"]), "şarkının kayıt anahtarları ve müziği olmalı (%s)" % sk["ad"])
+	dogrula(anahtarlar.size() == Ritim.SARKILAR.size(), "her şarkının rekor anahtarı ayrı")
 	dogrula(is_equal_approx(Ritim.desen_agirligi(Ritim.DESENLER[0], 1), 1.0) and Ritim.desen_agirligi(Ritim.DESENLER[8], 1) > 2.0, "boş desen ağırlığı 1, kisa_diken > 2 (%.2f)" % Ritim.desen_agirligi(Ritim.DESENLER[8], 1))
 	dogrula(not zor2_erken and zor2_gec, "zor desenler ancak 10. ölçüden sonra")
 	# Parça üretimi belirlenimci ve vuruşa hizalı
@@ -1180,6 +1192,29 @@ func _test_ritim() -> void:
 	var kalan := fposmod(ilk_parca.position.x + ilk_parca.uzunluk - o2._izgara0, Ritim.adim(1)) if ilk_parca else -1.0
 	dogrula(ilk_parca != null and minf(kalan, Ritim.adim(1) - kalan) < 0.01, "128 BPM parçaları ızgarada bitmeli (%.4f)" % kalan)
 	o2.queue_free()
+	await process_frame
+
+	# Üçüncü şarkı (140 BPM, v1.3): vuruş aralığı 128,6 px; sık ikili dikende de kusursuz oyuncu yaşar.
+	dogrula(absf(Ritim.adim(2) - 128.598) < 0.05, "140 BPM → vuruş ≈128,6 px (%.3f)" % Ritim.adim(2))
+	var o3 := await _ritim_oyunu(2, 9, false)
+	dogrula(is_equal_approx(o3._adim, Ritim.adim(2)), "oyun üçüncü şarkının adımını kullanmalı")
+	var s3: Array = await _ritim_oyna(o3, 0.0, 60 * 60)
+	print("  140 BPM kusursuz: %s" % str(s3))
+	dogrula(s3[0] and s3[1] >= 20 and s3[2] == s3[1], "140 BPM'de vuruşta zıplayan yaşar, hepsi tam vuruş (%s)" % str(s3))
+	var ikili_var := false
+	for p in o3.parcalar:
+		if p.has_meta("desenler"):
+			for ad in p.get_meta("desenler"):
+				if str(ad) == "ikili" or str(ad) == "arka_vurus":
+					ikili_var = true
+	var kalan3 := -1.0
+	for p in o3.parcalar:
+		if p.has_meta("desenler"):
+			kalan3 = fposmod(p.position.x + p.uzunluk - o3._izgara0, Ritim.adim(2))
+			break
+	dogrula(kalan3 >= 0.0 and minf(kalan3, Ritim.adim(2) - kalan3) < 0.01, "140 BPM parçaları ızgarada bitmeli (%.4f)" % kalan3)
+	print("  140 BPM koşusunda çift diken görüldü: %s" % str(ikili_var))
+	o3.queue_free()
 	await process_frame
 
 	# Vuruş ipucu sesi: zıplamadan koşan oyuncu ilk engelde ölene kadar en az bir tık duyar; ayar kapalıyken hiç
@@ -1278,6 +1313,9 @@ func _test_ritim() -> void:
 	var sd1: Button = menu.get_node("%SarkiDugme1")
 	dogrula(sd0.text.begins_with("Gece Koşusu · 150 BPM") and not sd0.text.ends_with(" m"), "1. şarkı düğmesi (%s)" % sd0.text)
 	dogrula(sd1.text.begins_with("Çatı Neşesi · 128 BPM") and sd1.text.ends_with("%d m" % r2), "2. şarkı düğmesi rekoru göstermeli (%s)" % sd1.text)
+	var sd2: Button = menu.get_node("%SarkiDugme2")
+	dogrula(sd2.visible and sd2.text.begins_with("Fırtına Hattı · 140 BPM") and sd2.tooltip_text.contains("ikili diken"), "3. şarkı düğmesi (%s)" % sd2.text)
+	dogrula(ekran.encloses(rp.get_global_rect()) and sd2.get_global_rect().end.y < (menu.get_node("%GunlukRitimDugme") as Control).get_global_rect().position.y + 1.0, "3 şarkı düğmesi panele sığmalı, günün ritmi altında kalmalı")
 	var gk: HSlider = menu.get_node("%GecikmeKaydirici")
 	gk.value = 60
 	await _kareler(1)
@@ -1328,7 +1366,7 @@ func _test_gunun_ritmi() -> void:
 		var o: Node2D = (load(OYUN) as PackedScene).instantiate()
 		o.ritim = true
 		o.ritim_gunluk = true
-		o.ritim_sarki = 1 - beklenen_sarki
+		o.ritim_sarki = (beklenen_sarki + 1) % Ritim.SARKILAR.size()
 		o.kayit_yap = false
 		o.olum_tekrari_acik = false
 		o.tohum = t
