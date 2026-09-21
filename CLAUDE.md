@@ -37,7 +37,7 @@ gelir ve içe aktarma bozuk varlık üretir) ve `mkdir -p build/web build/window
 (Godot dışa aktarma hedef klasörü yoksa "The given export path doesn't exist" der).
 
 ```
-G=godot   # Windows: C:\Users\furki\AppData\Local\Microsoft\WinGet\Links\godot.exe
+G=godot   # Windows'ta winget kurulumu PATH'e ekler; yoksa godot.exe'nin tam yolunu yaz
 $G --headless --path . -s res://tools/proje_ayarla.gd
 $G --headless --path . -s res://tools/varlik_uret.gd
 $G --headless --path . -s res://tools/ses_uret.gd
@@ -115,15 +115,18 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   (`Ritim.gecmis_yaz`, en çok `GECMIS_GUN` = 7 kayıt, aynı gün en iyi kalır); `Ritim.gecmis_metni()` panel açıklama
   satırının yerine geçer (yer kaplamaz; geçmiş yoksa `RITIM_ACIKLAMA`).
 - v1.7: `SapmaGrafigi` (`scripts/sapma_grafigi.gd`, sonuç panelinde `%SonSapma`) `son_sonuc["ritim_sapmalar"]`'ı
-  `kutula()` ile beş kutuya sayar (sınırlar `Ritim.TAM_VURUS_MS` ve `SapmaGrafigi.UZAK_MS`); `_son_paneli_goster`
+  `kutula()` ile beş kutuya sayar (sınırlar `Ritim.TAM_VURUS_MS` = 70 ms ve `SapmaGrafigi.UZAK_MS` = 150 ms).
+  Listeye yalnız **|sapma| < 250 ms** olan zıplamalar girer (`_ritim_degerlendir`), yani dış iki kutu fiilen
+  150-250 ms aralığıdır. `_son_paneli_goster`
   yalnız ritimde ve liste boş değilse gösterir, o zaman `%SonIpucu` gizlenir (panel 360 px'e sığsın). Başarım paneli
   `%BasarimListesi` artık 2 sütunlu `GridContainer` (16 başarım tek sütunda sığmıyordu); ritim başarımları
   `ritim100` (ist["ritim"], anlık), `uc_sarki300` (`SARKILAR[*].rekor` anahtarları — koşu sonunda rekor denetimden
   önce yazılır), `gunluk_ritim5` (`gunluk_ritim_gecmis` uzunluğu). Yeni başarım eklerken panelin sığdığı test var.
 - **Sonuç paneli 360 px'e sığmak zorunda.** Satır sayısı değişken (en çok 8: 3 tamamlanan görev + 3 yeni görev +
-  başarım satırı + seviye) ve panel `reset_size()` ile içeriğine göre büyür. `_son_paneli_goster` sonunda
-  `get_combined_minimum_size().y > ekran` ise histogram gizlenir (ortalama sapma üstteki satırda kalır);
-  2+ görev tamamlanan ritim koşusunda gerçekten devreye girer. Panele yeni satır/denetim eklersen
+  başarım satırı + seviye) ve panel `reset_size()` ile içeriğine göre büyür. `_son_paneli_goster` içinde,
+  `reset_size()` çağrısından **hemen önce**, `get_combined_minimum_size().y > ekran` ise histogram gizlenir
+  (ortalama sapma üstteki satırda kalır); 2+ görev tamamlanan ritim koşusunda gerçekten devreye girer.
+  `%SonIpucu` iki koşulla gizlenir: satır sayısı > 6 **ya da** histogram görünür. Panele yeni satır/denetim eklersen
   `tools/panel_olc.gd` ile beş kalabalık seviyesini ölç (dışa aktarmaya girmez).
 - Günlük seri kayıtta `gunluk_seri`; paylaşım metni `Gunluk.paylasim_metni()`. Web'de dokunmatik
   cihazda `navigator.share`, diğerlerinde panoya kopyalama (`oyun._paylas`).
@@ -149,11 +152,11 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
-- v1.7 (bulut): **853 test geçti** (kutulama sınırları, ritim sonucunda histogram + ipucu gizleme, orta ve en
+- v1.7.1 (bulut ve Windows 11, aynı sonuç): **853 test geçti** (kutulama sınırları, ritim sonucunda histogram + ipucu gizleme, orta ve en
   kalabalık panelin sığması, normal koşuda gizli, üç başarımın koşulları ve koşu sonu/anlık akışı, 16 başarımlı
   iki sütunlu panel sığması); `ekran-9-sonuc.png` histogramlı sonuç paneli.
-  Windows 11 doğrulaması (v17 günlüğü): 849 test (panel düzeltmesinden önceki hâl), bot stresi 8 tohum 0 ölüm,
-  üç şarkıda ritim stresi 4'er tohum 0 ölüm, iki dışa aktarma temiz.
+  v1.7 etiketinde 849 testti; panel taşma düzeltmesi 4 doğrulama ekledi. Windows 11 (v171 günlüğü):
+  853 test, bot stresi 8 tohum 0 ölüm, üç şarkıda ritim stresi 4'er tohum 0 ölüm, iki dışa aktarma temiz.
   Tarayıcıda (Chromium) canlı ritim koşusunda histogram göründü: "Tam vuruş 1 · Ort. sapma −5 ms", beş kutu
   etiketli; 16 başarımlı iki sütunlu panel ve ritim/ayarlar panelleri masaüstü + telefon emülasyonunda sığdı.
 - v1.7.1 denge ölçümü (bulut, yayın öncesi): bot stresi **24 tohum × 3 dk 0 ölüm**, 43 parçanın hepsi görüldü;
@@ -204,5 +207,5 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 - Godot çıkışta "N resources still in use at exit" yazar (test paketinde 7, stres koşusunda 3-5). Statik
   önbelleklerden (`Ses._akislar`, yüklenen sahneler) gelir, sürüm sürüm değişir, çıkış kodunu etkilemez —
   sızıntı avına çıkma.
-- Temiz klon doğrulaması (v1.7): `git lfs pull` → `--import` 0 hata → 849 test → Web + Windows dışa aktarma
+- Temiz klon doğrulaması (v1.7.1): `git lfs pull` → `--import` 0 hata → 853 test → Web + Windows dışa aktarma
   başarılı → web yapısı Chromium'da menü/başarım paneli/koşu, konsol temiz.

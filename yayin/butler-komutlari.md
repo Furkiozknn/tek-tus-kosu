@@ -1,6 +1,6 @@
 # butler komutları (ÇALIŞTIRILMADI — Furki onayı gerekir)
 
-itch.io kullanıcı adı ve oyun adresi henüz belli değil; `KULLANICI` yerine yazılacak.
+itch.io kullanıcı adı ve oyun adresi henüz belli değil; `<itch-kullanici>` yerine yazılacak.
 Oyun sayfası itch.io panelinden önce elle oluşturulmalı (adres önerisi: `tek-tus-kosu`).
 
 ```powershell
@@ -12,11 +12,11 @@ godot --headless --path . --export-release "Web" build/web/index.html
 godot --headless --path . --export-release "Windows Desktop" build/windows/tek-tus-kosu.exe
 
 # 3) Yükleme — kanal adları itch'in platform etiketlemesi için önemli
-butler push build/web      KULLANICI/tek-tus-kosu:html5   --userversion 1.7.1
-butler push build/windows  KULLANICI/tek-tus-kosu:windows --userversion 1.7.1
+butler push build/web      <itch-kullanici>/tek-tus-kosu:html5   --userversion 1.7.1
+butler push build/windows  <itch-kullanici>/tek-tus-kosu:windows --userversion 1.7.1
 
 # 4) Durum
-butler status KULLANICI/tek-tus-kosu
+butler status <itch-kullanici>/tek-tus-kosu
 ```
 
 Notlar:

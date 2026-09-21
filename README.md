@@ -1,9 +1,13 @@
 # Tek Tuş Koşu
 
+*One-button endless rooftop runner (Godot 4, Turkish UI). Its rhythm mode lays every obstacle on the music's beat grid, then shows you how you were off: a five-bucket timing histogram after the run, and an audio-delay correction the game derives from your own jumps. 853 headless tests.*
+
+[![CI](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml/badge.svg)](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml)
+
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v1.7 — geliştirme turu 12 (2026-09-21). Ritim koşusu sonuç panelinde vuruş sapması histogramı (çok erken /
+**Durum:** v1.7.1 — geliştirme turu 12 (2026-09-21). Ritim koşusu sonuç panelinde vuruş sapması histogramı (çok erken /
 erken / tam / geç / çok geç) ve ritim koşusuna özel üç başarım: Metronom (100 tam vuruş), Üç şarkı (her şarkıda 300 m),
 Ritim müdavimi (günün ritmini 5 ayrı gün); başarım paneli 16 başarımla iki sütun. v1.6: Ritim panelinde şarkı önizlemesi (düğmeye odaklanınca/üzerine gelince
 şarkının başından 2 sn; menü müziği o sırada duraklar) ve günün ritmi için son 7 günün rekor geçmişi (panelin
@@ -40,7 +44,7 @@ kostümler, ölüm tekrarı, ayarlar.)
   Çatı kenarındaki lambalar müzikle nabız atar, zıplanacak vuruşlar sarı ve oklu. Vuruşun ±70 ms
   içinde zıplamak "Tam vuruş ×N" serisi; dışında "Erken/Geç N ms". Engeller dikenler, çukurlar ve
   alçak tavan (kısa sıçrama); ilk 2 ölçü boş, 10. ölçüden sonra iki olaylı ölçüler (13 desen). Ayrı rekor
-  ve ölüm listesi; sonuç panelinde tam vuruş sayısı; 13. başarım "Vuruşu yakala" (tek koşuda 20 tam vuruş).
+  ve ölüm listesi; sonuç panelinde tam vuruş sayısı; "Vuruşu yakala" başarımı (tek koşuda 20 tam vuruş).
   Duraklatınca müzik de durur; müzik oyun zamanından 60 ms'den fazla kayarsa (sekme gizlendi,
   uzun takılma) müzik oyuna göre yeniden sarılır.
 - **Sapma histogramı ve ritim başarımları (v1.7):** koşu sonunda `SapmaGrafigi` (`%SonSapma`) değerlendirilen
@@ -132,6 +136,7 @@ scripts/oyuncu.gd        koşu + zıplama (kojot, tampon, değişken yükseklik,
 scripts/oyun.gd          parça üretimi, hız, puan, görev takibi, tema, efektler, ölüm tekrarı, sonuç paneli
 scripts/menu.gd          ana menü, karakter (kostüm satın alma), ayarlar
 scripts/parca.gd         parça tabanı + tehlike/tavan aralıkları
+scripts/parca_listesi.gd 43 parçanın yol + zorluk listesi (sahne üreticisi yazar; testler ve bot_stres okur)
 scripts/tehlike.gd       diken / blok / tavan / piston + kıl payı algılayıcı
 scripts/hareketli.gd     hareketli platform (AnimatableBody2D)
 scripts/zemin.gd         dokulu çatı/tuğla çizimi
@@ -157,13 +162,14 @@ scenes/parcalar/*.tscn   43 hazır parça (koddan üretilir)
 assets/fonts/simgeler.ttf  DejaVu Sans Bold'dan 10 simgelik alt küme ("TTK Simgeler", lisans yanında)
 tools/varlik_uret.gd     tüm sprite'ları (PNG) koddan üretir
 tools/ses_uret.gd        ses efektlerini (WAV) koddan üretir
-tools/muzik_uret.gd      menü ve oyun müziğini (WAV döngü) üretir
+tools/muzik_uret.gd      menü, oyun ve üç ritim şarkısının müziğini (WAV döngü) üretir
 tools/sahne_uret.gd      parça, oyun ve menü sahnelerini koddan üretir
 tools/proje_ayarla.gd    project.godot ayarlarını + girdi haritasını yazar
 tools/ekran_goruntusu.gd itch ekran görüntüleri + kapak (pencere açar)
 tools/bot_stres.gd       farklı tohumlarla uzun bot koşuları (ölümleri parça adıyla, parça kullanımını yazar);
                          --ritim [--sarki 1]: ritim koşusu, --vurus <ms>: vuruştan kaydırarak zıplayan oyuncu (zamanlama penceresi)
 tools/simge_fontu.py     simge yazı tipini üretir (Python + fonttools; yalnız simge seti değişince)
+tools/panel_olc.gd       koşu sonu panelinin 360 px'e sığdığını beş kalabalık seviyesinde ölçer
 tests/testler.gd         otomatik testler
 yayin/                   itch.io sayfa metni, ekran görüntüleri, kapak, butler komutları
 ```
@@ -177,11 +183,16 @@ godot --headless --path . -s res://tools/ses_uret.gd
 godot --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_oyun.wav --ruh hizli --tohum 11
 godot --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_menu.wav --ruh sakin --tohum 4
 godot --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_ritim2.wav --ruh neseli --tohum 7
+godot --headless --path . -s res://tools/muzik_uret.gd -- --cikti res://assets/audio/muzik_ritim3.wav --ruh gergin --tohum 5
 godot --headless --path . --import
 godot --headless --path . -s res://tools/sahne_uret.gd
 godot --headless --path . --import
 godot --headless --fixed-fps 60 --path . -s res://tests/testler.gd
+godot --headless --fixed-fps 60 --path . -s res://tools/panel_olc.gd   # sonuç paneli sığma ölçümü
 ```
+
+Dışa aktarmadan önce hedef klasörler var olmalı (`mkdir -p build/web build/windows`), yoksa Godot
+"The given export path doesn't exist" der.
 
 Parça eklemek için `tools/sahne_uret.gd` içindeki `PARCALAR` listesini düzenle. Test, her parçayı
 kendi en düşük hızında ve en yüksek hızda (460 px/sn) bot ile koşturur; geçilemeyen parça testi
@@ -218,9 +229,10 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 - **Paylaşımda bağlantı yok (şimdilik):** `Ayarlar.ITCH_ADRESI` boş; yayından sonra doldurulunca paylaşım metninin
   son satırına eklenir.
 - **Günün ritmi ayrı tohum ve ayrı kayıt:** günlük koşuyla aynı tohumu paylaşsaydı iki kip aynı günü
-  "tüketirdi"; ayrı tutunca iki günlük meydan okuma birbirini bozmadan yan yana duruyor. Hayalet henüz yok
-  (yol haritasında).
-- **Hayalet yalnız günlük koşuda:** rastgele koşuda çatılar farklı olduğundan hayalet yanıltıcı olurdu.
+  "tüketirdi"; ayrı tutunca iki günlük meydan okuma birbirini bozmadan yan yana duruyor. Hayaleti de ayrı
+  dosyada tutuyor (`Hayalet.dosya_yolu("ritim")`, v0.9'dan beri).
+- **Hayalet yalnız günlük kiplerde:** rastgele koşuda çatılar farklı olduğundan hayalet yanıltıcı olurdu;
+  günlük koşu ve günün ritmi aynı tohumu tekrarladığından orada anlamlı.
 - **Tek girdinin derinliği:** kısa dokunuş / basılı tutma / havada ikinci zıplama; alçak tavan
   kısa sıçramayı zorunlu kılar.
 - **Satın alma yalnız kozmetik:** kostümler oynanışı değiştirmez; reklam ve gerçek para yok.
@@ -231,12 +243,13 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 
 Ayrıntılar: `CLAUDE.md` → Doğrulama.
 
-**v1.7.1 (yayın adayı).** Bulut (Godot 4.7.2, Linux headless) **853 test geçti, 0 hata**;
-Windows 11'de v1.7 ile 849 test (panel düzeltmesi öncesi). Bot stresi 8 tohum × 3 dk 0 ölüm; ritim stresi üç şarkıda
-4'er tohum × 3 dk 0 ölüm; vuruş penceresi −175…+150 ms (v1.3'ten beri değişmedi).
-Windows + Web dışa aktarma temiz (exe 107 MB, web pck 839 KB); dokuz yayın ekran görüntüsü üretildi.
+**v1.7.1.** Bulut (Godot 4.7.2, Linux headless) ve Windows 11 aynı sonucu verdi: **853 test geçti, 0 hata**
+(v1.7 etiketinde 849'du; panel taşma düzeltmesi 4 doğrulama ekledi). Bot stresi 24 tohum × 3 dk 0 ölüm,
+43 parçanın hepsi görüldü; ritim stresi üç şarkıda 8'er tohum × 3 dk 0 ölüm; vuruş penceresi
+−175…+150 ms (v0.6'da ölçüldü, o günden beri değişmedi). Windows + Web dışa aktarma temiz
+(exe 105 MB, web pck 840 KB); `yayin/` altında 10 ekran görüntüsü + kapak.
 
-Temiz klon denemesi (v1.7): `git lfs pull` → `.godot` önbelleği olmadan içe aktarma 0 hata →
+Temiz klon denemesi (v1.7.1): `git lfs pull` → `.godot` önbelleği olmadan içe aktarma 0 hata →
 853 test → iki dışa aktarma → web yapısı Chromium'da açıldı (menü, 16 başarımlı iki sütunlu panel,
 koşu; konsolda hata yok).
 
@@ -253,3 +266,9 @@ ritim stresi üç şarkıda 8'er tohum × 3 dk 0 ölüm, vuruş penceresi −175
 
 `build/.gdignore` var: Godot'un dışa aktarma çıktısındaki PNG'leri proje kaynağı sanıp
 içeri aktarmasını engeller. Silme.
+
+## Lisans
+
+[MIT](LICENSE) — Furki Özkan, 2026. Görseller, sesler ve müzik depodaki üreteclerle koddan
+üretilir; MIT onları da kapsar. Tek istisna `assets/fonts/simgeler.ttf`: DejaVu Sans Bold'un simge
+alt kümesi, **Bitstream Vera** lisansı altında dağıtılır — bildirim `assets/fonts/LISANS-simgeler.txt`.
