@@ -514,7 +514,7 @@ func _oyun() -> Node:
 	sapma.name = "SonSapma"
 	sapma.unique_name_in_owner = true
 	sapma.set_script(_betik("res://scripts/sapma_grafigi.gd"))
-	sapma.custom_minimum_size = Vector2(340, 36)
+	sapma.custom_minimum_size = Vector2(340, SapmaGrafigi.BOY)
 	sapma.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	sapma.visible = false
 	sk.add_child(sapma)

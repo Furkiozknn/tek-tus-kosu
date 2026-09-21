@@ -114,6 +114,12 @@
 - [x] Başarımlar: ritim koşusuna özel 3 başarım — "Metronom" (tek koşuda 100 tam vuruş, anlık), "Üç şarkı"
       (her şarkıda 300 m rekor), "Ritim müdavimi" (günün ritmini 5 ayrı gün); başarım paneli iki sütun (16 başarım)
 
+## Bitti — v1.7.1 (2026-09-21)
+
+- [x] Kalabalık ritim sonuç panelinde (2-3 görev tamamlandı + seviye + başarım) histogram paneli 360 px'i
+      aşıyordu — başlık ekran dışında kalıyordu. Panel sığmıyorsa histogram düşüyor; ölçüm aracı
+      `tools/panel_olc.gd`, testte beş kalabalık seviyesi
+
 ## Sonraki tur (v1.8)
 
 - [ ] Ritim: koşu içi seri rozeti (×10, ×25 tam vuruşta kısa vurgu ve ses perdesi basamağı)

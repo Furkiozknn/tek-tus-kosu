@@ -118,6 +118,8 @@ kostümler, ölüm tekrarı, ayarlar.)
 
 ## Çalıştırma
 
+- Depoyu klonladıktan sonra **`git lfs pull`** çalıştır: görseller, sesler ve yazı tipi Git LFS'te tutulur;
+  çekilmezse yerlerine 128 baytlık işaretçi dosyalar gelir ve proje bozuk varlıklarla açılır.
 - Godot 4.7.2 ile `project.godot` dosyasını aç, F5.
 - Dışa aktarılmış sürüm: `build/windows/tek-tus-kosu.exe`, web: `build/web/index.html`
   (web sürümünü bir yerel sunucuyla aç, dosyayı çift tıklayarak değil).
@@ -227,18 +229,24 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 
 ## Doğrulama
 
-Ayrıntılar: `CLAUDE.md` → Doğrulama. Özet (v1.3, bulut, Godot 4.7.2 Linux headless):
-otomatik testler **804 geçti, 0 hata**; Fırtına Hattı'nda bot 16 tohum × 3 dk 0 ölüm, pencere −175…+150 ms (v1.2: 793 test; v1.0: 791 test; (v0.9: 788 test, 13 desenle iki şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere −175…+150 ms
-yeniden ölçüldü. (v0.8: 782 test, web'de günün ritmi ve paylaşım; v0.7: 765 test; 128 BPM şarkıda bot 12 tohum × 3 dk 0 ölüm, pencere yine
-−175…+150 ms. (v0.6: 740 test; ritim koşusunda bot 12 tohum × 3 dk, 0 ölüm, 10 desenin hepsi
-görüldü; vuruşta zıplayan oyuncu −175…+150 ms kaydırmayla 8 tohum × 3 dk, 0 ölüm. (v0.5: 714 test,
-32 tohum bot stresi, telefon emülasyonu; v0.4: 660, v0.3: 558 test.) v0.2: web sürümü Chromium'da menü, karakter, ayarlar, oyun, ölüm tekrarı
-ve sonuç paneliyle denendi.
+Ayrıntılar: `CLAUDE.md` → Doğrulama.
 
-Windows 11 (Godot 4.7.2, 2026-09-16): varlık/ses/müzik/sahne üretimi, içe aktarma, testler
-(v0.7: **765 geçti, 0 hata**, iki şarkıda ritim stresi 0 ölüm; v0.6: 742; v0.5: 714; v0.4: 660; v0.3: 558; v0.2: 388), bot stresi (8 tohum, 0 ölüm), ekran görüntüsü aracı ve iki
-dışa aktarma çalıştı (`tek-tus-kosu.exe` 105 MB, web pck 570 KB). Üretilen PNG ve WAV dosyaları bulutta üretilenlerle
-bayt bayt aynı.
+**v1.7.1 (yayın adayı).** Bulut (Godot 4.7.2, Linux headless) **853 test geçti, 0 hata**;
+Windows 11'de v1.7 ile 849 test (panel düzeltmesi öncesi). Bot stresi 8 tohum × 3 dk 0 ölüm; ritim stresi üç şarkıda
+4'er tohum × 3 dk 0 ölüm; vuruş penceresi −175…+150 ms (v1.3'ten beri değişmedi).
+Windows + Web dışa aktarma temiz (exe 107 MB, web pck 839 KB); dokuz yayın ekran görüntüsü üretildi.
+
+Temiz klon denemesi (v1.7): `git lfs pull` → `.godot` önbelleği olmadan içe aktarma 0 hata →
+853 test → iki dışa aktarma → web yapısı Chromium'da açıldı (menü, 16 başarımlı iki sütunlu panel,
+koşu; konsolda hata yok).
+
+Tarayıcı (Chromium, Playwright; masaüstü 1280×720 ve telefon emülasyonu 915×412): özel yükleme ekranı,
+menü, ritim paneli (üç şarkı + önizleme), ritim koşusu ve **sonuç panelinde vuruş sapması histogramı**
+(canlı koşuda "Tam vuruş 1 · Ort. sapma −5 ms" ile beş kutu), başarım paneli, ayarlar paneli, günlük koşu
+ve paylaşım; konsolda hata yok. Önceki sürümlerin test sayıları: v1.7 849, v1.6 821, v1.5 809, v1.3 804, v1.2 793,
+v1.0 791, v0.9 788, v0.8 782, v0.7 765, v0.6 740, v0.5 714, v0.4 660, v0.3 558, v0.2 388, v0.1 171.
+
+Üretilen PNG ve WAV dosyaları bulutta ve Windows'ta bayt bayt aynı (üreticiler deterministik).
 
 `build/.gdignore` var: Godot'un dışa aktarma çıktısındaki PNG'leri proje kaynağı sanıp
 içeri aktarmasını engeller. Silme.

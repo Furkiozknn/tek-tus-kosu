@@ -885,8 +885,6 @@ func _son_paneli_goster() -> void:
 	grafik.visible = ritim and not sapmalar.is_empty()
 	if grafik.visible:
 		grafik.ayarla(sapmalar)
-	# Kalabalık panelde alt ipucu yer kaplamasın (dokunma/boşluk yine çalışır).
-	%SonIpucu.visible = satirlar.size() <= 6 and not grafik.visible
 	# Günlük koşuda üç düğme: Tekrar | Paylaş | Menü. Ritimde gecikme önerisi varsa: Tekrar | Gecikme | Menü
 	%PaylasDugme.visible = gunluk or ritim_gunluk
 	%PaylasDugme.text = "Paylaş"
@@ -902,6 +900,13 @@ func _son_paneli_goster() -> void:
 		b.custom_minimum_size.x = genislik
 	%TekrarDugme.custom_minimum_size.x = genislik
 	%SonMenuDugme.custom_minimum_size.x = genislik
+	# v1.7: panel ekrana sığmalı. Kalabalık koşuda (2-3 görev tamamlandı + seviye atladı + başarım)
+	# 36 px'lik histogram paneli taşırıyor; o zaman histogram düşer — ortalama sapma üstteki
+	# satırda zaten yazıyor, başlık ve düğmeler asla kırpılmaz.
+	if grafik.visible and son_paneli.get_combined_minimum_size().y > get_viewport().get_visible_rect().size.y:
+		grafik.visible = false
+	# Kalabalık panelde alt ipucu yer kaplamasın (dokunma/boşluk yine çalışır).
+	%SonIpucu.visible = satirlar.size() <= 6 and not grafik.visible
 	son_paneli.reset_size()
 	son_paneli.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 	son_paneli.show()

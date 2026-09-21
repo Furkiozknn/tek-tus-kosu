@@ -7,6 +7,7 @@ extends Control
 const UZAK_MS := 150.0
 const KUTU_ADLARI := ["çok erken", "erken", "tam", "geç", "çok geç"]
 const RENKLER := [Color("8b9bb4"), Color("c0cbdc"), Color("fee761"), Color("c0cbdc"), Color("8b9bb4")]
+const BOY := 36.0   ## sahnedeki en küçük yükseklik; panel sığmazsa oyun.gd grafiği gizler
 
 var sayilar: Array[int] = [0, 0, 0, 0, 0]
 
@@ -46,8 +47,10 @@ func toplam() -> int:
 func _draw() -> void:
 	var w := size.x
 	var h := size.y
-	var yazi_h := 10.0            # alt etiket alanı
-	var sayi_h := 10.0            # üst sayı alanı
+	var isimli := h >= 20.0       # alt etiketler (kısaltılmış panelde düşer)
+	var sayili := h >= 32.0       # üst sayılar
+	var yazi_h := 10.0 if isimli else 0.0
+	var sayi_h := 10.0 if sayili else 0.0
 	var taban := h - yazi_h
 	var en_cok := 1
 	for s in sayilar:
@@ -64,9 +67,11 @@ func _draw() -> void:
 			draw_rect(cubuk, RENKLER[i])
 		else:
 			draw_rect(Rect2(x0 + 8.0, taban - 1.0, kutu_w - 16.0, 1.0), Color("5a6988"))
-		var sayi := str(sayilar[i])
-		var sw := font.get_string_size(sayi, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
-		draw_string(font, Vector2(x0 + (kutu_w - sw) * 0.5, taban - boy - 2.0), sayi, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, RENKLER[i] if sayilar[i] > 0 else Color("5a6988"))
-		var ad: String = KUTU_ADLARI[i]
-		var aw := font.get_string_size(ad, HORIZONTAL_ALIGNMENT_LEFT, -1, 8).x
-		draw_string(font, Vector2(x0 + (kutu_w - aw) * 0.5, h - 1.0), ad, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color("8b9bb4"))
+		if sayili:
+			var sayi := str(sayilar[i])
+			var sw := font.get_string_size(sayi, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
+			draw_string(font, Vector2(x0 + (kutu_w - sw) * 0.5, taban - boy - 2.0), sayi, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, RENKLER[i] if sayilar[i] > 0 else Color("5a6988"))
+		if isimli:
+			var ad: String = KUTU_ADLARI[i]
+			var aw := font.get_string_size(ad, HORIZONTAL_ALIGNMENT_LEFT, -1, 8).x
+			draw_string(font, Vector2(x0 + (kutu_w - aw) * 0.5, h - 1.0), ad, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color("8b9bb4"))

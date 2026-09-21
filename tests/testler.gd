@@ -1537,6 +1537,17 @@ func _test_v17_histogram_ve_basarimlar() -> void:
 	go._son_paneli_goster()
 	await _kareler(2)
 	dogrula(ekr.encloses(go.get_node("%SonPaneli").get_global_rect()), "kalabalık histogramlı sonuç paneli ekrana sığmalı (%s)" % go.get_node("%SonPaneli").get_global_rect())
+	dogrula(grafik.visible, "orta kalabalıkta histogram görünür kalmalı")
+	# En kalabalık koşu: 3 görev tamamlandı + seviye + 3 yeni görev + başarım satırı (8 satır).
+	# Histogram sığmaz; panel yine de ekranda kalmalı (başlık kırpılmasın) ve grafik düşmeli.
+	go.son_sonuc["gorev"] = {"tamamlanan": [{"metin": "Tek koşuda 120 m koş"}, {"metin": "Toplam 60 altın topla"},
+			{"metin": "Tek koşuda 3 kez havada zıpla"}], "odul": 190, "seviye_atladi": true}
+	go._son_paneli_goster()
+	await _kareler(2)
+	var kp: Rect2 = go.get_node("%SonPaneli").get_global_rect()
+	dogrula(ekr.encloses(kp), "en kalabalık ritim sonuç paneli ekrana sığmalı (%s)" % kp)
+	dogrula(not grafik.visible, "sığmayan panelde histogram gizlenmeli")
+	dogrula(go.get_node("%SonGorevler").text.split("\n").size() == 8, "en kalabalık panelde 8 görev satırı")
 	go.queue_free()
 	await process_frame
 	# Normal koşuda histogram gizli

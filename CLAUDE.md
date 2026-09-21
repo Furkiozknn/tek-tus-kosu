@@ -32,6 +32,10 @@ Proje sahibi: Furki. İlgili kurallar: `D:\Claude Projeleri\oyun-terminalleri\GE
 
 ## Komutlar
 
+Yeni klonda **önce** `git lfs pull` (PNG/WAV/TTF LFS'te; çekilmezse 128 baytlık işaretçi dosyalar
+gelir ve içe aktarma bozuk varlık üretir) ve `mkdir -p build/web build/windows`
+(Godot dışa aktarma hedef klasörü yoksa "The given export path doesn't exist" der).
+
 ```
 G=godot   # Windows: C:\Users\furki\AppData\Local\Microsoft\WinGet\Links\godot.exe
 $G --headless --path . -s res://tools/proje_ayarla.gd
@@ -46,6 +50,7 @@ $G --headless --path . --import
 $G --headless --path . -s res://tools/sahne_uret.gd
 $G --headless --path . --import
 $G --headless --fixed-fps 60 --path . -s res://tests/testler.gd     # beklenen: "SONUÇ: N geçti, 0 hata"
+$G --headless --fixed-fps 60 --path . -s res://tools/panel_olc.gd   # sonuç paneli 5 kalabalık seviyesinde sığıyor mu
 # itch ekran görüntüleri + kapak (pencere açar; Linux'ta xvfb-run ile):
 $G --rendering-driver opengl3 --resolution 1280x720 --fixed-fps 60 --path . -s res://tools/ekran_goruntusu.gd
 $G --headless --path . --export-release "Web" build/web/index.html
@@ -115,6 +120,11 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   `%BasarimListesi` artık 2 sütunlu `GridContainer` (16 başarım tek sütunda sığmıyordu); ritim başarımları
   `ritim100` (ist["ritim"], anlık), `uc_sarki300` (`SARKILAR[*].rekor` anahtarları — koşu sonunda rekor denetimden
   önce yazılır), `gunluk_ritim5` (`gunluk_ritim_gecmis` uzunluğu). Yeni başarım eklerken panelin sığdığı test var.
+- **Sonuç paneli 360 px'e sığmak zorunda.** Satır sayısı değişken (en çok 8: 3 tamamlanan görev + 3 yeni görev +
+  başarım satırı + seviye) ve panel `reset_size()` ile içeriğine göre büyür. `_son_paneli_goster` sonunda
+  `get_combined_minimum_size().y > ekran` ise histogram gizlenir (ortalama sapma üstteki satırda kalır);
+  2+ görev tamamlanan ritim koşusunda gerçekten devreye girer. Panele yeni satır/denetim eklersen
+  `tools/panel_olc.gd` ile beş kalabalık seviyesini ölç (dışa aktarmaya girmez).
 - Günlük seri kayıtta `gunluk_seri`; paylaşım metni `Gunluk.paylasim_metni()`. Web'de dokunmatik
   cihazda `navigator.share`, diğerlerinde panoya kopyalama (`oyun._paylas`).
 
@@ -139,9 +149,13 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
-- v1.7 (bulut): 849 test geçti (kutulama sınırları, ritim sonucunda histogram + ipucu gizleme, kalabalık panel sığması,
-  normal koşuda gizli, üç başarımın koşulları ve koşu sonu/anlık akışı, 16 başarımlı iki sütunlu panel sığması);
-  `ekran-9-sonuc.png` histogramlı sonuç paneli.
+- v1.7 (bulut): **853 test geçti** (kutulama sınırları, ritim sonucunda histogram + ipucu gizleme, orta ve en
+  kalabalık panelin sığması, normal koşuda gizli, üç başarımın koşulları ve koşu sonu/anlık akışı, 16 başarımlı
+  iki sütunlu panel sığması); `ekran-9-sonuc.png` histogramlı sonuç paneli.
+  Windows 11 doğrulaması (v17 günlüğü): 849 test (panel düzeltmesinden önceki hâl), bot stresi 8 tohum 0 ölüm,
+  üç şarkıda ritim stresi 4'er tohum 0 ölüm, iki dışa aktarma temiz.
+  Tarayıcıda (Chromium) canlı ritim koşusunda histogram göründü: "Tam vuruş 1 · Ort. sapma −5 ms", beş kutu
+  etiketli; 16 başarımlı iki sütunlu panel ve ritim/ayarlar panelleri masaüstü + telefon emülasyonunda sığdı.
 - v1.6 (bulut): 821 test geçti (önizleme: panel açılınca 1. şarkı, odakla değişim, süre dolunca/Geri'de/koşuda durma,
   menü müziği duraklama-sürme; geçmiş: yazma, 7 gün sınırı, aynı gün en iyi, metin sırası); web'de ritim paneli hatasız.
 - v1.5 (bulut): 809 test geçti (tema kilidi, şimşek sayacı, sarsıntı kapalıyken 0, 1. şarkıda kilit yok);
@@ -183,3 +197,8 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   `uid` değerleri makineye göre değişir; bu normal. Düğüm `unique_id` değerleri v0.4'ten beri
   `sahne_uret` tarafından düğüm yolundan türetilir (yeniden üretim gereksiz fark yaratmaz).
 - Web testinde bilinen durum: Chromium'un AudioContext otomatik oynatma uyarısı (zararsız).
+- Godot çıkışta "N resources still in use at exit" yazar (test paketinde 7, stres koşusunda 3-5). Statik
+  önbelleklerden (`Ses._akislar`, yüklenen sahneler) gelir, sürüm sürüm değişir, çıkış kodunu etkilemez —
+  sızıntı avına çıkma.
+- Temiz klon doğrulaması (v1.7): `git lfs pull` → `--import` 0 hata → 849 test → Web + Windows dışa aktarma
+  başarılı → web yapısı Chromium'da menü/başarım paneli/koşu, konsol temiz.
