@@ -4,10 +4,13 @@
 
 [![CI](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml/badge.svg)](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml)
 
+![Oynanış](yayin/ekran-2.png)
+
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v1.7.1 — geliştirme turu 12 (2026-09-21). Ritim koşusu sonuç panelinde vuruş sapması histogramı (çok erken /
+**Durum:** v1.7.2 — belge/lisans/CI turu (2026-09-21); oyun kodu v1.7.1 ile aynı.
+v1.7.1 — geliştirme turu 12. Ritim koşusu sonuç panelinde vuruş sapması histogramı (çok erken /
 erken / tam / geç / çok geç) ve ritim koşusuna özel üç başarım: Metronom (100 tam vuruş), Üç şarkı (her şarkıda 300 m),
 Ritim müdavimi (günün ritmini 5 ayrı gün); başarım paneli 16 başarımla iki sütun. v1.6: Ritim panelinde şarkı önizlemesi (düğmeye odaklanınca/üzerine gelince
 şarkının başından 2 sn; menü müziği o sırada duraklar) ve günün ritmi için son 7 günün rekor geçmişi (panelin
@@ -126,7 +129,9 @@ kostümler, ölüm tekrarı, ayarlar.)
   çekilmezse yerlerine 128 baytlık işaretçi dosyalar gelir ve proje bozuk varlıklarla açılır.
 - Godot 4.7.2 ile `project.godot` dosyasını aç, F5.
 - Dışa aktarılmış sürüm: `build/windows/tek-tus-kosu.exe`, web: `build/web/index.html`
-  (web sürümünü bir yerel sunucuyla aç, dosyayı çift tıklayarak değil).
+  (web sürümünü bir yerel sunucuyla aç, dosyayı çift tıklayarak değil). **Yapı dosyaları
+  depoda yok** (`.gitignore`); kendin üretmek için önce `mkdir -p build/web build/windows`,
+  sonra "Varlıkları ve sahneleri yeniden üretmek" bölümündeki iki `--export-release` komutu.
 
 ## Yapı
 
@@ -172,6 +177,7 @@ tools/simge_fontu.py     simge yazı tipini üretir (Python + fonttools; yalnız
 tools/panel_olc.gd       koşu sonu panelinin 360 px'e sığdığını beş kalabalık seviyesinde ölçer
 tests/testler.gd         otomatik testler
 yayin/                   itch.io sayfa metni, ekran görüntüleri, kapak, butler komutları
+.github/workflows/ci.yml her `main` push'unda ve her PR'da testleri koşar (Godot 4.7.2, Linux)
 ```
 
 ## Varlıkları ve sahneleri yeniden üretmek
@@ -242,6 +248,10 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
 ## Doğrulama
 
 Ayrıntılar: `CLAUDE.md` → Doğrulama.
+
+`main`'e her push'ta ve her pull request'te GitHub Actions taze bir checkout alıp (Git LFS
+çekilerek) Godot 4.7.2 ile aynı test kapısını koşuyor — rozet yukarıda. İlk koşu
+(21 Eylül 2026): **853 geçti, 0 hata**.
 
 **v1.7.1.** Bulut (Godot 4.7.2, Linux headless) ve Windows 11 aynı sonucu verdi: **853 test geçti, 0 hata**
 (v1.7 etiketinde 849'du; panel taşma düzeltmesi 4 doğrulama ekledi). Bot stresi 24 tohum × 3 dk 0 ölüm,

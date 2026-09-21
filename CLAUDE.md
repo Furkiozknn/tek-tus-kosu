@@ -5,7 +5,9 @@ Proje sahibi: Furki. İlgili kurallar: `D:\Claude Projeleri\oyun-terminalleri\GE
 
 ## Kurallar
 
-- Push, GitHub deposu açma, itch.io yükleme **yok** — Furki açıkça onaylamadan yapılmaz. `yayin/` yalnız hazırlık.
+- GitHub deposu **var** (`Furkiozknn/tek-tus-kosu`, dal `main`, public — Furki 21 Eylül 2026'da
+  onayladı); push serbest ve `main`'e her push'ta `.github/workflows/ci.yml` 853 testi koşar.
+  **itch.io yüklemesi yapılmadı** — `yayin/` yalnız hazırlık, yükleme kararı Furki'nin.
 - Dosya kalıcı silinmez; eskiyen dosya `_eski/` klasörüne taşınır.
 - Higgsfield kullanılmaz.
 - Görseller ve sesler **koddan** üretilir (`tools/varlik_uret.gd`, `tools/ses_uret.gd`, `tools/muzik_uret.gd`).
@@ -159,6 +161,8 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   853 test, bot stresi 8 tohum 0 ölüm, üç şarkıda ritim stresi 4'er tohum 0 ölüm, iki dışa aktarma temiz.
   Tarayıcıda (Chromium) canlı ritim koşusunda histogram göründü: "Tam vuruş 1 · Ort. sapma −5 ms", beş kutu
   etiketli; 16 başarımlı iki sütunlu panel ve ritim/ayarlar panelleri masaüstü + telefon emülasyonunda sığdı.
+- v1.7.2 (belge/lisans/CI turu): oyun kodu ve yayın yapıları v1.7.1 ile aynı; MIT `LICENSE`,
+  GitHub Actions ve belge düzeltmeleri geldi.
 - v1.7.1 denge ölçümü (bulut, yayın öncesi): bot stresi **24 tohum × 3 dk 0 ölüm**, 43 parçanın hepsi görüldü;
   ritim stresi **üç şarkıda 8'er tohum × 3 dk 0 ölüm**; kaydırmalı oyuncu −175 / −150 / +150 ms'de 4 tohum × 2 dk
   0 ölüm (pencere v0.6'dan beri aynı). Temiz klon: `git lfs pull` → içe aktarma 0 hata → 853 test → iki export →
@@ -204,8 +208,11 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   `uid` değerleri makineye göre değişir; bu normal. Düğüm `unique_id` değerleri v0.4'ten beri
   `sahne_uret` tarafından düğüm yolundan türetilir (yeniden üretim gereksiz fark yaratmaz).
 - Web testinde bilinen durum: Chromium'un AudioContext otomatik oynatma uyarısı (zararsız).
-- Godot çıkışta "N resources still in use at exit" yazar (test paketinde 7, stres koşusunda 3-5). Statik
+- Godot çıkışta "N ObjectDB instances were leaked at exit" (test paketinde 25) ve
+  "N resources still in use at exit" (test paketinde 7, stres koşusunda 3-5) yazar. Statik
   önbelleklerden (`Ses._akislar`, yüklenen sahneler) gelir, sürüm sürüm değişir, çıkış kodunu etkilemez —
   sızıntı avına çıkma.
+- GitHub Actions (her `main` push'u ve her PR): taze checkout (LFS ile) → Godot 4.7.2 indir →
+  `--import` → `--fixed-fps 60 -s res://tests/testler.gd`. İlk koşu 21 Eylül 2026: **853 geçti, 0 hata**.
 - Temiz klon doğrulaması (v1.7.1): `git lfs pull` → `--import` 0 hata → 853 test → Web + Windows dışa aktarma
   başarılı → web yapısı Chromium'da menü/başarım paneli/koşu, konsol temiz.
