@@ -9,6 +9,9 @@ const HAVUZ := 6
 static var _kok: Node
 static var _oynaticilar: Array[AudioStreamPlayer] = []
 static var _muzik: AudioStreamPlayer
+static var _onizleme: AudioStreamPlayer        ## v1.6: menüde şarkı önizlemesi (menü müziği o sırada duraklar)
+static var _onizleme_ad := ""
+static var _onizleme_zamanlayici: SceneTreeTimer
 static var _akislar := {}
 static var _sira := 0
 
@@ -34,8 +37,50 @@ static func _hazirla() -> bool:
 	_muzik.bus = "Muzik"
 	_muzik.finished.connect(func() -> void: _muzik.play())
 	_kok.add_child(_muzik)
+	_onizleme = AudioStreamPlayer.new()
+	_onizleme.bus = "Muzik"
+	_kok.add_child(_onizleme)
 	ses_duzeyi_uygula()
 	return true
+
+
+## v1.6: şarkının başını `sure` saniye çalar (menüde şarkı düğmesine odaklanınca); menü müziği bu sırada duraklar.
+## Aynı şarkı zaten önizleniyorsa yeniden başlatmaz. Headless'ta ses çıkmaz ama durum (`onizleme_adi`) tutulur.
+static func onizle(ad: String, sure := 2.0) -> void:
+	if not _hazirla():
+		return
+	var akis := _akis(ad)
+	if akis == null:
+		return
+	if not _onizleme.is_inside_tree():
+		(func() -> void: onizle(ad, sure)).call_deferred()
+		return
+	if _onizleme_ad == ad and _onizleme_zamanlayici != null:
+		return
+	_onizleme_ad = ad
+	_onizleme.stream = akis
+	_onizleme.play(0.0)
+	if is_instance_valid(_muzik):
+		_muzik.stream_paused = true
+	var agac := Engine.get_main_loop() as SceneTree
+	var z := agac.create_timer(sure, true, false, true)
+	_onizleme_zamanlayici = z
+	z.timeout.connect(func() -> void:
+		if _onizleme_zamanlayici == z:
+			onizle_durdur())
+
+
+static func onizle_durdur() -> void:
+	_onizleme_zamanlayici = null
+	_onizleme_ad = ""
+	if is_instance_valid(_onizleme):
+		_onizleme.stop()
+	if is_instance_valid(_muzik) and _muzik.stream != null:
+		_muzik.stream_paused = false
+
+
+static func onizleme_adi() -> String:
+	return _onizleme_ad
 
 
 static func _veriyollari() -> void:

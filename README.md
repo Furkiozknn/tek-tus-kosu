@@ -3,7 +3,9 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v1.5 — geliştirme turu 11 (2026-09-21). Fırtına Hattı'nda şarkıya kilitli "Fırtına" teması (yağmur,
+**Durum:** v1.6 — geliştirme turu 11 (2026-09-21). Ritim panelinde şarkı önizlemesi (düğmeye odaklanınca/üzerine gelince
+şarkının başından 2 sn; menü müziği o sırada duraklar) ve günün ritmi için son 7 günün rekor geçmişi (panelin
+açıklama satırında). v1.5: Fırtına Hattı'nda şarkıya kilitli "Fırtına" teması (yağmur,
 yıldızsız gök) ve ölçü başlarında şimşek perdesi (yalnız görsel; sarsıntı ayarı kapalıyken yok). v1.4: Özel web kabuğu (`yayin/web-kabuk.html`): oyunun gece paletinde
 yükleme ekranı, yüzdeli ilerleme çubuğu, kontrol ipucu, azaltılmış hareket desteği. v1.3: Üçüncü şarkı **Fırtına Hattı** (140 BPM, "gergin" ruh): diken ağırlığı
 ×1,5 ile çift dikenli ölçüler (ikili, arka vuruş) ×2,25 sıklıkta, alçak tavan daha seyrek; ritim paneli üç şarkıyla temel
@@ -39,6 +41,9 @@ kostümler, ölüm tekrarı, ayarlar.)
   ve ölüm listesi; sonuç panelinde tam vuruş sayısı; 13. başarım "Vuruşu yakala" (tek koşuda 20 tam vuruş).
   Duraklatınca müzik de durur; müzik oyun zamanından 60 ms'den fazla kayarsa (sekme gizlendi,
   uzun takılma) müzik oyuna göre yeniden sarılır.
+- **Şarkı önizleme ve günlük geçmiş (v1.6):** `Ses.onizle()` ayrı oynatıcıyla şarkının ilk 2 saniyesini çalar
+  (`Ritim.ONIZLEME_SN`), menü müziği duraklar ve önizleme bitince/panelden çıkınca sürer. Günün ritmi her koşuda
+  `gunluk_ritim_gecmis`'e yazılır (tarih, şarkı, rekor; 7 gün); panelde "Son günler: 21.09 Çatı 410 m · …".
 - **Şarkı teması (v1.5):** `Ritim.SARKILAR[i].tema` şarkıyı `oyun.TEMALAR` içindeki bir temaya kilitler
   (Fırtına Hattı → "Fırtına": yağış açık, yıldız yok). Normal koşu ilk `TEMA_DONGU` = 4 temada döner, Fırtına oraya
   girmez. Şimşek: `_ritim_ipucu_sesi()` her iki ölçüde bir (`k % 8 == 0`) `SIMSEK_OLASILIK` ile `_simsek()` —

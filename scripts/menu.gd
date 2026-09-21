@@ -6,6 +6,9 @@ var _aktif_panel: Control
 var _basliyor := false
 
 
+const RITIM_ACIKLAMA := "Engeller müziğin vuruşuna hizalı. Sarı oklu lambada zıpla."
+
+
 func _ready() -> void:
 	Simgeler.kur()
 	add_child(DikeyUyari.new())
@@ -22,8 +25,12 @@ func _ready() -> void:
 	%GunlukDugme.pressed.connect(basla.bind(true))
 	%RitimDugme.pressed.connect(func() -> void: _panel_ac(%RitimPaneli))
 	for i in Ritim.SARKILAR.size():
-		get_node("%%SarkiDugme%d" % i).pressed.connect(basla.bind(false, true, i))
-	%RitimGeri.pressed.connect(func() -> void: _panel_ac(%AnaPanel))
+		var sd: Button = get_node("%%SarkiDugme%d" % i)
+		sd.pressed.connect(basla.bind(false, true, i))
+		# v1.6: odaklanınca / üzerine gelince 2 sn önizleme (menü müziği duraklar, panelden çıkınca sürer)
+		sd.focus_entered.connect(_onizle.bind(i))
+		sd.mouse_entered.connect(_onizle.bind(i))
+	%RitimGeri.pressed.connect(func() -> void: Ses.onizle_durdur(); _panel_ac(%AnaPanel))
 	%GunlukRitimDugme.pressed.connect(func() -> void: basla(false, true, Ritim.gunun_sarkisi(Gunluk.bugun()), true))
 	%GecikmeKaydirici.value = float(d["ayarlar"].get("ritim_gecikme", 0))
 	%GecikmeKaydirici.value_changed.connect(func(v: float) -> void: _ayar("ritim_gecikme", int(v)); _yenile())
@@ -98,6 +105,13 @@ func _panel_ac(panel: Control) -> void:
 	Ses.cal("tik")
 
 
+## v1.6: şarkı önizlemesi yalnız ritim paneli açıkken.
+func _onizle(i: int) -> void:
+	if _aktif_panel != %RitimPaneli:
+		return
+	Ses.onizle(str(Ritim.SARKILAR[i]["muzik"]), Ritim.ONIZLEME_SN)
+
+
 func _yenile() -> void:
 	var rahat := bool(d["ayarlar"]["rahat"])
 	%RekorEtiketi.text = ("Rahat rekor: %d m" % int(d["rekor_rahat"])) if rahat else ("Rekor: %d m" % int(d["rekor"]))
@@ -116,6 +130,9 @@ func _yenile() -> void:
 	var gs: Dictionary = Ritim.SARKILAR[Ritim.gunun_sarkisi(Gunluk.bugun())]
 	%GunlukRitimDugme.text = "Günün ritmi · %s" % gs["ad"] + ("" if int(gr["deneme"]) == 0 else " · %d m" % int(gr["rekor"]))
 	%GunlukRitimDugme.tooltip_text = "Bugün herkes aynı şarkıda aynı çatılarda koşar. Deneme: %d" % int(gr["deneme"])
+	# v1.6: günün ritmi geçmişi varsa açıklama satırı yerine son günlerin rekorları (yer kaplamaz)
+	var gecmis := Ritim.gecmis_metni(d)
+	%RitimAciklama.text = gecmis if gecmis != "" else RITIM_ACIKLAMA
 	%RitimDugme.text = "Ritim" if rr <= 0 else "Ritim · %d m" % rr
 	%RitimDugme.tooltip_text = "Engeller müziğin vuruşlarına hizalı; vuruşta zıpla."
 	var gc := int(d["ayarlar"].get("ritim_gecikme", 0))
@@ -243,6 +260,7 @@ func basla(gunluk := false, ritim := false, sarki := 0, ritim_gunluk := false) -
 	if _basliyor:
 		return
 	_basliyor = true
+	Ses.onizle_durdur()
 	Gunluk.secili = gunluk and not ritim
 	Ritim.secili = ritim
 	Ritim.sarki = sarki

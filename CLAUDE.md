@@ -104,6 +104,11 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 - Tema: `_tema_secimi()` — ritimde şarkının `tema` anahtarı varsa kilit, yoksa mesafeyle `TEMA_DONGU` (4) tema döner;
   `TEMALAR[4]` "Fırtına" yalnız kilitle gelir (`simsek: true` → `_simsek()` perdesi, `_simsek_rng` tohumdan,
   `sarsinti` kapalıyken yok, sayaç `_simsek_sayisi`). Yeni temayı listenin sonuna ekle, `TEMA_DONGU`'yu değiştirme.
+- v1.6: `Ses.onizle(ad, sn)` ayrı `_onizleme` oynatıcısıyla şarkının başını çalar, menü müziğini duraklatır
+  (`onizle_durdur()` sürdürür; `onizleme_adi()` test için). Menü: şarkı düğmesi `focus_entered`/`mouse_entered` →
+  `_onizle(i)` (yalnız ritim paneli açıkken); Geri ve `basla()` durdurur. Günün ritmi geçmişi `gunluk_ritim_gecmis`
+  (`Ritim.gecmis_yaz`, en çok `GECMIS_GUN` = 7 kayıt, aynı gün en iyi kalır); `Ritim.gecmis_metni()` panel açıklama
+  satırının yerine geçer (yer kaplamaz; geçmiş yoksa `RITIM_ACIKLAMA`).
 - Günlük seri kayıtta `gunluk_seri`; paylaşım metni `Gunluk.paylasim_metni()`. Web'de dokunmatik
   cihazda `navigator.share`, diğerlerinde panoya kopyalama (`oyun._paylas`).
 
@@ -128,6 +133,8 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
+- v1.6 (bulut): 821 test geçti (önizleme: panel açılınca 1. şarkı, odakla değişim, süre dolunca/Geri'de/koşuda durma,
+  menü müziği duraklama-sürme; geçmiş: yazma, 7 gün sınırı, aynı gün en iyi, metin sırası); web'de ritim paneli hatasız.
 - v1.5 (bulut): 809 test geçti (tema kilidi, şimşek sayacı, sarsıntı kapalıyken 0, 1. şarkıda kilit yok);
   Fırtına Hattı bot 4 tohum × 3 dk 0 ölüm; `ekran-8-firtina.png` şimşek anında çekildi.
 - v1.4 (bulut): özel web kabuğu Chromium'da masaüstü + telefon emülasyonunda: yükleme ekranı (ilerleme %2 → %100,

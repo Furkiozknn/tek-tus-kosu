@@ -102,10 +102,15 @@
 - [x] Ritim: Fırtına Hattı'nda kilitli "Fırtına" teması (yağmur, yıldızsız gök) ve ölçü başında şimşek perdesi;
       yalnız görsel, sarsıntı ayarı kapalıyken şimşek yok (v1.5)
 
-## Sonraki tur (v1.6)
+## Bitti — v1.6 (2026-09-21)
 
-- [ ] Ritim: şarkı seçim panelinde 2 saniyelik önizleme (şarkının ilk ölçüsü çalar)
-- [ ] Günün ritmi: son 7 günün rekor listesi (kayıtta `gunluk_ritim_gecmis`)
+- [x] Ritim: şarkı seçim panelinde 2 saniyelik önizleme (odak/üzerine gelme; menü müziği duraklar)
+- [x] Günün ritmi: son 7 günün rekor listesi (kayıtta `gunluk_ritim_gecmis`, panel açıklama satırında)
+
+## Sonraki tur (v1.7)
+
+- [ ] Ritim: sonuç panelinde vuruş sapması histogramı (erken/geç dağılımı, 5 kutu)
+- [ ] Başarımlar: ritim koşusuna özel 3 başarım (100 tam vuruş, üç şarkıda 300 m, günün ritmi 5 gün)
 - [ ] Gerçek telefonda deneme (dokunma gecikmesi, tam ekran, paylaşım menüsü)
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] Paylaşım metnine itch adresi (yayından sonra `Ayarlar.ITCH_ADRESI` doldurulur — kod hazır)

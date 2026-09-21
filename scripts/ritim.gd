@@ -30,6 +30,7 @@ const PARCA_OLCU := 4            ## parça başına ölçü
 const TAM_VURUS_MS := 70.0       ## bu kadar içinde zıplamak "tam vuruş"
 const ISINMA_OLCU := 2           ## koşu başında boş ölçü
 const SES_KAYMA_SN := 0.06       ## müzik oyundan bu kadar kayarsa yeniden sarılır
+const ONIZLEME_SN := 2.0         ## v1.6: menüde şarkı önizleme süresi
 
 ## Menüden seçilen kip ve şarkı.
 static var secili := false
@@ -67,7 +68,45 @@ static func gunluk_isle(d: Dictionary, mesafe: int) -> bool:
 	var yeni := mesafe > int(g["rekor"])
 	if yeni:
 		g["rekor"] = mesafe
+	gecmis_yaz(d, Gunluk.bugun(), gunun_sarkisi(Gunluk.bugun()), int(g["rekor"]))
 	return yeni
+
+
+const GECMIS_GUN := 7   ## v1.6: günün ritmi geçmişinde tutulan gün sayısı
+
+## Günün ritmi geçmişi (`gunluk_ritim_gecmis`: [{tarih, sarki, rekor}], en yeni sonda, en çok GECMIS_GUN kayıt).
+static func gecmis_yaz(d: Dictionary, tarih: String, sarki_no: int, rekor: int) -> void:
+	var liste: Array = d.get("gunluk_ritim_gecmis", [])
+	var bulundu := false
+	for k in liste:
+		if str(k.get("tarih", "")) == tarih:
+			k["rekor"] = maxi(int(k.get("rekor", 0)), rekor)
+			k["sarki"] = sarki_no
+			bulundu = true
+	if not bulundu:
+		liste.append({"tarih": tarih, "sarki": sarki_no, "rekor": rekor})
+	liste.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return str(a["tarih"]) < str(b["tarih"]))
+	while liste.size() > GECMIS_GUN:
+		liste.pop_front()
+	d["gunluk_ritim_gecmis"] = liste
+
+
+## Menü için özet: "Son günler: 20.09 Çatı 410 m · 19.09 Gece 380 m" (en yeni önce); geçmiş yoksa "".
+static func gecmis_metni(d: Dictionary, en_cok := 4) -> String:
+	var liste: Array = d.get("gunluk_ritim_gecmis", [])
+	if liste.is_empty():
+		return ""
+	var parcalar: PackedStringArray = []
+	var i := liste.size() - 1
+	while i >= 0 and parcalar.size() < en_cok:
+		var k: Dictionary = liste[i]
+		var t := str(k.get("tarih", ""))
+		var kisa := (t.substr(8, 2) + "." + t.substr(5, 2)) if t.length() >= 10 else t
+		var sk := clampi(int(k.get("sarki", 0)), 0, SARKILAR.size() - 1)
+		var ad := str(SARKILAR[sk]["ad"]).split(" ")[0]
+		parcalar.append("%s %s %d m" % [kisa, ad, int(k.get("rekor", 0))])
+		i -= 1
+	return "Son günler: " + " · ".join(parcalar)
 
 
 static func adim(sarki_no: int) -> float:
