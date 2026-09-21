@@ -3,7 +3,8 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v1.3 — geliştirme turu 11 (2026-09-20). Üçüncü şarkı **Fırtına Hattı** (140 BPM, "gergin" ruh): diken ağırlığı
+**Durum:** v1.4 — geliştirme turu 11 (2026-09-20). Özel web kabuğu (`yayin/web-kabuk.html`): oyunun gece paletinde
+yükleme ekranı, yüzdeli ilerleme çubuğu, kontrol ipucu, azaltılmış hareket desteği. v1.3: Üçüncü şarkı **Fırtına Hattı** (140 BPM, "gergin" ruh): diken ağırlığı
 ×1,5 ile çift dikenli ölçüler (ikili, arka vuruş) ×2,25 sıklıkta, alçak tavan daha seyrek; ritim paneli üç şarkıyla temel
 çözünürlüğe sığacak biçimde sıkılaştırıldı. (v1.2: şarkıya özel desen ağırlığı: Çatı Neşesi'nde alçak tavan daha
 sık, çukur daha seyrek; şarkı düğmelerinde karakter ipucu; paylaşım metni için `Ayarlar.ITCH_ADRESI`. v1.0: ritimde
@@ -37,6 +38,11 @@ kostümler, ölüm tekrarı, ayarlar.)
   ve ölüm listesi; sonuç panelinde tam vuruş sayısı; 13. başarım "Vuruşu yakala" (tek koşuda 20 tam vuruş).
   Duraklatınca müzik de durur; müzik oyun zamanından 60 ms'den fazla kayarsa (sekme gizlendi,
   uzun takılma) müzik oyuna göre yeniden sarılır.
+- **Web kabuğu (v1.4):** Godot'nun varsayılan beyaz-siyah yükleme sayfası yerine `yayin/web-kabuk.html`
+  (`html/custom_html_shell`): "TEK TUŞ KOŞU" başlığı, tek vurgu rengi (menüdeki cam göbeği), sistem yazı tipi,
+  `transform`/`opacity` ile ilerleme (sabit hız → `linear`), 260 ms güçlü ease-out giriş ve 220 ms solma çıkışı,
+  `prefers-reduced-motion` desteği, Türkçe hata kutusu. Tasarım kararları Emil Kowalski'nin animasyon kuralları ve
+  taste-skill "anti-slop" ilkeleriyle (saf siyah yok, tek vurgu, ışıma yok) verildi.
 - **Üçüncü şarkı (v1.3):** "Fırtına Hattı · 140 BPM" (`muzik_ritim3.wav`, `muzik_uret --ruh gergin --tohum 5`, 13,7 sn
   döngü; gerçek tempo 22050·15/2363 = 139,97 BPM → vuruş 128,6 px). `agirlik: {diken 1,5, kisa 0,6, cukur 0,8}`;
   ayrı rekor/ölüm anahtarları (`rekor_ritim3`, `olumler_ritim3`); günün ritmi artık üç şarkıdan seçer.

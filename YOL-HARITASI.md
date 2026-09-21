@@ -99,7 +99,7 @@
 ## Sonraki tur (v1.4)
 
 - [ ] Ritim: şarkıya özel görsel tema (Fırtına Hattı'nda yağmur/şimşek parçacığı) — yalnız görsel, geometri aynı
-- [ ] Web kabuğu: özel yükleme ekranı (`html/custom_html_shell`) — başlık, ilerleme çubuğu, tek tuş ipucu
+- [x] Web kabuğu: özel yükleme ekranı (`yayin/web-kabuk.html`) — başlık, yüzdeli ilerleme, tek tuş ipucu (v1.4)
 - [ ] Gerçek telefonda deneme (dokunma gecikmesi, tam ekran, paylaşım menüsü)
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] Paylaşım metnine itch adresi (yayından sonra `Ayarlar.ITCH_ADRESI` doldurulur — kod hazır)

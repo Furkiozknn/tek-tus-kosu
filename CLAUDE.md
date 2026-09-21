@@ -23,6 +23,10 @@ Proje sahibi: Furki. İlgili kurallar: `D:\Claude Projeleri\oyun-terminalleri\GE
 - Godot'nun gömülü yazı tipinde (Open Sans) ★ ☆ ✓ ✗ ← ↑ → ↓ ■ □ yok. Masaüstünde sistem yazı tipi
   örter, **web'de kutu çıkar**. Bu simgeler `assets/fonts/simgeler.ttf` yedeğinden gelir
   (`Simgeler.kur()`, üretici `tools/simge_fontu.py`). Yeni bir simge kullanacaksan önce oraya ekle.
+- Web dışa aktarımı özel kabuk kullanır: `yayin/web-kabuk.html` (`export_presets.cfg` → `html/custom_html_shell`).
+  Godot'nun yer tutucuları (`$GODOT_URL`, `$GODOT_CONFIG`, `$GODOT_THREADS_ENABLED`, `$GODOT_HEAD_INCLUDE`,
+  `$GODOT_PROJECT_NAME`) ve `#status` / `#status-notice` / `Engine.getMissingFeatures` akışı korunmalı; yalnız
+  görünüm değişir. Değişiklikten sonra web'i Playwright ile aç (yükleme ekranı → oyun; `web_kabuk.py` deseni).
 - `JavaScriptBridge.eval` JS `true/false` değerini 1/0 (int) döndürebilir; sonucu `== true` ile
   karşılaştırma (int == bool çalışma zamanı hatası, release yapıda sessizce işlevi keser).
 
@@ -121,6 +125,8 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
+- v1.4 (bulut): özel web kabuğu Chromium'da masaüstü + telefon emülasyonunda: yükleme ekranı (ilerleme %2 → %100,
+  "Başlatılıyor"), 220 ms solarak kaldırılıyor, oyun menüsü açılıyor; konsolda hata yok. 804 test değişmedi.
 - v1.3 (bulut): 804 test geçti; Fırtına Hattı (140 BPM, diken ×1,5) bot 16 tohum × 3 dk 0 ölüm; kaydırmalı oyuncu
   −175/−150/+150 ms 4 tohum × 2 dk 0 ölüm, −200/+175/+200 ms'de alçak tavan dikeninde ölüm (pencere −175…+150 ms, öncekilerle aynı).
   Ritim paneli 3 şarkıyla 360 px'lik temel çözünürlüğe sığıyor (kenar 12, aralık 5, düğme 30).
