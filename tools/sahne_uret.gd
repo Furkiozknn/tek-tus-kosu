@@ -509,6 +509,15 @@ func _oyun() -> Node:
 	sk.add_child(harita)
 	sk.add_child(_etiket("SonRekor", "Rekor: 0 m", 15, Color("fee761")))
 	sk.add_child(_etiket("SonAltin", "Altın: 0", 14))
+	# v1.7: ritim koşusunda vuruş sapması histogramı (oyun.gd yalnız ritimde gösterir)
+	var sapma := Control.new()
+	sapma.name = "SonSapma"
+	sapma.unique_name_in_owner = true
+	sapma.set_script(_betik("res://scripts/sapma_grafigi.gd"))
+	sapma.custom_minimum_size = Vector2(340, 36)
+	sapma.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sapma.visible = false
+	sk.add_child(sapma)
 	var sg := _etiket("SonGorevler", "", 11, Color("c0cbdc"))
 	sg.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	sk.add_child(sg)
@@ -812,10 +821,13 @@ func _menu() -> Node:
 	var bb := _etiket("BasarimBaslik", "Başarımlar", 20)
 	bb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	bv.add_child(bb)
-	var bl := VBoxContainer.new()
+	# v1.7: 16 başarım tek sütunda 360 px'e sığmıyor; iki sütunlu ızgara (menu.gd doldurur).
+	var bl := GridContainer.new()
 	bl.name = "BasarimListesi"
 	bl.unique_name_in_owner = true
-	bl.add_theme_constant_override("separation", 1)
+	bl.columns = 2
+	bl.add_theme_constant_override("v_separation", 1)
+	bl.add_theme_constant_override("h_separation", 14)
 	bv.add_child(bl)
 	bv.add_child(_dugme("BasarimGeri", "Geri", Vector2(160, 32)))
 	_ortala(bv)

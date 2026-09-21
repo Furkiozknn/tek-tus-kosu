@@ -1,29 +1,30 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/oyun.gd" id="1_0grmb"]
-[ext_resource type="Texture2D" path="res://assets/sprites/yildizlar.png" id="2_cd5sw"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ay.png" id="3_ajti7"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sehir_uzak.png" id="4_dx7yv"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sehir_yakin.png" id="5_ymggw"]
-[ext_resource type="PackedScene" path="res://scenes/oyuncu.tscn" id="6_l17qn"]
-[ext_resource type="Script" path="res://scripts/oyuncu.gd" id="7_gy3e2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/altin.png" id="8_n01t3"]
-[ext_resource type="Script" path="res://scripts/mini_harita.gd" id="9_bevm8"]
+[ext_resource type="Script" path="res://scripts/oyun.gd" id="1_cd5sw"]
+[ext_resource type="Texture2D" path="res://assets/sprites/yildizlar.png" id="2_ajti7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/ay.png" id="3_dx7yv"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sehir_uzak.png" id="4_ymggw"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sehir_yakin.png" id="5_l17qn"]
+[ext_resource type="PackedScene" path="res://scenes/oyuncu.tscn" id="6_gy3e2"]
+[ext_resource type="Script" path="res://scripts/oyuncu.gd" id="7_n01t3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/altin.png" id="8_bevm8"]
+[ext_resource type="Script" path="res://scripts/mini_harita.gd" id="9_lfd6f"]
+[ext_resource type="Script" path="res://scripts/sapma_grafigi.gd" id="10_t7fvk"]
 
-[sub_resource type="Gradient" id="Gradient_lfd6f"]
+[sub_resource type="Gradient" id="Gradient_dqhw2"]
 colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1)
 
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_t7fvk"]
-gradient = SubResource("Gradient_lfd6f")
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_r3jcr"]
+gradient = SubResource("Gradient_dqhw2")
 width = 1
 height = 7
 fill_to = Vector2(0, 1)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_dqhw2"]
-atlas = ExtResource("8_n01t3")
+[sub_resource type="AtlasTexture" id="AtlasTexture_7wslt"]
+atlas = ExtResource("8_bevm8")
 region = Rect2(0, 0, 12, 12)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r3jcr"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wee8i"]
 content_margin_left = 16.0
 content_margin_top = 16.0
 content_margin_right = 16.0
@@ -39,7 +40,7 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7wslt"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi6hm"]
 content_margin_left = 16.0
 content_margin_top = 16.0
 content_margin_right = 16.0
@@ -58,7 +59,7 @@ corner_radius_bottom_left = 6
 [node name="Oyun" type="Node2D" unique_id=1538904700]
 process_mode = 3
 texture_filter = 1
-script = ExtResource("1_0grmb")
+script = ExtResource("1_cd5sw")
 
 [node name="Gokyuzu" type="CanvasLayer" parent="." unique_id=8569036]
 layer = -20
@@ -78,7 +79,7 @@ repeat_size = Vector2(320, 0)
 repeat_times = 3
 
 [node name="Resim" type="Sprite2D" parent="Yildizlar" unique_id=455454996]
-texture = ExtResource("2_cd5sw")
+texture = ExtResource("2_ajti7")
 centered = false
 
 [node name="Ay" type="Parallax2D" parent="." unique_id=1537636488]
@@ -88,7 +89,7 @@ scroll_scale = Vector2(0, 0)
 
 [node name="Resim" type="Sprite2D" parent="Ay" unique_id=1764421370]
 position = Vector2(548, 66)
-texture = ExtResource("3_ajti7")
+texture = ExtResource("3_dx7yv")
 centered = false
 
 [node name="SehirUzak" type="Parallax2D" parent="." unique_id=1977089316]
@@ -100,7 +101,7 @@ repeat_times = 3
 
 [node name="Resim" type="Sprite2D" parent="SehirUzak" unique_id=1886310198]
 position = Vector2(0, 150)
-texture = ExtResource("4_dx7yv")
+texture = ExtResource("4_ymggw")
 centered = false
 
 [node name="SehirYakin" type="Parallax2D" parent="." unique_id=823294149]
@@ -112,15 +113,15 @@ repeat_times = 3
 
 [node name="Resim" type="Sprite2D" parent="SehirYakin" unique_id=174562295]
 position = Vector2(0, 170)
-texture = ExtResource("5_ymggw")
+texture = ExtResource("5_l17qn")
 centered = false
 
 [node name="Dunya" type="Node2D" parent="." unique_id=1291708175]
 process_mode = 1
 
-[node name="Oyuncu" type="CharacterBody2D" parent="." unique_id=1173728172 instance=ExtResource("6_l17qn")]
+[node name="Oyuncu" type="CharacterBody2D" parent="." unique_id=1173728172 instance=ExtResource("6_gy3e2")]
 process_mode = 1
-script = ExtResource("7_gy3e2")
+script = ExtResource("7_n01t3")
 
 [node name="Efektler" type="Node2D" parent="." unique_id=1530952000]
 
@@ -132,7 +133,7 @@ script = ExtResource("7_gy3e2")
 position = Vector2(360, -10)
 emitting = false
 amount = 90
-texture = SubResource("GradientTexture2D_t7fvk")
+texture = SubResource("GradientTexture2D_r3jcr")
 lifetime = 0.7
 emission_shape = 3
 emission_rect_extents = Vector2(380, 4)
@@ -172,7 +173,7 @@ text = "0 m"
 custom_minimum_size = Vector2(14, 30)
 layout_mode = 2
 mouse_filter = 2
-texture = SubResource("AtlasTexture_dqhw2")
+texture = SubResource("AtlasTexture_7wslt")
 stretch_mode = 3
 
 [node name="AltinSayisi" type="Label" parent="Arayuz/Ust" unique_id=956223377]
@@ -277,7 +278,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_r3jcr")
+theme_override_styles/panel = SubResource("StyleBoxFlat_wee8i")
 
 [node name="Kutu" type="VBoxContainer" parent="Arayuz/DuraklatPaneli" unique_id=1728382373]
 layout_mode = 2
@@ -318,7 +319,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_7wslt")
+theme_override_styles/panel = SubResource("StyleBoxFlat_xi6hm")
 
 [node name="Kutu" type="VBoxContainer" parent="Arayuz/SonPaneli" unique_id=1550314525]
 layout_mode = 2
@@ -350,7 +351,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(340, 26)
 layout_mode = 2
 mouse_filter = 2
-script = ExtResource("9_bevm8")
+script = ExtResource("9_lfd6f")
 
 [node name="SonRekor" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=1363345951]
 unique_name_in_owner = true
@@ -371,6 +372,14 @@ theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.203921
 theme_override_constants/outline_size = 4
 text = "Altın: 0"
 horizontal_alignment = 1
+
+[node name="SonSapma" type="Control" parent="Arayuz/SonPaneli/Kutu" unique_id=1364393486]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(340, 36)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("10_t7fvk")
 
 [node name="SonGorevler" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=1512153346]
 unique_name_in_owner = true

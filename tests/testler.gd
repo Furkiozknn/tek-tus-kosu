@@ -34,6 +34,7 @@ func _calistir() -> void:
 	await _test_dikey_uyari()
 	await _test_ritim()
 	await _test_gunun_ritmi()
+	await _test_v17_histogram_ve_basarimlar()
 	print("\n=== SONUÇ: %d geçti, %d hata ===" % [gecen, hatalar])
 	quit(1 if hatalar > 0 else 0)
 
@@ -1506,6 +1507,117 @@ func _test_gunun_ritmi() -> void:
 	Ritim.sarki = 0
 	Gunluk.tarih_ezme = ""
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(Hayalet.dosya_yolu("ritim")))
+	_kayit_temizle()
+
+
+## v1.7: sonuç panelinde vuruş sapması histogramı; ritim koşusuna özel üç başarım; iki sütunlu başarım paneli.
+func _test_v17_histogram_ve_basarimlar() -> void:
+	print("[v1.7: sapma histogramı, ritim başarımları]")
+	_kayit_temizle()
+	# Kutulama saf hesap: sınırlar TAM_VURUS_MS (70) ve UZAK_MS (150)
+	var k := SapmaGrafigi.kutula([-200.0, -151.0, -150.0, -71.0, -70.0, 0.0, 70.0, 71.0, 150.0, 151.0, 240.0])
+	dogrula(k == [2, 2, 3, 2, 2], "sapmalar beş kutuya sınırlarıyla ayrılmalı (%s)" % str(k))
+	dogrula(SapmaGrafigi.kutula([]) == [0, 0, 0, 0, 0], "boş sapma listesi sıfır kutular")
+	# Ritim koşusu sonucu: histogram görünür, sayılar sapmalardan; sonuç paneli sığar
+	var go: Node2D = await _ritim_oyunu(0, 5, true)
+	await _kareler(30)
+	for ms in [-180.0, -90.0, -20.0, 10.0, 60.0, 100.0, 200.0]:
+		go._ritim_sapmalar.append(ms)
+	go.oyuncu.ol()
+	await _kareler(2)
+	var grafik: SapmaGrafigi = go.get_node("%SonSapma")
+	dogrula(grafik.visible and grafik.sayilar == [1, 1, 3, 1, 1] and grafik.toplam() == 7, "ritim sonucunda histogram sapmaları saymalı (%s)" % str(grafik.sayilar))
+	dogrula((go.son_sonuc["ritim_sapmalar"] as Array).size() == 7, "sonuç sapma listesini taşımalı")
+	dogrula(not go.get_node("%SonIpucu").visible, "histogram varken alt ipucu gizlenmeli")
+	var ekr: Rect2 = go.get_viewport().get_visible_rect()
+	dogrula(ekr.encloses(go.get_node("%SonPaneli").get_global_rect()), "histogramlı ritim sonuç paneli ekrana sığmalı (%s)" % go.get_node("%SonPaneli").get_global_rect())
+	# Kalabalık ritim paneli: yeni başarım + görevler + histogram birlikte sığmalı
+	go.son_sonuc["basarimlar"] = [Basarimlar.tanim("ritim100"), Basarimlar.tanim("m500")]
+	go.son_sonuc["gorev"] = {"tamamlanan": [{"metin": "Tek koşuda 120 m koş"}], "odul": 70, "seviye_atladi": true}
+	go._son_paneli_goster()
+	await _kareler(2)
+	dogrula(ekr.encloses(go.get_node("%SonPaneli").get_global_rect()), "kalabalık histogramlı sonuç paneli ekrana sığmalı (%s)" % go.get_node("%SonPaneli").get_global_rect())
+	go.queue_free()
+	await process_frame
+	# Normal koşuda histogram gizli
+	var no: Node2D = (load(OYUN) as PackedScene).instantiate()
+	no.kayit_yap = false
+	no.olum_tekrari_acik = false
+	root.add_child(no)
+	await _kareler(20)
+	no.oyuncu.ol()
+	await _kareler(2)
+	dogrula(not no.get_node("%SonSapma").visible and no.get_node("%SonIpucu").visible, "normal koşuda histogram gizli, ipucu görünür")
+	no.queue_free()
+	await process_frame
+	# Başarımlar: tanımlar ve koşullar
+	for id in ["ritim100", "uc_sarki300", "gunluk_ritim5"]:
+		dogrula(not Basarimlar.tanim(id).is_empty(), "başarım tanımlı: %s" % id)
+	dogrula(Basarimlar.LISTE.size() == 16 and bool(Basarimlar.tanim("ritim100")["tek"]) and not bool(Basarimlar.tanim("uc_sarki300")["tek"]), "16 başarım; Metronom anlık, diğer ikisi koşu sonu")
+	_kayit_temizle()
+	var d := Kayit.yukle()
+	var ist := Gorevler.bos_istatistik()
+	ist["ritim"] = 99
+	dogrula(not Basarimlar.saglandi_mi("ritim100", d, ist, false), "99 tam vuruş Metronom'u açmamalı")
+	ist["ritim"] = 100
+	dogrula(Basarimlar.saglandi_mi("ritim100", d, ist, false), "100 tam vuruş Metronom'u açmalı")
+	dogrula(not Basarimlar.saglandi_mi("uc_sarki300", d, ist, false), "rekorsuz Üç şarkı açılmamalı")
+	for s in Ritim.SARKILAR:
+		d[str(s["rekor"])] = 300
+	dogrula(Basarimlar.saglandi_mi("uc_sarki300", d, ist, false), "üç şarkıda 300 m rekorla Üç şarkı açılmalı")
+	d[str(Ritim.SARKILAR[2]["rekor"])] = 299
+	dogrula(not Basarimlar.saglandi_mi("uc_sarki300", d, ist, false), "bir şarkı 299 m ise Üç şarkı açılmamalı")
+	for i in 4:
+		Ritim.gecmis_yaz(d, "2026-09-%02d" % (10 + i), 0, 100)
+	dogrula(not Basarimlar.saglandi_mi("gunluk_ritim5", d, ist, false), "4 günlük geçmiş Ritim müdavimi'ni açmamalı")
+	Ritim.gecmis_yaz(d, "2026-09-10", 0, 150)   # aynı gün: sayı artmaz
+	dogrula(not Basarimlar.saglandi_mi("gunluk_ritim5", d, ist, false), "aynı gün tekrar koşmak gün saymamalı")
+	Ritim.gecmis_yaz(d, "2026-09-14", 1, 100)
+	dogrula(Basarimlar.saglandi_mi("gunluk_ritim5", d, ist, false), "5 ayrı gün Ritim müdavimi'ni açmalı")
+	# Koşu sonunda gerçek akış: şarkı rekoru denetimden önce yazılır → Üç şarkı açılır
+	_kayit_temizle()
+	var d2 := Kayit.yukle()
+	for s in Ritim.SARKILAR:
+		d2[str(s["rekor"])] = 300
+	Kayit.kaydet(d2)
+	var uo: Node2D = await _ritim_oyunu(0, 5, true)
+	await _kareler(20)
+	uo.istatistik["ritim"] = 100
+	uo.oyuncu.ol()
+	await _kareler(2)
+	var acilan: Array = (uo.son_sonuc["basarimlar"] as Array).map(func(b: Dictionary) -> String: return str(b["id"]))
+	dogrula(acilan.has("ritim100") and acilan.has("uc_sarki300") and not acilan.has("gunluk_ritim5"), "koşu sonunda Metronom ve Üç şarkı açılmalı (%s)" % str(acilan))
+	var kd: Array = Kayit.yukle()["basarimlar"]
+	dogrula(kd.has("ritim100") and kd.has("uc_sarki300"), "açılan ritim başarımları kayda yazılmalı")
+	dogrula(uo.get_node("%SonGorevler").text.contains("Metronom, Üç şarkı"), "sonuç paneli yeni başarımları listelemeli (%s)" % uo.get_node("%SonGorevler").text)
+	uo.queue_free()
+	await process_frame
+	# Anlık duyuru: Metronom "tek" → koşu içinde bildirilir (temiz kayıt: önceki koşu açmıştı)
+	_kayit_temizle()
+	var ao: Node2D = await _ritim_oyunu(1, 3, false)
+	await _kareler(10)
+	ao.istatistik["ritim"] = 100
+	var anlik := Basarimlar.anlik(Kayit.yukle(), ao.istatistik, false, [])
+	dogrula(anlik.map(func(b: Dictionary) -> String: return str(b["id"])).has("ritim100"), "Metronom koşu içinde anlık duyurulmalı")
+	ao.queue_free()
+	await process_frame
+	# Menü: 16 başarım iki sütunlu ızgarada, panel 360 px'e sığar, düğme sayısı /16
+	_kayit_temizle()
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _kareler(3)
+	dogrula(menu.get_node("%BasarimDugme").text.ends_with("/16"), "başarım düğmesi 0/16 göstermeli (%s)" % menu.get_node("%BasarimDugme").text)
+	(menu.get_node("%BasarimDugme") as Button).pressed.emit()
+	await _kareler(3)
+	var liste: GridContainer = menu.get_node("%BasarimListesi")
+	var bp: Control = menu.get_node("%BasarimPaneli")
+	dogrula(liste.columns == 2 and liste.get_child_count() == 16, "başarım listesi iki sütun, 16 satır")
+	dogrula(menu.get_viewport().get_visible_rect().encloses(bp.get_global_rect()), "16 başarımlı panel ekrana sığmalı (%s)" % bp.get_global_rect())
+	var son: Label = liste.get_child(15)
+	dogrula(son.text.begins_with("☆ Ritim müdavimi"), "son satır yeni başarım (%s)" % son.text)
+	menu.queue_free()
+	await process_frame
+	Ritim.secili = false
 	_kayit_temizle()
 
 

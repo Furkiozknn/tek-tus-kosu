@@ -5,7 +5,7 @@
 **Önerilen ayarlar:** Kind: HTML (tarayıcıda oyna) + Windows indirme · Viewport 1280×720,
 "Mobile friendly" açık, "Fullscreen button" açık · Genre: Action / Platformer ·
 Tags: endless-runner, one-button, pixel-art, casual, mobile, godot · Fiyat: ücretsiz ·
-Kapak: `kapak.png` (630×500) · Ekran görüntüleri: `ekran-1..8*.png` (+ isteğe bağlı `ekran-4a-tekrar.png`; hepsi `tools/ekran_goruntusu.gd` ile üretildi).
+Kapak: `kapak.png` (630×500) · Ekran görüntüleri: `ekran-1..9*.png` (+ isteğe bağlı `ekran-4a-tekrar.png`; hepsi `tools/ekran_goruntusu.gd` ile üretildi).
 
 ---
 
@@ -31,7 +31,8 @@ jump, tap again in mid-air for a second jump. The city speeds up; how far can yo
   as a ghost. Keep a daily streak and share your result with one tap.
 - Flags mark your record and your last fall; the end-of-run city strip shows how far you got and
   where you fell before.
-- 13 achievements.
+- 16 achievements, three of them for the rhythm run (100 perfect beats in one run, 300 m on every track, five days of Beat of the Day).
+- After a rhythm run, a five-bucket histogram shows whether your jumps land early, late or right on the beat — and the game suggests an audio-delay fix when they drift.
 - 43 hand-designed rooftop sections: gaps, spikes, low ceilings you can only pass with a short
   hop, pistons, moving platforms, rotten scaffolds that give way under your feet, gusts of wind that
   stretch or shorten your jumps, and risky coin routes.
@@ -71,7 +72,8 @@ Havada tekrar dokun: ikinci zıplama. Şehir hızlandıkça ne kadar uzağa gide
   Günlük seriyi sürdür, sonucunu tek dokunuşla paylaş.
 - Rekorunun ve son düştüğün yerin üstünde bayrak; koşu sonunda nereye kadar gittiğini ve daha önce
   nerede düştüğünü gösteren şehir şeridi.
-- 13 başarım.
+- 16 başarım; üçü ritim koşusuna özel (tek koşuda 100 tam vuruş, her şarkıda 300 m, günün ritmini 5 ayrı gün).
+- Ritim koşusu bitince beş kutulu sapma histogramı: zıplamaların erken mi, geç mi, tam vuruşta mı olduğunu gösterir; kayma varsa oyun ses gecikmesi düzeltmesi önerir.
 - 43 çatı bölümü: boşluklar, dikenler, yalnızca kısa sıçramayla geçilen alçak tavanlar,
   pistonlar, hareketli platformlar, basınca çöken çürük iskeleler, zıplamayı uzatan ya da kısaltan
   rüzgâr ve riskli altın rotaları.

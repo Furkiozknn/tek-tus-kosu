@@ -17,6 +17,10 @@ const LISTE := [
 	{"id": "gunluk300", "ad": "Günün koşucusu", "metin": "Günlük koşuda 300 m", "tek": true},
 	{"id": "toplam10k", "ad": "Maratoncu", "metin": "Toplam 10.000 m koş", "tek": false},
 	{"id": "dolap", "ad": "Gardırop", "metin": "Bütün kostümleri aç", "tek": false},
+	# v1.7: ritim koşusuna özel üç başarım
+	{"id": "ritim100", "ad": "Metronom", "metin": "Ritim koşusunda 100 tam vuruş", "tek": true},
+	{"id": "uc_sarki300", "ad": "Üç şarkı", "metin": "Her şarkıda 300 m rekor", "tek": false},
+	{"id": "gunluk_ritim5", "ad": "Ritim müdavimi", "metin": "Günün ritmini 5 ayrı gün koş", "tek": false},
 ]
 
 
@@ -56,6 +60,16 @@ static func saglandi_mi(id: String, d: Dictionary, ist: Dictionary, gunluk: bool
 			return int(d.get("toplam_mesafe", 0)) >= 10000
 		"dolap":
 			return (d.get("acik_kostumler", []) as Array).size() >= Kostumler.LISTE.size()
+		"ritim100":
+			return int(ist.get("ritim", 0)) >= 100
+		"uc_sarki300":
+			# Şarkı rekorları koşu sonunda denetimden önce kayda yazılır (oyun._kosu_sonucunu_isle).
+			for s in Ritim.SARKILAR:
+				if int(d.get(str(s["rekor"]), 0)) < 300:
+					return false
+			return true
+		"gunluk_ritim5":
+			return (d.get("gunluk_ritim_gecmis", []) as Array).size() >= 5
 	return false
 
 

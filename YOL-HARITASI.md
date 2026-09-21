@@ -107,10 +107,17 @@
 - [x] Ritim: şarkı seçim panelinde 2 saniyelik önizleme (odak/üzerine gelme; menü müziği duraklar)
 - [x] Günün ritmi: son 7 günün rekor listesi (kayıtta `gunluk_ritim_gecmis`, panel açıklama satırında)
 
-## Sonraki tur (v1.7)
+## Bitti — v1.7 (2026-09-21)
 
-- [ ] Ritim: sonuç panelinde vuruş sapması histogramı (erken/geç dağılımı, 5 kutu)
-- [ ] Başarımlar: ritim koşusuna özel 3 başarım (100 tam vuruş, üç şarkıda 300 m, günün ritmi 5 gün)
+- [x] Ritim: sonuç panelinde vuruş sapması histogramı (5 kutu: çok erken / erken / tam / geç / çok geç;
+      `SapmaGrafigi`, sınırlar ±70 ve ±150 ms; yalnız ritim koşusunda ve en az bir değerlendirilmiş zıplama varsa)
+- [x] Başarımlar: ritim koşusuna özel 3 başarım — "Metronom" (tek koşuda 100 tam vuruş, anlık), "Üç şarkı"
+      (her şarkıda 300 m rekor), "Ritim müdavimi" (günün ritmini 5 ayrı gün); başarım paneli iki sütun (16 başarım)
+
+## Sonraki tur (v1.8)
+
+- [ ] Ritim: koşu içi seri rozeti (×10, ×25 tam vuruşta kısa vurgu ve ses perdesi basamağı)
+- [ ] Günün ritmi: haftalık en iyi 3 gün özeti paylaşım metnine (opsiyonel satır)
 - [ ] Gerçek telefonda deneme (dokunma gecikmesi, tam ekran, paylaşım menüsü)
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] Paylaşım metnine itch adresi (yayından sonra `Ayarlar.ITCH_ADRESI` doldurulur — kod hazır)

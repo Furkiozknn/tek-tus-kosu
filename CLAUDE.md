@@ -109,6 +109,12 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   `_onizle(i)` (yalnız ritim paneli açıkken); Geri ve `basla()` durdurur. Günün ritmi geçmişi `gunluk_ritim_gecmis`
   (`Ritim.gecmis_yaz`, en çok `GECMIS_GUN` = 7 kayıt, aynı gün en iyi kalır); `Ritim.gecmis_metni()` panel açıklama
   satırının yerine geçer (yer kaplamaz; geçmiş yoksa `RITIM_ACIKLAMA`).
+- v1.7: `SapmaGrafigi` (`scripts/sapma_grafigi.gd`, sonuç panelinde `%SonSapma`) `son_sonuc["ritim_sapmalar"]`'ı
+  `kutula()` ile beş kutuya sayar (sınırlar `Ritim.TAM_VURUS_MS` ve `SapmaGrafigi.UZAK_MS`); `_son_paneli_goster`
+  yalnız ritimde ve liste boş değilse gösterir, o zaman `%SonIpucu` gizlenir (panel 360 px'e sığsın). Başarım paneli
+  `%BasarimListesi` artık 2 sütunlu `GridContainer` (16 başarım tek sütunda sığmıyordu); ritim başarımları
+  `ritim100` (ist["ritim"], anlık), `uc_sarki300` (`SARKILAR[*].rekor` anahtarları — koşu sonunda rekor denetimden
+  önce yazılır), `gunluk_ritim5` (`gunluk_ritim_gecmis` uzunluğu). Yeni başarım eklerken panelin sığdığı test var.
 - Günlük seri kayıtta `gunluk_seri`; paylaşım metni `Gunluk.paylasim_metni()`. Web'de dokunmatik
   cihazda `navigator.share`, diğerlerinde panoya kopyalama (`oyun._paylas`).
 
@@ -133,6 +139,9 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
+- v1.7 (bulut): 849 test geçti (kutulama sınırları, ritim sonucunda histogram + ipucu gizleme, kalabalık panel sığması,
+  normal koşuda gizli, üç başarımın koşulları ve koşu sonu/anlık akışı, 16 başarımlı iki sütunlu panel sığması);
+  `ekran-9-sonuc.png` histogramlı sonuç paneli.
 - v1.6 (bulut): 821 test geçti (önizleme: panel açılınca 1. şarkı, odakla değişim, süre dolunca/Geri'de/koşuda durma,
   menü müziği duraklama-sürme; geçmiş: yazma, 7 gün sınırı, aynı gün en iyi, metin sırası); web'de ritim paneli hatasız.
 - v1.5 (bulut): 809 test geçti (tema kilidi, şimşek sayacı, sarsıntı kapalıyken 0, 1. şarkıda kilit yok);

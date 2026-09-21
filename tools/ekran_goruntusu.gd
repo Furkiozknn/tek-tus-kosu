@@ -274,12 +274,13 @@ func _ritim() -> void:
 		push_error("ritim görüntüsü için uygun an bulunamadı")
 	await _bekle(16)
 	await _kaydet("ekran-7-ritim.png")
-	# Sonuç paneli: zıplamalar ortalama 70 ms geç → gecikme önerisi düğmesi
+	# Sonuç paneli (v1.7): sapma histogramı — dağılım geç tarafa yığılı, ortalama +60 ms → gecikme önerisi düğmesi de çıkar
 	oyun._ritim_sapmalar.clear()
-	for i in 8:
-		oyun._ritim_sapmalar.append(66.0 + i)
+	for ms in [-120.0, -60.0, -30.0, 10.0, 25.0, 40.0, 55.0, 65.0, 85.0, 95.0, 110.0, 130.0, 165.0, 190.0]:
+		oyun._ritim_sapmalar.append(ms)
 	oyun.oyuncu.ol()
 	await _bekle(10)
+	await _kaydet("ekran-9-sonuc.png")
 	await _kaydet("ritim-sonuc.png", KONTROL)
 	oyun.queue_free()
 	await _bekle(2)

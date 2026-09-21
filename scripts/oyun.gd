@@ -776,6 +776,7 @@ func _kosu_sonucunu_isle() -> void:
 			toplam += m2
 		son_sonuc["ritim_sapma"] = toplam / _ritim_sapmalar.size() if not _ritim_sapmalar.is_empty() else 0.0
 		son_sonuc["ritim_sapma_sayi"] = _ritim_sapmalar.size()
+		son_sonuc["ritim_sapmalar"] = _ritim_sapmalar.duplicate()   # v1.7: sonuç panelindeki histogram
 		_gecikme_onerisi = Ritim.gecikme_onerisi(int(d["ayarlar"].get("ritim_gecikme", 0)), _ritim_sapmalar)
 	kosu_bitti.emit(m, altin)
 
@@ -878,8 +879,14 @@ func _son_paneli_goster() -> void:
 		satirlar.append("Görev seviyesi %d!" % int(s.get("seviye", 1)))
 	son_altin.text = satirlar[0]
 	son_gorevler.text = "\n".join(satirlar.slice(1))
+	# v1.7: ritimde vuruş sapması histogramı (değerlendirilen zıplama yoksa gizli)
+	var sapmalar: Array = s.get("ritim_sapmalar", [])
+	var grafik: SapmaGrafigi = %SonSapma
+	grafik.visible = ritim and not sapmalar.is_empty()
+	if grafik.visible:
+		grafik.ayarla(sapmalar)
 	# Kalabalık panelde alt ipucu yer kaplamasın (dokunma/boşluk yine çalışır).
-	%SonIpucu.visible = satirlar.size() <= 6
+	%SonIpucu.visible = satirlar.size() <= 6 and not grafik.visible
 	# Günlük koşuda üç düğme: Tekrar | Paylaş | Menü. Ritimde gecikme önerisi varsa: Tekrar | Gecikme | Menü
 	%PaylasDugme.visible = gunluk or ritim_gunluk
 	%PaylasDugme.text = "Paylaş"

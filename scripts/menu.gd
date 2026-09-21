@@ -190,7 +190,7 @@ func _kostum_listesi() -> void:
 
 
 func _basarim_listesi() -> void:
-	var liste: VBoxContainer = %BasarimListesi
+	var liste: GridContainer = %BasarimListesi
 	for c in liste.get_children():
 		c.queue_free()
 	var acik: Array = d["basarimlar"]
@@ -198,7 +198,7 @@ func _basarim_listesi() -> void:
 		var l := Label.new()
 		var tamam := acik.has(b["id"])
 		l.text = ("★ " if tamam else "☆ ") + "%s — %s" % [b["ad"], b["metin"]]
-		l.add_theme_font_size_override("font_size", 12)
+		l.add_theme_font_size_override("font_size", 11)   # v1.7: iki sütun, 16 başarım
 		l.add_theme_color_override("font_color", Color("fee761") if tamam else Color("8b9bb4"))
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		liste.add_child(l)

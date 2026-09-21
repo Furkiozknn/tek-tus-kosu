@@ -3,7 +3,9 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v1.6 — geliştirme turu 11 (2026-09-21). Ritim panelinde şarkı önizlemesi (düğmeye odaklanınca/üzerine gelince
+**Durum:** v1.7 — geliştirme turu 12 (2026-09-21). Ritim koşusu sonuç panelinde vuruş sapması histogramı (çok erken /
+erken / tam / geç / çok geç) ve ritim koşusuna özel üç başarım: Metronom (100 tam vuruş), Üç şarkı (her şarkıda 300 m),
+Ritim müdavimi (günün ritmini 5 ayrı gün); başarım paneli 16 başarımla iki sütun. v1.6: Ritim panelinde şarkı önizlemesi (düğmeye odaklanınca/üzerine gelince
 şarkının başından 2 sn; menü müziği o sırada duraklar) ve günün ritmi için son 7 günün rekor geçmişi (panelin
 açıklama satırında). v1.5: Fırtına Hattı'nda şarkıya kilitli "Fırtına" teması (yağmur,
 yıldızsız gök) ve ölçü başlarında şimşek perdesi (yalnız görsel; sarsıntı ayarı kapalıyken yok). v1.4: Özel web kabuğu (`yayin/web-kabuk.html`): oyunun gece paletinde
@@ -41,6 +43,10 @@ kostümler, ölüm tekrarı, ayarlar.)
   ve ölüm listesi; sonuç panelinde tam vuruş sayısı; 13. başarım "Vuruşu yakala" (tek koşuda 20 tam vuruş).
   Duraklatınca müzik de durur; müzik oyun zamanından 60 ms'den fazla kayarsa (sekme gizlendi,
   uzun takılma) müzik oyuna göre yeniden sarılır.
+- **Sapma histogramı ve ritim başarımları (v1.7):** koşu sonunda `SapmaGrafigi` (`%SonSapma`) değerlendirilen
+  zıplamaların sapmasını beş kutuya sayar (|x| ≤ 70 ms tam; 70–150 erken/geç; > 150 çok erken/çok geç) ve çubuklarla
+  çizer; yalnız ritimde ve zıplama varsa görünür. Başarımlar: "Metronom" (tek koşuda 100 tam vuruş, koşu içinde
+  duyurulur), "Üç şarkı" (üç şarkı rekoru da ≥ 300 m), "Ritim müdavimi" (`gunluk_ritim_gecmis` ≥ 5 gün).
 - **Şarkı önizleme ve günlük geçmiş (v1.6):** `Ses.onizle()` ayrı oynatıcıyla şarkının ilk 2 saniyesini çalar
   (`Ritim.ONIZLEME_SN`), menü müziği duraklar ve önizleme bitince/panelden çıkınca sürer. Günün ritmi her koşuda
   `gunluk_ritim_gecmis`'e yazılır (tarih, şarkı, rekor; 7 gün); panelde "Son günler: 21.09 Çatı 410 m · …".
@@ -94,7 +100,7 @@ kostümler, ölüm tekrarı, ayarlar.)
 - **Telefonda (v0.5):** dikey tutulunca "Telefonu yan çevir" perdesi ve koşu duraklar; web'de dokunmatik
   cihazda Başla'ya basınca tam ekran + yatay kilit denenir.
 - **Kostüm izleri (v0.4):** zıplama/iniş tozu kostüm renginde; Neon ve Altın Taç koşarken iz bırakır.
-- **Başarımlar (v0.3):** 13 başarım (her biri +25 altın), menüde liste, koşu sırasında duyuru.
+- **Başarımlar (v0.3, v1.7):** 16 başarım (her biri +25 altın), menüde iki sütunlu liste, koşu sırasında duyuru.
 - **43 parça:** zorluk 0 "nefes" parçaları (3–8 tehlikeli parçada bir), zorluk 1–3 parçalar;
   öğeler: çukur, diken, blok, alçak tavan (yalnız kısa sıçramayla geçilir), piston (yükselip inen
   diken), hareketli platform, çürük iskele, rüzgâr, riskli altın rotaları.
@@ -135,6 +141,7 @@ scripts/kayit.gd         kayıt + yedek + ayarlar
 scripts/gunluk.gd        günlük koşu: tarih, tohum, günün rekoru/denemeleri
 scripts/hayalet.gd       günlük koşu hayaleti: örnekleme, kaydet/yükle, geri oynatma
 scripts/basarimlar.gd    başarım listesi ve denetimi
+scripts/sapma_grafigi.gd ritim sonucunda vuruş sapması histogramı (v1.7)
 scripts/isaret.gd        dünyadaki rekor / son ölüm / hayalet bayrakları
 scripts/mini_harita.gd   koşu sonu şehir ışıkları şeridi
 scripts/coken.gd         çürük iskele (basınca çöken tahta köprü)
