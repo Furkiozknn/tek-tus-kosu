@@ -1,7 +1,8 @@
 # CLAUDE.md — Tek Tuş Koşu
 
 Godot 4.7.2 (GL Compatibility), GDScript, 2D yandan görünüm, sonsuz koşu. Arayüz ve kod dili Türkçe.
-Proje sahibi: Furki. İlgili kurallar: `D:\Claude Projeleri\oyun-terminalleri\GELISTIRME-1-ORTAK.md`.
+Proje sahibi: Furki. Geliştirme makinesinde ayrıca ortak kurallar dosyası var
+(`oyun-terminalleri/GELISTIRME-1-ORTAK.md`) — bu depoda değil.
 
 ## Kurallar
 
@@ -59,8 +60,9 @@ $G --headless --path . --export-release "Web" build/web/index.html
 $G --headless --path . --export-release "Windows Desktop" build/windows/tek-tus-kosu.exe
 ```
 
-PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kullan
-(`D:\Claude Projeleri\oyun-terminalleri\tek-tus-kosu-dogrula.ps1` bunu yapar).
+Geliştirme makinesinde aynı anda tek Godot çalışsın: depoların ortak üst klasöründeki
+`.godot-kilit` dosyasını kullan (`oyun-terminalleri/tek-tus-kosu-dogrula.ps1` bunu yapar;
+ikisi de bu deponun dışında). CI'da gerekmez.
 
 ## Mimari özeti
 
