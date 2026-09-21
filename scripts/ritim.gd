@@ -20,7 +20,7 @@ const SARKILAR := [
 	{"ad": "Çatı Neşesi", "muzik": "muzik_ritim2", "bpm": 22050.0 * 15.0 / 2584.0, "rekor": "rekor_ritim2", "olumler": "olumler_ritim2",
 		"agirlik": {"kisa": 2.2, "cukur": 0.7}, "aciklama": "128 BPM · daha çok alçak tavan"},
 	{"ad": "Fırtına Hattı", "muzik": "muzik_ritim3", "bpm": 22050.0 * 15.0 / 2363.0, "rekor": "rekor_ritim3", "olumler": "olumler_ritim3",
-		"agirlik": {"diken": 1.5, "kisa": 0.6, "cukur": 0.8}, "aciklama": "140 BPM · sık ikili diken"},
+		"agirlik": {"diken": 1.5, "kisa": 0.6, "cukur": 0.8}, "aciklama": "140 BPM · sık ikili diken", "tema": 4},
 ]
 const GECIKME_ARALIK := Vector2i(-150, 300)   ## oyuncu ses gecikmesi ayarı (ms)
 const ONERI_ESIK_MS := 25.0                    ## ortalama sapma bundan büyükse ayar önerilir

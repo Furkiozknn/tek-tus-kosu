@@ -34,6 +34,7 @@ func _calistir() -> void:
 	await _iskele()
 	await _ruzgar()
 	await _ritim()
+	await _firtina()
 	await _menu_paneller()
 	await _kapak()
 	Gunluk.tarih_ezme = ""
@@ -280,6 +281,34 @@ func _ritim() -> void:
 	oyun.oyuncu.ol()
 	await _bekle(10)
 	await _kaydet("ritim-sonuc.png", KONTROL)
+	oyun.queue_free()
+	await _bekle(2)
+
+
+## v1.5: Fırtına Hattı — yağmurlu kilitli tema ve şimşek anı (ölçü başında çakar; 3. karede perde hâlâ belirgin)
+func _firtina() -> void:
+	var oyun: Node2D = (load("res://scenes/oyun.tscn") as PackedScene).instantiate()
+	oyun.ritim = true
+	oyun.ritim_sarki = 2
+	oyun.tohum = 9
+	oyun.kayit_yap = false
+	oyun.olum_tekrari_acik = false
+	oyun.bot_modu = true
+	root.add_child(oyun)
+	await _bekle(2)
+	oyun.ipucu.hide()
+	await _bekle(60 * 12)
+	var sinir := 60 * 40
+	var onceki: int = oyun._simsek_sayisi
+	while sinir > 0:
+		sinir -= 1
+		await process_frame
+		if oyun._simsek_sayisi > onceki:
+			break
+	if sinir <= 0:
+		push_error("fırtına görüntüsü için şimşek bulunamadı")
+	await _bekle(2)
+	await _kaydet("ekran-8-firtina.png")
 	oyun.queue_free()
 	await _bekle(2)
 

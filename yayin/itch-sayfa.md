@@ -5,7 +5,7 @@
 **Önerilen ayarlar:** Kind: HTML (tarayıcıda oyna) + Windows indirme · Viewport 1280×720,
 "Mobile friendly" açık, "Fullscreen button" açık · Genre: Action / Platformer ·
 Tags: endless-runner, one-button, pixel-art, casual, mobile, godot · Fiyat: ücretsiz ·
-Kapak: `kapak.png` (630×500) · Ekran görüntüleri: `ekran-1..7*.png` (+ isteğe bağlı `ekran-4a-tekrar.png`; hepsi `tools/ekran_goruntusu.gd` ile üretildi).
+Kapak: `kapak.png` (630×500) · Ekran görüntüleri: `ekran-1..8*.png` (+ isteğe bağlı `ekran-4a-tekrar.png`; hepsi `tools/ekran_goruntusu.gd` ile üretildi).
 
 ---
 

@@ -22,7 +22,11 @@ const TEMALAR := [
 	{"ad": "Gece", "ust": Color("181425"), "alt": Color("262b44"), "uzak": Color(1, 1, 1), "yakin": Color(1, 1, 1), "yildiz": 1.0, "yagis": false},
 	{"ad": "Yağış", "ust": Color("262b44"), "alt": Color("5a6988"), "uzak": Color(0.75, 0.8, 0.9), "yakin": Color(0.8, 0.85, 0.95), "yildiz": 0.0, "yagis": true},
 	{"ad": "Neon", "ust": Color("181425"), "alt": Color("b55088"), "uzak": Color(0.9, 0.7, 1.0), "yakin": Color(1.0, 0.75, 1.0), "yildiz": 0.6, "yagis": false},
+	# v1.5: yalnız şarkı kilidiyle (Ritim.SARKILAR[i].tema) gelir, normal koşu döngüsüne girmez (TEMA_DONGU)
+	{"ad": "Fırtına", "ust": Color("14162b"), "alt": Color("3a4466"), "uzak": Color(0.6, 0.65, 0.82), "yakin": Color(0.68, 0.74, 0.9), "yildiz": 0.0, "yagis": true, "simsek": true},
 ]
+const TEMA_DONGU := 4                 ## normal koşuda mesafeyle dönen tema sayısı (ilk 4)
+const SIMSEK_OLASILIK := 0.4          ## fırtına temasında her 2 ölçüde bir şimşek olasılığı
 
 @onready var dunya: Node2D = $Dunya
 @onready var oyuncu: Oyuncu = $Oyuncu
@@ -103,6 +107,9 @@ var _ritim_sapmalar: Array[float] = []  ## ritim: değerlendirilen zıplamaları
 var _gecikme_onerisi: Variant = null
 var _ritim_ipucu := true                ## ritim: zıplama vuruşundan bir vuruş önce tık sesi (ayar)
 var _ritim_vurus_k := -999999           ## ritim: son geçilen vuruş indeksi
+var _simsek_rng := RandomNumberGenerator.new()   ## şimşek zamanlaması (parça dizisinden bağımsız)
+var _simsek_rect: ColorRect                       ## şimşek perdesi (gökyüzü katmanında, çalışma anında kurulur)
+var _simsek_sayisi := 0                           ## test/istatistik: bu koşuda çakan şimşek
 var _ritim_ipucu_sayisi := 0            ## ritim: çalınan ipucu sesi sayısı (test)
 
 
@@ -209,6 +216,10 @@ func yeniden_baslat() -> void:
 	_ritim_ipucu = bool(ayar.get("ritim_ipucu", true)) and not bot_modu
 	_ritim_vurus_k = -999999
 	_ritim_ipucu_sayisi = 0
+	_simsek_sayisi = 0
+	_simsek_rng.seed = tohum if tohum >= 0 else int(Time.get_ticks_usec())
+	if _simsek_rect:
+		_simsek_rect.color.a = 0.0
 	_ritim_olcu = 0
 	_ritim_son = -1
 	_ritim_olaylar.clear()
@@ -442,6 +453,25 @@ func _ritim_ipucu_sesi() -> void:
 	if _ritim_ipucu and _ritim_olaylar.has(k + 1):
 		_ritim_ipucu_sayisi += 1
 		Ses.cal("tik", 0.7)
+	# v1.5: fırtına temasında iki ölçüde bir, ölçü başında şimşek (yalnız görsel; sarsıntı ayarı kapalıysa yok)
+	if k >= 0 and k % (Ritim.OLCU * 2) == 0 and tema >= 0 and bool(TEMALAR[tema].get("simsek", false)) \
+			and sarsinti_acik and _simsek_rng.randf() < SIMSEK_OLASILIK:
+		_simsek()
+
+
+## Kısa beyaz perde: 0,45 alfa → 0, 320 ms, güçlü ease-out (giriş yok, ışık anında çakar).
+func _simsek() -> void:
+	if _simsek_rect == null:
+		_simsek_rect = ColorRect.new()
+		_simsek_rect.name = "Simsek"
+		_simsek_rect.color = Color(0.9, 0.95, 1.0, 0.0)
+		_simsek_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_simsek_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		gok.get_parent().add_child(_simsek_rect)
+	_simsek_sayisi += 1
+	_simsek_rect.color.a = 0.45
+	var tw := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(_simsek_rect, "color:a", 0.0, 0.32)
 
 
 ## Ritim: zıplanmadan (ya da çok erken/geç zıplanarak) geçilen vuruşlar seriyi bozar.
@@ -593,8 +623,17 @@ func _kamera_guncelle() -> void:
 
 
 # ------------------------------------------------------------------ görsel
+## Şarkıya kilitli tema (Fırtına Hattı → Fırtına); yoksa mesafeyle dönen ilk TEMA_DONGU tema.
+func _tema_secimi() -> int:
+	if ritim:
+		var kilit: int = int(Ritim.SARKILAR[ritim_sarki].get("tema", -1))
+		if kilit >= 0 and kilit < TEMALAR.size():
+			return kilit
+	return int(mesafe() / Ayarlar.TEMA_ARALIGI_M) % TEMA_DONGU
+
+
 func _tema_guncelle(aninda: bool) -> void:
-	var yeni := int(mesafe() / Ayarlar.TEMA_ARALIGI_M) % TEMALAR.size()
+	var yeni := _tema_secimi()
 	if yeni == tema:
 		return
 	tema = yeni

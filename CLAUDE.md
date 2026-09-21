@@ -101,6 +101,9 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   Desen eklerken: ardışık olaylar arası ≥ 2 vuruş (tam zıplama 1,86 vuruş), alçak tavana ≥ 3 (`desen_sec`
   ölçüler arasında da uygular); 3. vuruşta yalnız diken (çukur/tavan geometrisi parça sonunu aşar). Sonra
   `bot_stres --ritim [--sarki 1]` ve `--vurus -175 / 150` ile pencereyi yeniden ölç.
+- Tema: `_tema_secimi()` — ritimde şarkının `tema` anahtarı varsa kilit, yoksa mesafeyle `TEMA_DONGU` (4) tema döner;
+  `TEMALAR[4]` "Fırtına" yalnız kilitle gelir (`simsek: true` → `_simsek()` perdesi, `_simsek_rng` tohumdan,
+  `sarsinti` kapalıyken yok, sayaç `_simsek_sayisi`). Yeni temayı listenin sonuna ekle, `TEMA_DONGU`'yu değiştirme.
 - Günlük seri kayıtta `gunluk_seri`; paylaşım metni `Gunluk.paylasim_metni()`. Web'de dokunmatik
   cihazda `navigator.share`, diğerlerinde panoya kopyalama (`oyun._paylas`).
 
@@ -125,6 +128,8 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
 
 ## Doğrulama
 
+- v1.5 (bulut): 809 test geçti (tema kilidi, şimşek sayacı, sarsıntı kapalıyken 0, 1. şarkıda kilit yok);
+  Fırtına Hattı bot 4 tohum × 3 dk 0 ölüm; `ekran-8-firtina.png` şimşek anında çekildi.
 - v1.4 (bulut): özel web kabuğu Chromium'da masaüstü + telefon emülasyonunda: yükleme ekranı (ilerleme %2 → %100,
   "Başlatılıyor"), 220 ms solarak kaldırılıyor, oyun menüsü açılıyor; konsolda hata yok. 804 test değişmedi.
 - v1.3 (bulut): 804 test geçti; Fırtına Hattı (140 BPM, diken ×1,5) bot 16 tohum × 3 dk 0 ölüm; kaydırmalı oyuncu

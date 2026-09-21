@@ -1214,7 +1214,31 @@ func _test_ritim() -> void:
 			break
 	dogrula(kalan3 >= 0.0 and minf(kalan3, Ritim.adim(2) - kalan3) < 0.01, "140 BPM parçaları ızgarada bitmeli (%.4f)" % kalan3)
 	print("  140 BPM koşusunda çift diken görüldü: %s" % str(ikili_var))
+	# v1.5: Fırtına Hattı temayı Fırtına'ya kilitler (yağış açık, yıldız yok), ölçü başlarında şimşek çakar
+	var firtina := -1
+	for i in o3.TEMALAR.size():
+		if str(o3.TEMALAR[i]["ad"]) == "Fırtına":
+			firtina = i
+	dogrula(firtina == o3.TEMALAR.size() - 1 and firtina >= o3.TEMA_DONGU, "Fırtına teması listenin sonunda, normal döngünün dışında")
+	dogrula(o3.tema == firtina and o3.yagis.emitting and is_zero_approx(o3.katman_yildiz.modulate.a), "3. şarkı temayı Fırtına'ya kilitlemeli (tema=%d)" % o3.tema)
+	dogrula(o3._simsek_sayisi > 0 and o3._simsek_rect != null and o3._simsek_rect.color.a < 0.46, "60 sn'de en az bir şimşek çakmalı (%d)" % o3._simsek_sayisi)
 	o3.queue_free()
+	await process_frame
+	# Sarsıntı ayarı kapalıyken şimşek yok (fotosensitivite); ilk şarkıda tema kilidi yok, ilk 4 temada döner
+	var kd0 := Kayit.yukle()
+	kd0["ayarlar"]["sarsinti"] = false
+	Kayit.kaydet(kd0)
+	var o4 := await _ritim_oyunu(2, 9, false)
+	var s4: Array = await _ritim_oyna(o4, 0.0, 60 * 30)
+	dogrula(s4[0] and o4._simsek_sayisi == 0 and o4.tema == firtina, "sarsıntı kapalıyken şimşek çakmamalı, tema yine Fırtına (%d)" % o4._simsek_sayisi)
+	o4.queue_free()
+	await process_frame
+	kd0["ayarlar"]["sarsinti"] = true
+	Kayit.kaydet(kd0)
+	var o5 := await _ritim_oyunu(0, 9, false)
+	await _ritim_oyna(o5, 0.0, 60 * 5)
+	dogrula(o5.tema >= 0 and o5.tema < o5.TEMA_DONGU and o5._simsek_sayisi == 0, "1. şarkıda tema kilidi ve şimşek yok (tema=%d)" % o5.tema)
+	o5.queue_free()
 	await process_frame
 
 	# Vuruş ipucu sesi: zıplamadan koşan oyuncu ilk engelde ölene kadar en az bir tık duyar; ayar kapalıyken hiç

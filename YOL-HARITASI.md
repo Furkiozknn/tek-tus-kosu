@@ -96,10 +96,16 @@
 
 - [x] Üçüncü şarkı: Fırtına Hattı, 140 BPM "gergin" — `agirlik` diken ×1,5 (çift diken ×2,25), 16 tohum stres 0 ölüm, pencere −175…+150 ms
 
-## Sonraki tur (v1.4)
+## Bitti — v1.4 / v1.5 (2026-09-21)
 
-- [ ] Ritim: şarkıya özel görsel tema (Fırtına Hattı'nda yağmur/şimşek parçacığı) — yalnız görsel, geometri aynı
 - [x] Web kabuğu: özel yükleme ekranı (`yayin/web-kabuk.html`) — başlık, yüzdeli ilerleme, tek tuş ipucu (v1.4)
+- [x] Ritim: Fırtına Hattı'nda kilitli "Fırtına" teması (yağmur, yıldızsız gök) ve ölçü başında şimşek perdesi;
+      yalnız görsel, sarsıntı ayarı kapalıyken şimşek yok (v1.5)
+
+## Sonraki tur (v1.6)
+
+- [ ] Ritim: şarkı seçim panelinde 2 saniyelik önizleme (şarkının ilk ölçüsü çalar)
+- [ ] Günün ritmi: son 7 günün rekor listesi (kayıtta `gunluk_ritim_gecmis`)
 - [ ] Gerçek telefonda deneme (dokunma gecikmesi, tam ekran, paylaşım menüsü)
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] Paylaşım metnine itch adresi (yayından sonra `Ayarlar.ITCH_ADRESI` doldurulur — kod hazır)

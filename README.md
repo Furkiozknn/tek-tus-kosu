@@ -3,7 +3,8 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v1.4 — geliştirme turu 11 (2026-09-20). Özel web kabuğu (`yayin/web-kabuk.html`): oyunun gece paletinde
+**Durum:** v1.5 — geliştirme turu 11 (2026-09-21). Fırtına Hattı'nda şarkıya kilitli "Fırtına" teması (yağmur,
+yıldızsız gök) ve ölçü başlarında şimşek perdesi (yalnız görsel; sarsıntı ayarı kapalıyken yok). v1.4: Özel web kabuğu (`yayin/web-kabuk.html`): oyunun gece paletinde
 yükleme ekranı, yüzdeli ilerleme çubuğu, kontrol ipucu, azaltılmış hareket desteği. v1.3: Üçüncü şarkı **Fırtına Hattı** (140 BPM, "gergin" ruh): diken ağırlığı
 ×1,5 ile çift dikenli ölçüler (ikili, arka vuruş) ×2,25 sıklıkta, alçak tavan daha seyrek; ritim paneli üç şarkıyla temel
 çözünürlüğe sığacak biçimde sıkılaştırıldı. (v1.2: şarkıya özel desen ağırlığı: Çatı Neşesi'nde alçak tavan daha
@@ -38,6 +39,11 @@ kostümler, ölüm tekrarı, ayarlar.)
   ve ölüm listesi; sonuç panelinde tam vuruş sayısı; 13. başarım "Vuruşu yakala" (tek koşuda 20 tam vuruş).
   Duraklatınca müzik de durur; müzik oyun zamanından 60 ms'den fazla kayarsa (sekme gizlendi,
   uzun takılma) müzik oyuna göre yeniden sarılır.
+- **Şarkı teması (v1.5):** `Ritim.SARKILAR[i].tema` şarkıyı `oyun.TEMALAR` içindeki bir temaya kilitler
+  (Fırtına Hattı → "Fırtına": yağış açık, yıldız yok). Normal koşu ilk `TEMA_DONGU` = 4 temada döner, Fırtına oraya
+  girmez. Şimşek: `_ritim_ipucu_sesi()` her iki ölçüde bir (`k % 8 == 0`) `SIMSEK_OLASILIK` ile `_simsek()` —
+  gökyüzü katmanına çalışma anında eklenen beyaz `ColorRect` 0,45 → 0 alfa, 320 ms cubic ease-out; zamanlama
+  `_simsek_rng` (tohumdan) ile parça dizisinden bağımsız; `sarsinti` ayarı kapalıysa hiç çakmaz.
 - **Web kabuğu (v1.4):** Godot'nun varsayılan beyaz-siyah yükleme sayfası yerine `yayin/web-kabuk.html`
   (`html/custom_html_shell`): "TEK TUŞ KOŞU" başlığı, tek vurgu rengi (menüdeki cam göbeği), sistem yazı tipi,
   `transform`/`opacity` ile ilerleme (sabit hız → `linear`), 260 ms güçlü ease-out giriş ve 220 ms solma çıkışı,
