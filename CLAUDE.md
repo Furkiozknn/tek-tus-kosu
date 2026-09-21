@@ -156,6 +156,10 @@ PC'de aynı anda tek Godot çalışsın: `D:\Repolar\.godot-kilit` kilidini kull
   üç şarkıda ritim stresi 4'er tohum 0 ölüm, iki dışa aktarma temiz.
   Tarayıcıda (Chromium) canlı ritim koşusunda histogram göründü: "Tam vuruş 1 · Ort. sapma −5 ms", beş kutu
   etiketli; 16 başarımlı iki sütunlu panel ve ritim/ayarlar panelleri masaüstü + telefon emülasyonunda sığdı.
+- v1.7.1 denge ölçümü (bulut, yayın öncesi): bot stresi **24 tohum × 3 dk 0 ölüm**, 43 parçanın hepsi görüldü;
+  ritim stresi **üç şarkıda 8'er tohum × 3 dk 0 ölüm**; kaydırmalı oyuncu −175 / −150 / +150 ms'de 4 tohum × 2 dk
+  0 ölüm (pencere v0.6'dan beri aynı). Temiz klon: `git lfs pull` → içe aktarma 0 hata → 853 test → iki export →
+  tarayıcıda menü/başarım/koşu, konsol temiz.
 - v1.6 (bulut): 821 test geçti (önizleme: panel açılınca 1. şarkı, odakla değişim, süre dolunca/Geri'de/koşuda durma,
   menü müziği duraklama-sürme; geçmiş: yazma, 7 gün sınırı, aynı gün en iyi, metin sırası); web'de ritim paneli hatasız.
 - v1.5 (bulut): 809 test geçti (tema kilidi, şimşek sayacı, sarsıntı kapalıyken 0, 1. şarkıda kilit yok);

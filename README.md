@@ -246,6 +246,9 @@ menü, ritim paneli (üç şarkı + önizleme), ritim koşusu ve **sonuç paneli
 ve paylaşım; konsolda hata yok. Önceki sürümlerin test sayıları: v1.7 849, v1.6 821, v1.5 809, v1.3 804, v1.2 793,
 v1.0 791, v0.9 788, v0.8 782, v0.7 765, v0.6 740, v0.5 714, v0.4 660, v0.3 558, v0.2 388, v0.1 171.
 
+Yayın öncesi denge ölçümü (v1.7.1, bulut): bot stresi 24 tohum × 3 dk 0 ölüm (43 parçanın hepsi görüldü),
+ritim stresi üç şarkıda 8'er tohum × 3 dk 0 ölüm, vuruş penceresi −175 / −150 / +150 ms'de 0 ölüm.
+
 Üretilen PNG ve WAV dosyaları bulutta ve Windows'ta bayt bayt aynı (üreticiler deterministik).
 
 `build/.gdignore` var: Godot'un dışa aktarma çıktısındaki PNG'leri proje kaynağı sanıp
