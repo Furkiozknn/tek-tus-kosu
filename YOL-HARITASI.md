@@ -136,9 +136,7 @@
 
 - [ ] Ritim: koşu içi seri rozeti (×10, ×25 tam vuruşta kısa vurgu ve ses perdesi basamağı)
 - [ ] Günün ritmi: haftalık en iyi 3 gün özeti paylaşım metnine (opsiyonel satır)
-- [ ] Gerçek telefonda deneme (dokunma gecikmesi, tam ekran, paylaşım menüsü)
+- [ ] Gerçek telefonda deneme: dokunma gecikmesi, tam ekran, paylaşım menüsü (cihaz gerekir)
 - [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] Paylaşım metnine itch adresi (yayından sonra `Ayarlar.ITCH_ADRESI` doldurulur — kod hazır)
-- [ ] Gerçek telefonda dokunma, tam ekran ve paylaşım menüsü denemesi
-- [ ] Android dışa aktarma (JDK + Android SDK kurulumu gerekir)
 - [ ] itch.io web yayını (Furki'nin onayıyla)
