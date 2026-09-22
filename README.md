@@ -128,8 +128,10 @@ kurmak, dışa aktarma şablonu indirmek gerekmiyor.
 Son koşuda ölçülen: web `index.pck` **861.964 bayt**, web paketi ~10 MB,
 Windows paketi ~38 MB.
 
-İş akışı hiçbir şey yayımlamaz: ne release varlığı ekler, ne Pages'e
-gönderir. Yayın kararı paket oynandıktan sonra verilir.
+Varsayılanı hiçbir şey yayımlamamaktır. Oynayıp "yayınlanabilir" dediğinde
+aynı pencerede **`sayfaya_yayinla`** kutusunu işaretlemen yeterli: o zaman
+web paketi GitHub Pages'e gider ve oyun tarayıcıdan oynanır hâle gelir.
+Kutu işaretlenmedikçe Pages'e dokunulmaz.
 
 - Depoyu klonladıktan sonra **`git lfs pull`** çalıştır: görseller, sesler ve yazı tipi Git LFS'te tutulur;
   çekilmezse yerlerine 128 baytlık işaretçi dosyalar gelir ve proje bozuk varlıklarla açılır.
