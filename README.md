@@ -1,3 +1,5 @@
+![Tek Tus Kosu - one-button endless rooftop runner in Godot 4 with a beat-aligned rhythm mode and a post-run timing histogram](yayin/banner.svg)
+
 # Tek Tuş Koşu
 
 *One-button endless rooftop runner (Godot 4, Turkish UI). Its rhythm mode lays every obstacle on the music's beat grid, then shows you how you were off: a five-bucket timing histogram after the run, and an audio-delay correction the game derives from your own jumps. 853 headless tests.*
