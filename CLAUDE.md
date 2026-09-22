@@ -156,65 +156,19 @@ ikisi de bu deponun dışında). CI'da gerekmez.
 
 ## Doğrulama
 
-- v1.7.1 (bulut ve Windows 11, aynı sonuç): **853 test geçti** (kutulama sınırları, ritim sonucunda histogram + ipucu gizleme, orta ve en
-  kalabalık panelin sığması, normal koşuda gizli, üç başarımın koşulları ve koşu sonu/anlık akışı, 16 başarımlı
-  iki sütunlu panel sığması); `ekran-9-sonuc.png` histogramlı sonuç paneli.
-  v1.7 etiketinde 849 testti; panel taşma düzeltmesi 4 doğrulama ekledi. Windows 11 (v171 günlüğü):
-  853 test, bot stresi 8 tohum 0 ölüm, üç şarkıda ritim stresi 4'er tohum 0 ölüm, iki dışa aktarma temiz.
-  Tarayıcıda (Chromium) canlı ritim koşusunda histogram göründü: "Tam vuruş 1 · Ort. sapma −5 ms", beş kutu
-  etiketli; 16 başarımlı iki sütunlu panel ve ritim/ayarlar panelleri masaüstü + telefon emülasyonunda sığdı.
-- v1.7.2 (belge/lisans/CI turu): oyun kodu ve yayın yapıları v1.7.1 ile aynı; MIT `LICENSE`,
-  GitHub Actions ve belge düzeltmeleri geldi.
-- v1.7.1 denge ölçümü (bulut, yayın öncesi): bot stresi **24 tohum × 3 dk 0 ölüm**, 43 parçanın hepsi görüldü;
-  ritim stresi **üç şarkıda 8'er tohum × 3 dk 0 ölüm**; kaydırmalı oyuncu −175 / −150 / +150 ms'de 4 tohum × 2 dk
-  0 ölüm (pencere v0.6'dan beri aynı). Temiz klon: `git lfs pull` → içe aktarma 0 hata → 853 test → iki export →
-  tarayıcıda menü/başarım/koşu, konsol temiz.
-- v1.6 (bulut): 821 test geçti (önizleme: panel açılınca 1. şarkı, odakla değişim, süre dolunca/Geri'de/koşuda durma,
-  menü müziği duraklama-sürme; geçmiş: yazma, 7 gün sınırı, aynı gün en iyi, metin sırası); web'de ritim paneli hatasız.
-- v1.5 (bulut): 809 test geçti (tema kilidi, şimşek sayacı, sarsıntı kapalıyken 0, 1. şarkıda kilit yok);
-  Fırtına Hattı bot 4 tohum × 3 dk 0 ölüm; `ekran-8-firtina.png` şimşek anında çekildi.
-- v1.4 (bulut): özel web kabuğu Chromium'da masaüstü + telefon emülasyonunda: yükleme ekranı (ilerleme %2 → %100,
-  "Başlatılıyor"), 220 ms solarak kaldırılıyor, oyun menüsü açılıyor; konsolda hata yok. 804 test değişmedi.
-- v1.3 (bulut): 804 test geçti; Fırtına Hattı (140 BPM, diken ×1,5) bot 16 tohum × 3 dk 0 ölüm; kaydırmalı oyuncu
-  −175/−150/+150 ms 4 tohum × 2 dk 0 ölüm, −200/+175/+200 ms'de alçak tavan dikeninde ölüm (pencere −175…+150 ms, öncekilerle aynı).
-  Ritim paneli 3 şarkıyla 360 px'lik temel çözünürlüğe sığıyor (kenar 12, aralık 5, düğme 30).
-- v1.2 (bulut): 793 test geçti; Çatı Neşesi ağırlıklarıyla bot 16 tohum × 3 dk 0 ölüm, −175/+150 ms 8 tohum 0 ölüm.
-- v1.0 (bulut): 791 test geçti (tık sesi ayarı ve sayacı, ritim paneli sığıyor).
-- v0.9 (bulut): 788 test geçti. 13 desenle iki şarkıda bot 12 tohum × 3 dk 0 ölüm (bütün desenler görüldü);
-  kaydırmalı oyuncu −175 ve +150 ms iki şarkıda 8 tohum × 3 dk 0 ölüm (pencere değişmedi).
-- v0.8 (bulut): 782 test geçti; web'de (Chromium) ritim paneli → Günün ritmi → koşu → sonuç → Paylaş
-  (pano: "Tek Tuş Koşu · Günün ritmi (Gece Koşusu) 16.09.2026 …"); dört düğmeli sonuç paneli testte sığıyor.
-- v0.7 (Windows 11): 765 test; bot stresi 8 tohum, iki şarkıda ritim stresi 4'er tohum, 0 ölüm; web pck 707 KB.
-- v0.7 (bulut): 765 test geçti. 128 BPM: bot 12 tohum × 3 dk 0 ölüm (10 desen); kaydırmalı oyuncu
-  −175 / 0 / +150 ms 0 ölüm, −200 ve +175 ms'de ölüm (150 BPM ile aynı pencere).
-- v0.6 (bulut): 740 test geçti. Ritim: bot 12 tohum × 3 dk 0 ölüm (10 desenin hepsi); vuruşa göre
-  kaydırarak zıplayan oyuncu 8 tohum × 3 dk: −175…+150 ms 0 ölüm, −200 ms ve +175 ms'de alçak tavan
-  dikeninde ölüm (pencerenin sınırı). Çukur 140 → 120 px daraltılarak erken sınır −125'ten −175 ms'ye genişledi.
-- v0.6 (Windows 11): 742 test geçti; bot stresi 8 tohum ve ritim stresi 4 tohum, 0 ölüm; dışa aktarmalar tamam
-  (exe 107 MB, web pck 570 KB).
-- v0.1 (bulut + Windows): 171 test geçti; Windows ve Web dışa aktarma çalıştı.
-- v0.2 (bulut, Linux headless): 388 test geçti, 0 hata. Web sürümü Playwright/Chromium ile:
-  menü, karakter paneli, ayarlar paneli, fareyle başlatma, oyun, ölüm tekrarı, sonuç paneli.
-- v0.3 (bulut): 558 test geçti; bot stresi 24 tohum × 3 dk, 0 ölüm; web'de günlük koşu açıldı.
-- v0.2 (Windows 11): aynı akış + `tools/ekran_goruntusu.gd`; 388 test geçti, dışa aktarmalar tamam.
-- v0.5 (bulut): 714 test geçti; bot stresi 32 tohum × 3 dk, 0 ölüm, 43 parçanın hepsi görüldü. Web'de
-  (Chromium, telefon emülasyonu) dikey → perde + duraklama, yatay → Devam; dokunuşla tam ekran açıldı.
-- v0.5 (Windows 11): 714 test geçti; bot stresi 8 tohum, 0 ölüm; dışa aktarmalar tamam (pck 560 KB).
-- v0.4 (Windows 11): 660 test geçti; bot stresi 8 tohum, 0 ölüm; dışa aktarmalar tamam (pck 546 KB).
-- v0.4 (bulut): 660 test geçti; bot stresi 24 tohum × 3 dk, 0 ölüm, 40 parçanın hepsi görüldü
-  (`bot_stres` artık parça kullanımını yazar). Web'de (Chromium) günlük sonuç → Paylaş → pano
-  metni doğrulandı; ★ ve ✓ simgeleri web'de görünüyor.
-- v0.3 (Windows 11): 558 test geçti; bot stresi 8 tohum × 3 dk, 0 ölüm; ekran görüntüleri ve iki dışa
-  aktarma tamam. Ekran görüntüleri buluttakinden yalnız GPU gürültüsü kadar farklı (kanal farkı ≤ 30).
-  PNG/WAV üreticileri deterministik (bulut ve Windows çıktıları aynı hash). Sahne dosyalarındaki
-  `uid` değerleri makineye göre değişir; bu normal. Düğüm `unique_id` değerleri v0.4'ten beri
-  `sahne_uret` tarafından düğüm yolundan türetilir (yeniden üretim gereksiz fark yaratmaz).
-- Web testinde bilinen durum: Chromium'un AudioContext otomatik oynatma uyarısı (zararsız).
-- Godot çıkışta "N ObjectDB instances were leaked at exit" (test paketinde 25) ve
-  "N resources still in use at exit" (test paketinde 7, stres koşusunda 3-5) yazar. Statik
-  önbelleklerden (`Ses._akislar`, yüklenen sahneler) gelir, sürüm sürüm değişir, çıkış kodunu etkilemez —
-  sızıntı avına çıkma.
-- GitHub Actions (her `main` push'u ve her PR): taze checkout (LFS ile) → Godot 4.7.2 indir →
-  `--import` → `--fixed-fps 60 -s res://tests/testler.gd`. İlk koşu 21 Eylül 2026: **853 geçti, 0 hata**.
-- Temiz klon doğrulaması (v1.7.1): `git lfs pull` → `--import` 0 hata → 853 test → Web + Windows dışa aktarma
-  başarılı → web yapısı Chromium'da menü/başarım paneli/koşu, konsol temiz.
+Kapılar (hepsi geçmeden tur bitmez):
+
+- `-s res://tests/testler.gd` → **853 test, 0 hata**. GitHub Actions `main`'e her push'ta ve
+  her PR'da aynı komutu koşar (taze checkout + Git LFS + Godot 4.7.2); rozet README'de.
+- `tools/bot_stres.gd` uzun koşu: 24 tohum × 3 dk **0 ölüm**, 43 parçanın hepsi görülmeli.
+  Ritim için `--ritim --sarki N`, zamanlama penceresi için `--vurus <ms>` (pencere −175…+150 ms).
+- `tools/panel_olc.gd`: sonuç paneli beş kalabalık seviyesinde de 360 px'e sığmalı.
+- Web yapısı Chromium'da masaüstü + telefon emülasyonunda açılmalı, **konsol hatası 0**.
+- Temiz klon: `git lfs pull` → `mkdir -p build/web build/windows` → `--import` 0 hata → testler.
+
+Beklenen gürültü (hata değil): Godot çıkışta "N ObjectDB instances were leaked" (test
+paketinde 25) ve "N resources still in use at exit" (7) yazar — statik önbelleklerden gelir,
+çıkış kodunu etkilemez. Chromium'un AudioContext otomatik oynatma uyarısı da normaldir.
+Sahne `uid` değerleri makineye göre değişir; düğüm `unique_id`'leri düğüm yolundan türetilir.
+
+Sürüm sürüm ne yapıldığı ve ölçüm geçmişi: `YOL-HARITASI.md` ve README'nin tur bölümleri.

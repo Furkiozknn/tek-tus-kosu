@@ -120,6 +120,18 @@
       aşıyordu — başlık ekran dışında kalıyordu. Panel sığmıyorsa histogram düşüyor; ölçüm aracı
       `tools/panel_olc.gd`, testte beş kalabalık seviyesi
 
+## Bitti — v1.7.2 / v1.7.3: depo hijyeni (2026-09-21/22)
+
+- [x] MIT `LICENSE`
+- [x] GitHub deposu **public** (`Furkiozknn/tek-tus-kosu`, dal `main`), `v1.7.3` etiketi ve Release
+- [x] GitHub Actions: 853 test her `main` push'unda ve her PR'da (Godot 4.7.2 sabit,
+      Git LFS çekilerek); README'de rozet
+- [x] `*.gif` Git LFS'e alındı (`.gitattributes` kuralı artık gerçekten tutuyor)
+- [x] Makineye özel yollar belgelerden ve betiklerden çıkarıldı
+- [x] İki tur bağımsız belge denetimi: sürüm başlığı, test sayısı, vuruş penceresi, günün ritmi hayaleti,
+      ±250 ms sapma filtresi ve temiz klon ön koşulları kodla hizalandı
+- [x] CLAUDE.md sürüm sürüm doğrulama günlüğünden arındırıldı; artık yalnız kapılar var
+
 ## Sonraki tur (v1.8)
 
 - [ ] Ritim: koşu içi seri rozeti (×10, ×25 tam vuruşta kısa vurgu ve ses perdesi basamağı)
