@@ -118,6 +118,19 @@ notları [Releases](https://github.com/Furkiozknn/tek-tus-kosu/releases) sayfas�
 
 ## Çalıştırma
 
+### Godot kurmadan bir paket indir
+
+Depoda **Yapi** adında, yalnızca elle tetiklenen bir iş akışı var. Actions
+sekmesinden bir kez çalıştırdığında sabit Godot 4.7.2-stable ile Windows ve
+Web paketlerini üretip *Artifacts* altına bırakır — oynamak için Godot
+kurmak, dışa aktarma şablonu indirmek gerekmiyor.
+
+Son koşuda ölçülen: web `index.pck` **861.964 bayt**, web paketi ~10 MB,
+Windows paketi ~38 MB.
+
+İş akışı hiçbir şey yayımlamaz: ne release varlığı ekler, ne Pages'e
+gönderir. Yayın kararı paket oynandıktan sonra verilir.
+
 - Depoyu klonladıktan sonra **`git lfs pull`** çalıştır: görseller, sesler ve yazı tipi Git LFS'te tutulur;
   çekilmezse yerlerine 128 baytlık işaretçi dosyalar gelir ve proje bozuk varlıklarla açılır.
 - Godot 4.7.2 ile `project.godot` dosyasını aç, F5.
