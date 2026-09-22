@@ -287,6 +287,19 @@ ritim stresi üç şarkıda 8'er tohum × 3 dk 0 ölüm, vuruş penceresi −175
 `build/.gdignore` var: Godot'un dışa aktarma çıktısındaki PNG'leri proje kaynağı sanıp
 içeri aktarmasını engeller. Silme.
 
+
+### Kırık kaynak referansları
+
+Bir oyunda en geç fark edilen kusur, kırık bir kaynak referansıdır: silinmiş
+bir `.png`, taşınmış bir `.tscn`, adı değişmiş bir `.tres`. Motor bunu her
+zaman açılışta söylemez — sahne o kod yolu çalışana kadar sessiz kalabilir,
+yani testler yeşilken de orada durabilir.
+
+CI'da ayrı bir iş bunu arıyor: aynı hesaptaki
+[godot-refcheck](https://github.com/Furkiozknn/godot-refcheck), motoru
+indirmeden projeyi tarıyor ve bulguları SARIF olarak kod taramaya yüklüyor.
+Şu an temiz: **222 dosya, 215 referans, sıfır bulgu.**
+
 ## Lisans
 
 [MIT](LICENSE) — Furki Özkan, 2026. Görseller, sesler ve müzik depodaki üreteclerle koddan
