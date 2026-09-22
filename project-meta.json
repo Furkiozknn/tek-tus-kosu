@@ -21,10 +21,15 @@
   "license": "MIT",
   "topics": [
     "2d-game",
+    "endless-runner",
     "game-development",
     "gdscript",
     "godot",
-    "godot4"
+    "godot4",
+    "indie-game",
+    "one-button",
+    "rhythm-game",
+    "turkce"
   ],
   "summary": "One-button endless rooftop runner in Godot 4: a rhythm mode that lays every obstacle on the music beat grid, plus a post-run timing histogram. Turkish UI.",
   "key_features": [
