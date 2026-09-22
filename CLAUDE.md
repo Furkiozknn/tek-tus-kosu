@@ -7,7 +7,7 @@ Proje sahibi: Furki. Geliştirme makinesinde ayrıca ortak kurallar dosyası var
 ## Kurallar
 
 - GitHub deposu **var** (`Furkiozknn/tek-tus-kosu`, dal `main`, public — Furki 21 Eylül 2026'da
-  onayladı); push serbest ve `main`'e her push'ta `.github/workflows/ci.yml` 853 testi koşar.
+  onayladı); push serbest ve `main`'e her push'ta `.github/workflows/ci.yml` 961 testi koşar.
   **itch.io yüklemesi yapılmadı** — `yayin/` yalnız hazırlık, yükleme kararı Furki'nin.
 - Dosya kalıcı silinmez; eskiyen dosya `_eski/` klasörüne taşınır.
 - Higgsfield kullanılmaz.
@@ -158,7 +158,7 @@ ikisi de bu deponun dışında). CI'da gerekmez.
 
 Kapılar (hepsi geçmeden tur bitmez):
 
-- `-s res://tests/testler.gd` → **853 test, 0 hata**. GitHub Actions `main`'e her push'ta ve
+- `-s res://tests/testler.gd` → **961 test, 0 hata**. GitHub Actions `main`'e her push'ta ve
   her PR'da aynı komutu koşar (taze checkout + Git LFS + Godot 4.7.2); rozet README'de.
 - `tools/bot_stres.gd` uzun koşu: 24 tohum × 3 dk **0 ölüm**, 43 parçanın hepsi görülmeli.
   Ritim için `--ritim --sarki N`, zamanlama penceresi için `--vurus <ms>` (pencere −175…+150 ms).

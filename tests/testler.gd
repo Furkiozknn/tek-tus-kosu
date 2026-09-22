@@ -35,6 +35,7 @@ func _calistir() -> void:
 	await _test_ritim()
 	await _test_gunun_ritmi()
 	await _test_v17_histogram_ve_basarimlar()
+	await _test_ritim_desen_gecilebilirligi()
 	print("\n=== SONUÇ: %d geçti, %d hata ===" % [gecen, hatalar])
 	quit(1 if hatalar > 0 else 0)
 
@@ -1632,13 +1633,59 @@ func _test_v17_histogram_ve_basarimlar() -> void:
 	_kayit_temizle()
 
 
-func _ritim_oyunu(sarki: int, tohum: int, kayit: bool) -> Node2D:
+# --------------------------------------------- ritim: her desen, her şarkıda
+## Sonsuz koşuda her parça, en düşük ve en yüksek hızında bot ile geçiliyor
+## (`_test_gecilebilirlik`). Ritim koşusunun karşılığı yoktu: bot yalnız rastgele
+## üretilmiş bir akışta koşuyordu, ve rastgele seçim her deseni her şarkıda
+## üretmiyor -- şarkı ağırlıkları bazılarını bilerek seyrekleştiriyor
+## (Fırtına Hattı'nda alçak tavan ×0,6, Çatı Neşesi'nde çukur ×0,7).
+##
+## Önemli olan da tam bu: engel geometrisi mutlak piksel (diken vuruştan +99,
+## çukur +40..+160, alçak tavan −60'tan 260 px), vuruş aralığı ise şarkıya göre
+## değişiyor (120 / 140,6 / 128,6 px). Aynı desen dar aralıklı bir şarkıda
+## geçilemez olabilir, ve o ölçü seyrek çıkıyorsa suit yeşil kalır.
+func _test_ritim_desen_gecilebilirligi() -> void:
+	print("[ritim: her desen, her şarkının vuruş aralığında, kusursuz bot ile]")
+	for sarki in Ritim.SARKILAR.size():
+		var adim: float = Ritim.adim(sarki)
+		for d in Ritim.DESENLER:
+			var ad := str(d["ad"])
+			if (d["olaylar"] as Array).is_empty():
+				continue
+			# Isınma iki ölçü boş; sonra desen, arasına boş ölçü koyarak iki kez.
+			# Boş ölçü, jeneratörün kendi kuralını (olaylar arası ≥ 2 vuruş,
+			# alçak tavana ≥ 3) her zaman sağlıyor -- yani sınanan şey, üretimin
+			# gerçekten üretebileceği bir dünya.
+			var sira: Array[String] = ["bos", "bos", ad, "bos", ad, "bos", ad, "bos"]
+			var oyun: Node2D = await _ritim_oyunu(sarki, 7, false, sira, true)
+			var sonuc := await _ritim_oyna(oyun, 0.0, 1200)
+			dogrula(bool(sonuc[0]), "%s deseni %s şarkısında (vuruş %.1f px) geçilemedi"
+				% [ad, Ritim.SARKILAR[sarki]["ad"], adim])
+			dogrula(int(sonuc[1]) >= 3, "%s / %s: desen en az üç kez olay vermeli (%d)"
+				% [ad, Ritim.SARKILAR[sarki]["ad"], int(sonuc[1])])
+			dogrula(int(sonuc[2]) == int(sonuc[1]),
+				"%s / %s: vuruşta zıplayan botun her zıplaması tam vuruş olmalı (%d/%d)"
+				% [ad, Ritim.SARKILAR[sarki]["ad"], int(sonuc[2]), int(sonuc[1])])
+			oyun.queue_free()
+			await process_frame
+	_kayit_temizle()
+
+
+## `desenler` verilirse ritim ölçüleri AĞACA GİRMEDEN önce kilitlenir. Sonradan
+## atamak yetmiyordu: `_ready` ilk parçaları hemen üretiyor, yani koşunun ilk
+## ölçüleri rastgele kalıyor ve orada gelen bir ölçüde ölüm, sınanan desene
+## yazılıyordu -- negatif kontrol bunu gösterdi.
+func _ritim_oyunu(sarki: int, tohum: int, kayit: bool, desenler: Array[String] = [],
+		bitince_bos := false) -> Node2D:
 	var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
 	oyun.ritim = true
 	oyun.ritim_sarki = sarki
 	oyun.kayit_yap = kayit
 	oyun.olum_tekrari_acik = false
 	oyun.tohum = tohum
+	if not desenler.is_empty() or bitince_bos:
+		oyun.ritim_desen_sirasi = desenler.duplicate()
+		oyun.ritim_sira_bitince_bos = bitince_bos
 	root.add_child(oyun)
 	await process_frame
 	return oyun

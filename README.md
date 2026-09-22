@@ -2,7 +2,7 @@
 
 # Tek Tuş Koşu
 
-*One-button endless rooftop runner (Godot 4, Turkish UI). Its rhythm mode lays every obstacle on the music's beat grid, then shows you how you were off: a five-bucket timing histogram after the run, and an audio-delay correction the game derives from your own jumps. 853 headless tests.*
+*One-button endless rooftop runner (Godot 4, Turkish UI). Its rhythm mode lays every obstacle on the music's beat grid, then shows you how you were off: a five-bucket timing histogram after the run, and an audio-delay correction the game derives from your own jumps. 961 headless tests, including a beat-perfect bot that has to clear every bar pattern at every song's beat spacing.*
 
 [![CI](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml/badge.svg)](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml)
 
@@ -11,7 +11,7 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v1.7.3 — MIT lisansı, her push'ta ve her PR'da **853 testin** koştuğu CI.
+**Durum:** v1.7.3 — MIT lisansı, her push'ta ve her PR'da **961 testin** koştuğu CI.
 Oyun kodu v1.7.1 ile aynı: v1.7.2 ve v1.7.3 belge/lisans/CI turlarıydı, yayımlanmış
 derlemeler değişmedi.
 
@@ -272,6 +272,18 @@ Ayrıntılar: `CLAUDE.md` → Doğrulama.
 Temiz klon denemesi (v1.7.1): `git lfs pull` → `.godot` önbelleği olmadan içe aktarma 0 hata →
 853 test → iki dışa aktarma → web yapısı Chromium'da açıldı (menü, 16 başarımlı iki sütunlu panel,
 koşu; konsolda hata yok).
+
+**Ritim ölçüleri artık tek tek geçiliyor (22 Eylül 2026, 853 → 961).** Sonsuz koşuda
+her parça, en düşük ve en yüksek hızında bot ile geçiliyordu; ritim koşusunun karşılığı
+yoktu — bot yalnızca rastgele üretilmiş bir akışta koşuyordu. Rastgele seçim her deseni
+her şarkıda üretmiyor (şarkı ağırlıkları bazılarını bilerek seyrekleştiriyor), ve engel
+geometrisi mutlak piksel iken vuruş aralığı şarkıya göre değişiyor: 120 / 140,6 /
+128,6 px. Geçilemeyen bir ölçü tam da o seyrek eşleşmede saklanabilirdi. Artık on iki
+olaylı desenin her biri, üç şarkının her birinin vuruş aralığında, vuruşta zıplayan bir
+botla ayrı ayrı koşuluyor; hepsi geçiliyor ve her zıplama tam vuruş sayılıyor. Kapının
+gerçekten ısırdığı ölçüldü: çukur 120 px'ten 260 px'e genişletildiğinde yalnızca çukur
+içeren dört desen (cukur0, cukur2, karma, cift_cukur) üç şarkıda birden kırmızı yandı,
+diken ve alçak tavan desenleri yeşil kaldı.
 
 Tarayıcı (Chromium, Playwright; masaüstü 1280×720 ve telefon emülasyonu 915×412): özel yükleme ekranı,
 menü, ritim paneli (üç şarkı + önizleme), ritim koşusu ve **sonuç panelinde vuruş sapması histogramı**

@@ -8,6 +8,14 @@ signal kosu_bitti(mesafe: int, altin: int)
 var bot_modu := false
 var sabit_hiz := -1.0                 ## >= 0 ise hız artmaz
 var parca_sirasi: Array[String] = []  ## Boş değilse parçalar bu sırayla gelir
+## Test: boş değilse ritim ölçüleri bu desen adlarıyla kurulur (Ritim.DESENLER'deki adlar).
+## Rastgele seçim her deseni her şarkıda üretmez -- şarkı ağırlıkları bazılarını seyrekleştirir --
+## ve geçilemeyen bir ölçü tam da seyrek olanda saklanır.
+var ritim_desen_sirasi: Array[String] = []
+## Test: sıra bitince rastgele üretime DÖNME, boş ölçü ver (`sira_bitince_duz`in ritim karşılığı).
+## Dönseydi tek bir deseni sınayan bir test, sıradan sonra gelen rastgele ölçüde ölür ve
+## ölümü sınadığı desene yazardı -- bu tam da olmuştu.
+var ritim_sira_bitince_bos := false
 var tohum := -1                       ## >= 0 ise rastgelelik sabit
 var sira_bitince_duz := false         ## Test: sıra bitince yalnız düz zemin gelsin
 var kayit_yap := true
@@ -599,7 +607,15 @@ func _parca_ekle(yol: String) -> void:
 
 
 func _ritim_parcasi_ekle() -> void:
-	var r := Ritim.parca_uret(sonraki_x, _izgara0, parca_rng, _ritim_olcu, _ritim_son, _adim, ritim_sarki)
+	var r: Array
+	if ritim_desen_sirasi.is_empty() and not ritim_sira_bitince_bos:
+		r = Ritim.parca_uret(sonraki_x, _izgara0, parca_rng, _ritim_olcu, _ritim_son, _adim, ritim_sarki)
+	else:
+		var desenler: Array = []
+		for i in Ritim.PARCA_OLCU:
+			desenler.append(Ritim.desen_bul(
+				ritim_desen_sirasi.pop_front() if not ritim_desen_sirasi.is_empty() else "bos"))
+		r = Ritim.parca_kur(sonraki_x, _izgara0, desenler, _adim)
 	_ritim_olcu += Ritim.PARCA_OLCU
 	_ritim_son = r[1]
 	for k in r[2]:

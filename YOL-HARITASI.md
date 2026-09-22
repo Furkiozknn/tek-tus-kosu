@@ -124,7 +124,7 @@
 
 - [x] MIT `LICENSE`
 - [x] GitHub deposu **public** (`Furkiozknn/tek-tus-kosu`, dal `main`), `v1.7.3` etiketi ve Release
-- [x] GitHub Actions: 853 test her `main` push'unda ve her PR'da (Godot 4.7.2 sabit,
+- [x] GitHub Actions: 961 test her `main` push'unda ve her PR'da (Godot 4.7.2 sabit,
       Git LFS çekilerek); README'de rozet
 - [x] `*.gif` Git LFS'e alındı (`.gitattributes` kuralı artık gerçekten tutuyor)
 - [x] Makineye özel yollar belgelerden ve betiklerden çıkarıldı

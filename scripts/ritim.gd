@@ -185,8 +185,37 @@ static func desen_sec(rng: RandomNumberGenerator, olcu_no: int, onceki_son: int,
 	return adaylar[rng.rand_weighted(agirlik)]
 
 
+## Bir parçanın ölçü desenleri, sırayla seçilir. `parca_uret` bunu kullanır; ayrı
+## durmasının nedeni SECMEK ile KURMAK'ın iki ayrı soru olmasi: hangi desenler gelsin,
+## ve verilen desenlerden nasıl bir dünya çıkar. İkincisi rastgeleliğe hiç bağlı değil,
+## yani tek tek sınanabilir (`parca_kur`).
+static func desenleri_sec(rng: RandomNumberGenerator, olcu_no: int, onceki_son: int, sarki_no := 0) -> Array:
+	var out: Array = []
+	var son := onceki_son
+	for o in PARCA_OLCU:
+		var d := desen_sec(rng, olcu_no + o, son, sarki_no)
+		out.append(d)
+		var olaylar: Array = d["olaylar"]
+		son = -1 if olaylar.is_empty() else int((olaylar[-1] as Array)[0])
+	return out
+
+
+## Adıyla desen; bilinmeyen ad boş desen döndürür (`desen_kur` ve testler için).
+static func desen_bul(ad: String) -> Dictionary:
+	for d in DESENLER:
+		if str(d["ad"]) == ad:
+			return d
+	return DESENLER[0]
+
+
 ## Ritim parçası üretir. bas_x: parçanın dünya x'i. Dönüş: [Parca, son olay vuruşu, olay vuruşları (dünya indeksleri)].
 static func parca_uret(bas_x: float, izgara0: float, rng: RandomNumberGenerator, olcu_no: int, onceki_son: int, adim_px := ADIM, sarki_no := 0) -> Array:
+	return parca_kur(bas_x, izgara0, desenleri_sec(rng, olcu_no, onceki_son, sarki_no), adim_px)
+
+
+## Verilen ölçü desenlerinden ritim parçası kurar. Rastgelelik yok: aynı desenler
+## aynı dünyayı verir, yani her desen tek tek, her şarkının vuruş aralığında sınanabilir.
+static func parca_kur(bas_x: float, izgara0: float, desenler: Array, adim_px := ADIM) -> Array:
 	var k0 := int(ceil((bas_x - izgara0) / adim_px - 0.001))
 	var giris := izgara0 + k0 * adim_px - bas_x          # parça başından ilk vuruşa (0..adım)
 	var uzunluk := giris + PARCA_OLCU * OLCU * adim_px
@@ -203,10 +232,10 @@ static func parca_uret(bas_x: float, izgara0: float, rng: RandomNumberGenerator,
 	var olay_vuruslari: Array[int] = []
 	var vuruslar := PackedFloat32Array()
 	var zipla := PackedByteArray()
-	var son := onceki_son
+	var son := -1
 	var adlar: Array[String] = []
-	for o in PARCA_OLCU:
-		var d := desen_sec(rng, olcu_no + o, son, sarki_no)
+	for o in desenler.size():
+		var d: Dictionary = desenler[o]
 		adlar.append(str(d["ad"]))
 		var ozel := {}
 		for olay in d["olaylar"]:

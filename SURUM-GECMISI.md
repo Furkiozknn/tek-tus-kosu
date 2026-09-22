@@ -10,7 +10,7 @@ Güncel sürümün notları GitHub'da da duruyor:
 ## v1.7.3 — belge/lisans/CI turu (22 Eylül 2026)
 
 Oyun kodu v1.7.1 ile aynı; yayımlanmış derlemeler değişmedi. MIT lisansı,
-`main`'e her push'ta ve her pull request'te **853 testin** koştuğu CI (Godot
+`main`'e her push'ta ve her pull request'te **961 testin** koştuğu CI (Godot
 4.7.2, Linux headless, Git LFS çekilerek), README ve CLAUDE.md'nin kodla
 hizalanması, makineye özel yolların kaldırılması.
 

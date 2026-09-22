@@ -54,7 +54,7 @@ jobs:
 
       # --fixed-fps 60 SART: testlerin bir bolumu fizik karesi adimlayarak
       # zamanlama olcuyor (ziplama boyu, ritim vurus penceresi).
-      - name: Testler (853)
+      - name: Testler (961)
         run: godot --headless --fixed-fps 60 --path . -s res://tests/testler.gd
 
   referanslar:
