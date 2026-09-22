@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "id": "tek-tus-kosu",
+  "owner": "Furkiozknn",
+  "repository": "https://github.com/Furkiozknn/tek-tus-kosu",
+  "homepage": null,
+  "releases": "https://github.com/Furkiozknn/tek-tus-kosu/releases",
+  "status": "active",
+  "category": "game",
+  "platform": [
+    "windows",
+    "web"
+  ],
+  "primary_language": "GDScript",
+  "technologies": [
+    "Godot 4.7",
+    "GDScript",
+    "GL Compatibility renderer"
+  ],
+  "version": "1.7.3",
+  "license": "MIT",
+  "topics": [
+    "2d-game",
+    "game-development",
+    "gdscript",
+    "godot",
+    "godot4"
+  ],
+  "summary": "One-button endless rooftop runner in Godot 4: a rhythm mode that lays every obstacle on the music beat grid, plus a post-run timing histogram. Turkish UI.",
+  "key_features": [
+    "One-button endless rooftop runner: the only input is when to press",
+    "Rhythm mode lays every obstacle on the music's beat grid instead of a random spacer",
+    "Post-run timing histogram shows how early or late each press landed",
+    "Daily run seeded from the date, so every player gets the same rooftops"
+  ],
+  "media": {
+    "hero": "yayin/ekran-2.png",
+    "screenshots": [
+      "yayin/ekran-2.png"
+    ],
+    "gifs": [],
+    "videos": []
+  },
+  "tests": {
+    "count": 853,
+    "source": "CI log: `=== SONUC: 853 gecti, 0 hata ===`",
+    "measured": "2026-09-22"
+  },
+  "ci": {
+    "workflows": [
+      "ci.yml"
+    ],
+    "badge": "https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml/badge.svg"
+  },
+  "docs": {
+    "readme": "README.md",
+    "changelog": null,
+    "roadmap": "YOL-HARITASI.md",
+    "security": null,
+    "contributing": null,
+    "license_file": "LICENSE"
+  },
+  "social": {
+    "headline": "One button. Every obstacle on the beat.",
+    "hashtags": [
+      "godot",
+      "godot4",
+      "indiedev",
+      "gamedev",
+      "rhythmgame"
+    ],
+    "primary_link": "https://github.com/Furkiozknn/tek-tus-kosu"
+  },
+  "provenance": {
+    "generated_at": "2026-09-22",
+    "generator": "ghcc/gen_meta.py",
+    "rule": "mechanical fields read from the repository and the GitHub API; editorial fields hand-written and reviewed; no field is generated from a guess"
+  }
+}
