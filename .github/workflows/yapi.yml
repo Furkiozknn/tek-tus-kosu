@@ -14,6 +14,11 @@ name: Yapi
 #
 # Paket boyutlari adimda yazdiriliyor; disa aktarma suzgecinin oyuncuya
 # inen pakete ne koydugu boylece olculuyor, tahmin edilmiyor.
+#
+# Web paketi artifact'e ve Pages'e gitmeden once tarayicida acilir
+# (tools/web_duman.py): yukleme ekrani kalkmali, menu cizilmeli, Bosluk ile
+# kosu baslamali, konsolda betik hatasi olmamali. Duman testi duserse is
+# kirmizi olur ve "sayfa" isi hic kosmaz.
 
 on:
   workflow_dispatch:
@@ -40,8 +45,9 @@ jobs:
   yapi:
     name: Windows + Web disa aktar
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Varliklar Git LFS'te; cekilmezse sahneler "bozuk kaynak" duser.
           lfs: true
@@ -86,13 +92,33 @@ jobs:
           ls -l build/windows
           du -sh build/web build/windows
 
-      - uses: actions/upload-artifact@v4
+      # Motorun ici testlerde; bu adim motorun DISINI sinar: web kabugu,
+      # .pck yukleme, WebGL 2 (SwiftShader) ve tarayicidaki girdi.
+      - name: Web duman testi (Chromium)
+        run: |
+          set -euo pipefail
+          # Runner'in sistem Python'u PEP 668 ile korunuyor; ayri venv.
+          python3 -m venv "$RUNNER_TEMP/duman"
+          py="$RUNNER_TEMP/duman/bin/python"
+          "$py" -m pip install --quiet playwright==1.63.0 pillow==12.3.0
+          "$py" -m playwright install --with-deps chromium
+          "$py" tools/web_duman.py build/web --cikti build/duman
+
+      - name: Duman testi ekran goruntuleri
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: tek-tus-kosu-duman
+          path: build/duman
+          if-no-files-found: ignore
+
+      - uses: actions/upload-artifact@v6
         with:
           name: tek-tus-kosu-web
           path: build/web
           if-no-files-found: error
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: tek-tus-kosu-windows
           path: build/windows

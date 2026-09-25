@@ -130,10 +130,23 @@ kurmak, dışa aktarma şablonu indirmek gerekmiyor.
 Son koşuda ölçülen: web `index.pck` **861.964 bayt**, web paketi ~10 MB,
 Windows paketi ~38 MB.
 
+Web paketi artifact'e bırakılmadan önce tarayıcıda açılıp sınanır
+(`tools/web_duman.py`, headless Chromium): yükleme ekranı kalkmalı, menü
+çizilmeli, Boşluk ile koşu başlamalı, konsolda betik hatası olmamalı. Menü ve
+koşu ekran görüntüleri *tek-tus-kosu-duman* artifact'inde durur. Duman testi
+düşerse iş kırmızı olur ve paket yayımlanmaz.
+
 Varsayılanı hiçbir şey yayımlamamaktır. Oynayıp "yayınlanabilir" dediğinde
-aynı pencerede **`sayfaya_yayinla`** kutusunu işaretlemen yeterli: o zaman
-web paketi GitHub Pages'e gider ve oyun tarayıcıdan oynanır hâle gelir.
-Kutu işaretlenmedikçe Pages'e dokunulmaz.
+aynı pencerede **`sayfaya_yayinla`** kutusunu işaretlersin: web paketi GitHub
+Pages'e gider ve oyun tarayıcıdan oynanır hâle gelir. Kutu işaretlenmedikçe
+Pages'e dokunulmaz.
+
+**Pages bir kez elle açılmalı.** İş akışının `GITHUB_TOKEN`'ı Pages sitesini
+sıfırdan oluşturamıyor; 25 Eylül 2026'daki ilk deneme `configure-pages`
+adımında "Resource not accessible by integration" ile düştü (Windows ve web
+paketleri yine de üretildi). Önce **Settings → Pages → Build and deployment →
+Source: GitHub Actions**, sonra kutu işaretli çalıştırma. Şu an Pages açık
+değil, yani oyunun canlı bir web adresi yok.
 
 - Depoyu klonladıktan sonra **`git lfs pull`** çalıştır: görseller, sesler ve yazı tipi Git LFS'te tutulur;
   çekilmezse yerlerine 128 baytlık işaretçi dosyalar gelir ve proje bozuk varlıklarla açılır.
@@ -188,6 +201,10 @@ tools/panel_olc.gd       koşu sonu panelinin 360 px'e sığdığını beş kala
 tests/testler.gd         otomatik testler
 yayin/                   itch.io sayfa metni, ekran görüntüleri, kapak, butler komutları
 .github/workflows/ci.yml her `main` push'unda ve her PR'da testleri koşar (Godot 4.7.2, Linux)
+.github/workflows/yapi.yml elle: Windows + Web dışa aktarma, web duman testi, isteğe bağlı Pages yayını
+tests/kapi.sh            test günlüğünü okuyan CI kapısı (SONUÇ satırı, taban sayı, SCRIPT ERROR yok)
+tests/kapi_sinama.sh     kapının kendi sınaması (Godot gerektirmez)
+tools/web_duman.py       web yapısını headless Chromium'da açan duman testi (Playwright)
 ```
 
 ## Varlıkları ve sahneleri yeniden üretmek
@@ -262,6 +279,14 @@ Ayrıntılar: `CLAUDE.md` → Doğrulama.
 `main`'e her push'ta ve her pull request'te GitHub Actions taze bir checkout alıp (Git LFS
 çekilerek) Godot 4.7.2 ile aynı test kapısını koşuyor — rozet yukarıda. İlk koşu
 (21 Eylül 2026): **853 geçti, 0 hata**.
+
+**Test kapısı yalnız çıkış koduna bakmıyor.** `testler.gd` yalnızca `hatalar > 0` ise 1 ile
+çıkıyor; oysa bir test fonksiyonundaki çalışma zamanı hatası (null erişimi, `int == bool`)
+yalnızca o fonksiyonu keser — motor `SCRIPT ERROR` yazar, kalan doğrulamalar hiç sayılmaz ve
+takım yine "0 hata" ile biter. CI günlüğü `tests/kapi.sh`'a veriyor: `=== SONUÇ ===` satırı
+olmalı, geçen sayı tabanın (`ci.yml` → `TEST_TABANI`, şu an 961) altına düşmemeli, günlükte
+`SCRIPT ERROR` / `Parse Error` olmamalı. Kapının kendisi `tests/kapi_sinama.sh` ile dokuz örnek
+günlükte sınanıyor (Godot'suz, `bash tests/kapi_sinama.sh`). Test ekleyince tabanı da yükselt.
 
 **v1.7.1.** Bulut (Godot 4.7.2, Linux headless) ve Windows 11 aynı sonucu verdi: **853 test geçti, 0 hata**
 (v1.7 etiketinde 849'du; panel taşma düzeltmesi 4 doğrulama ekledi). Bot stresi 24 tohum × 3 dk 0 ölüm,
