@@ -29,7 +29,8 @@ Proje sahibi: Furki. Geliştirme makinesinde ayrıca ortak kurallar dosyası var
 - Web dışa aktarımı özel kabuk kullanır: `yayin/web-kabuk.html` (`export_presets.cfg` → `html/custom_html_shell`).
   Godot'nun yer tutucuları (`$GODOT_URL`, `$GODOT_CONFIG`, `$GODOT_THREADS_ENABLED`, `$GODOT_HEAD_INCLUDE`,
   `$GODOT_PROJECT_NAME`) ve `#status` / `#status-notice` / `Engine.getMissingFeatures` akışı korunmalı; yalnız
-  görünüm değişir. Değişiklikten sonra web'i Playwright ile aç (yükleme ekranı → oyun; `web_kabuk.py` deseni).
+  görünüm değişir. Değişiklikten sonra web'i Playwright ile aç: `python3 tools/web_duman.py build/web` (yükleme ekranı → menü →
+  Boşluk ile koşu; Yapi iş akışı da aynısını koşar).
 - `JavaScriptBridge.eval` JS `true/false` değerini 1/0 (int) döndürebilir; sonucu `== true` ile
   karşılaştırma (int == bool çalışma zamanı hatası, release yapıda sessizce işlevi keser).
 
@@ -53,6 +54,7 @@ $G --headless --path . --import
 $G --headless --path . -s res://tools/sahne_uret.gd
 $G --headless --path . --import
 $G --headless --fixed-fps 60 --path . -s res://tests/testler.gd     # beklenen: "SONUÇ: N geçti, 0 hata"
+# CI aynı komutun günlüğünü tests/kapi.sh'a verir (taban: ci.yml → TEST_TABANI). Test ekleyince tabanı yükselt.
 $G --headless --fixed-fps 60 --path . -s res://tools/panel_olc.gd   # sonuç paneli 5 kalabalık seviyesinde sığıyor mu
 # itch ekran görüntüleri + kapak (pencere açar; Linux'ta xvfb-run ile):
 $G --rendering-driver opengl3 --resolution 1280x720 --fixed-fps 60 --path . -s res://tools/ekran_goruntusu.gd

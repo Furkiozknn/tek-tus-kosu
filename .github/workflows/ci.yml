@@ -23,12 +23,19 @@ env:
   # "latest" kullanmak, motor guncellenince testlerin bizden habersiz
   # kirmizi yanmasi demek olurdu.
   GODOT_SURUM: 4.7.2-stable
+  # Test kapisinin tabani: gecen dogrulama sayisi bunun altina duserse CI
+  # kirmizi. Test EKLEYINCE yukselt (README, project-meta.json ile birlikte);
+  # dusurmek, bir bolumun sessizce kayboldugunu kabul etmek demek.
+  TEST_TABANI: 961
 
 jobs:
   testler:
     runs-on: ubuntu-latest
+    # Normal kosu ~40 sn. Bir coroutine'in `await`i hic donmezse takim
+    # sonsuza kadar bekler; 6 saatlik varsayilan yerine erken kirmizi.
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # PNG/WAV/TTF Git LFS'te (.gitattributes). LFS cekilmezse
           # checkout yalnizca ~130 baytlik isaretci dosyalari getirir ve
@@ -54,17 +61,33 @@ jobs:
 
       # --fixed-fps 60 SART: testlerin bir bolumu fizik karesi adimlayarak
       # zamanlama olcuyor (ziplama boyu, ritim vurus penceresi).
-      - name: Testler (961)
-        run: godot --headless --fixed-fps 60 --path . -s res://tests/testler.gd
+      #
+      # Cikis kodu tek basina yetmiyor: bir test fonksiyonundaki calisma
+      # zamani hatasi yalnizca o fonksiyonu keser, kalan dogrulamalar
+      # sayilmaz ve takim yine "0 hata" ile 0 doner. tests/kapi.sh gunlugu
+      # okuyup SONUC satirini, tabani ve "SCRIPT ERROR" yoklugunu zorunlu
+      # kiliyor.
+      - name: Testler (en az ${{ env.TEST_TABANI }})
+        run: |
+          set -o pipefail
+          godot --headless --fixed-fps 60 --path . -s res://tests/testler.gd 2>&1 | tee test.log
+          bash tests/kapi.sh test.log "$TEST_TABANI"
 
   referanslar:
     name: Kaynak referanslari saglam mi
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+
+      # Test kapisinin kendi sinamasi: Godot gerektirmez, bu yuzden motoru
+      # indirmeyen bu iste. Kapi bozulursa (ornegin SCRIPT ERROR aramasi
+      # silinirse) burada kirmizi yanar.
+      - name: Test kapisi sinamasi
+        run: bash tests/kapi_sinama.sh
 
       # Kirik bir kaynak referansi motoru her zaman durdurmuyor: eksik bir
       # .tscn ya da silinmis bir .png, sahne o kod yolu calisana kadar
@@ -79,9 +102,15 @@ jobs:
           fail-on: error
           sarif: refcheck.sarif
 
+      # Catal (fork) PR'larinda GITHUB_TOKEN'a security-events: write
+      # verilmiyor; yukleme orada her zaman duser ve dis katkiyi haksiz yere
+      # kirmizi gosterirdi. Bulgu varsa godot-refcheck adimi zaten dusuruyor.
       - name: SARIF raporunu kod taramaya yukle
-        if: always() && hashFiles('refcheck.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
+        if: >-
+          always() && hashFiles('refcheck.sarif') != '' &&
+          (github.event_name != 'pull_request' ||
+           github.event.pull_request.head.repo.full_name == github.repository)
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: refcheck.sarif
           category: godot-refcheck
