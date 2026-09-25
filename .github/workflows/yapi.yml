@@ -130,6 +130,7 @@ jobs:
     # Kutu isaretlenmedikce bu is hic kosmaz; varsayilan yayimlamamaktir.
     if: ${{ inputs.sayfaya_yayinla }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10  # olculmedi: basarili kosusu yok (tek kosusu Pages kapaliyken 8 sn'de dustu); ust sinir
     permissions:
       pages: write
       id-token: write
