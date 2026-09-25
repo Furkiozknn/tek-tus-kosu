@@ -7,10 +7,26 @@ Liste silinmedi, buraya taşındı.
 Güncel sürümün notları GitHub'da da duruyor:
 <https://github.com/Furkiozknn/tek-tus-kosu/releases>
 
+## Yayımlanmamış (`main`, v1.7.3'ten sonra)
+
+Oynanış değişmedi; yeni bir sürüm etiketi yok.
+
+- **Test takımı 853 → 961.** Ritimdeki on iki olaylı desenin her biri, üç
+  şarkının her birinin vuruş aralığında (120 / 140,6 / 128,6 px) vuruşta zıplayan
+  bir botla ayrı ayrı koşuluyor. Bunun için ritim üreticisinde *seçmek* ile
+  *kurmak* ayrıldı (`Ritim.desenleri_sec` / `Ritim.parca_kur`); rastgele akış
+  aynı kaldı.
+- **CI test kapısı** (`tests/kapi.sh`): çıkış koduna ek olarak günlükte `SONUÇ`
+  satırı, en az `TEST_TABANI` geçen doğrulama ve `SCRIPT ERROR` yokluğu aranıyor.
+- **Kırık kaynak referansı kapısı** (godot-refcheck, SARIF).
+- **Yapı iş akışı:** Windows + Web paketleri artifact olarak; web paketi
+  headless Chromium'da duman testinden geçiyor (`tools/web_duman.py`); isteğe
+  bağlı Pages yayını (Pages önce bir kez elle açılmalı).
+
 ## v1.7.3 — belge/lisans/CI turu (22 Eylül 2026)
 
 Oyun kodu v1.7.1 ile aynı; yayımlanmış derlemeler değişmedi. MIT lisansı,
-`main`'e her push'ta ve her pull request'te **961 testin** koştuğu CI (Godot
+`main`'e her push'ta ve her pull request'te **853 testin** koştuğu CI (Godot
 4.7.2, Linux headless, Git LFS çekilerek), README ve CLAUDE.md'nin kodla
 hizalanması, makineye özel yolların kaldırılması.
 
