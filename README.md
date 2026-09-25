@@ -12,6 +12,30 @@
 
 <sub>Web build, recorded in headless Chromium.</sub>
 
+<details>
+<summary><b>In English</b></summary>
+
+<br>
+
+A mobile-first endless rooftop runner. The runner moves on its own and you only jump; speed climbs over time and the goal is distance.
+
+- **Rhythm mode.** Three songs at 128–150 BPM. Every obstacle is placed on the beat grid, and the lamps on the roof edge pulse with the music; the yellow ones with arrows mark the beats to jump on. A jump within ±70 ms of the beat counts as on time.
+- **After a rhythm run** you get a five-bucket histogram of how early or late each jump was (way early / early / on time / late / way late). The game also estimates your audio delay from your own jumps and offers to correct for it, which matters with Bluetooth headphones.
+- **Daily rhythm:** one song and roof sequence per date, with a ghost of the day's best run.
+- **Also:** 16 achievements, costumes, daily runs and streaks.
+
+| Action | Keyboard | Gamepad | Touch / mouse |
+|---|---|---|---|
+| Jump | Space / W / ↑ | A | Tap / left click |
+| Higher jump | Hold | Hold | Hold |
+| Short hop (under a low ceiling) | Tap and release | Same | Short tap |
+| Double jump | Press again in the air | Same | Tap again |
+| Pause | Esc / P | Start | **II** top right |
+
+The UI is in Turkish. Godot 4.7 (GL Compatibility), MIT licence. All art, sound and music are generated from code by scripts in `tools/`, and 961 headless tests run on every push, including a bot that has to clear every obstacle pattern at every song's beat spacing. The rest of this README is in Turkish.
+
+</details>
+
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
