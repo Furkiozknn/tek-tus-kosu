@@ -6,6 +6,8 @@
 
 [![CI](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml/badge.svg)](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml)
 
+**[▶ Play in the browser](https://furkiozknn.github.io/tek-tus-kosu/)**: no install; space, click or tap to jump. · **[▶ Tarayıcıda oyna](https://furkiozknn.github.io/tek-tus-kosu/)**
+
 ![Oynanış](yayin/ekran-2.png)
 
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
