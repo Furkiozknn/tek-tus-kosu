@@ -8,7 +8,9 @@
 
 **[▶ Play in the browser](https://furkiozknn.github.io/tek-tus-kosu/)**: no install; space, click or tap to jump. · **[▶ Tarayıcıda oyna](https://furkiozknn.github.io/tek-tus-kosu/)**
 
-![Oynanış](yayin/ekran-2.png)
+![Tek Tuş Koşu: rhythm mode, one key to jump; the yellow arrow lamps mark the beat](yayin/oynanis.gif)
+
+<sub>Web build, recorded in headless Chromium.</sub>
 
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
