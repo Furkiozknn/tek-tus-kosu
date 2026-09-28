@@ -2,6 +2,9 @@
 
 # Tek Tuş Koşu
 
+<p align="center"><img src="docs/reel/reel.gif" alt="tek-tus-kosu - 15 saniyelik tanıtım videosu" width="720"></p>
+<p align="center"><sub><a href="docs/reel/reel.mp4">Sesli MP4 sürümü</a></sub></p>
+
 *One-button endless rooftop runner (Godot 4, Turkish UI). Its rhythm mode lays every obstacle on the music's beat grid, then shows you how you were off: a five-bucket timing histogram after the run, and an audio-delay correction the game derives from your own jumps. 961 headless tests, including a beat-perfect bot that has to clear every bar pattern at every song's beat spacing.*
 
 [![CI](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml/badge.svg)](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml)
