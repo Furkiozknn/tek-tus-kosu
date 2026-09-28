@@ -116,8 +116,11 @@ jobs:
           name: tek-tus-kosu-web
           path: web
 
-      # enablement: true -- depoda Pages hic acilmamissa bu adim aciyor,
-      # yani ayarlara elle girmek gerekmiyor.
+      # Pages depoda BIR KEZ elle acilmali: Settings -> Pages -> Source:
+      # "GitHub Actions". `enablement: true` bunu yapamiyor -- is akisinin
+      # GITHUB_TOKEN'i Pages sitesi olusturamaz; 25 Eylul 2026'daki ilk
+      # yayin denemesi tam burada "Resource not accessible by integration"
+      # ile dustu. Bir kez acildiktan sonra bu adim yalnizca dogrular.
       - uses: actions/configure-pages@v5
         with:
           enablement: true
