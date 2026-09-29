@@ -3,7 +3,7 @@
   "id": "tek-tus-kosu",
   "owner": "Furkiozknn",
   "repository": "https://github.com/Furkiozknn/tek-tus-kosu",
-  "homepage": "https://furkiozknn.github.io/#tek-tus-kosu",
+  "homepage": "https://furkiozknn.github.io/tek-tus-kosu/",
   "releases": "https://github.com/Furkiozknn/tek-tus-kosu/releases",
   "status": "active",
   "category": "game",
@@ -48,9 +48,9 @@
     "videos": []
   },
   "tests": {
-    "count": 961,
-    "source": "CI log: `=== SONUC: 961 gecti, 0 hata ===`",
-    "measured": "2026-09-22"
+    "count": 1148,
+    "source": "CI log: `=== SONUÇ: 1148 geçti, 0 hata ===`",
+    "measured": "2026-09-29"
   },
   "ci": {
     "workflows": [
@@ -77,7 +77,7 @@
       "gamedev",
       "rhythmgame"
     ],
-    "primary_link": "https://github.com/Furkiozknn/tek-tus-kosu"
+    "primary_link": "https://furkiozknn.github.io/tek-tus-kosu/"
   },
   "provenance": {
     "generated_at": "2026-09-22",
