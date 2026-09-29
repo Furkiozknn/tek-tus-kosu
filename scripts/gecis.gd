@@ -10,6 +10,8 @@ const ACMA := 0.20
 const GENISLIK := 660.0
 
 static var hizli := false
+## Testler: false ise bant oynar ama sahne degismez (menu.basla() testte oyun sahnesini ortaya sokmasin).
+static var degistir := true
 
 var _bant: ColorRect
 var _mesgul := false
@@ -37,7 +39,8 @@ func git(yol: String, renk: Color = Tema.PEMBE) -> void:
 		return
 	_mesgul = true
 	await kapat(renk)
-	get_tree().change_scene_to_file(yol)
+	if degistir:
+		get_tree().change_scene_to_file(yol)
 	await get_tree().process_frame
 	await get_tree().process_frame
 	await ac()

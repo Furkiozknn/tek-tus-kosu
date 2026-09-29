@@ -18,6 +18,7 @@ func _calistir() -> void:
 	Ceviri.zorla = "tr"
 	Ceviri.dil_uygula()
 	GecisKatmani.hizli = true
+	GecisKatmani.degistir = false   # menu.basla() sahneyi değiştirip artakalan bir oyun sahnesi bırakmasın (ritim testi bundan kırılgandı)
 	await _test_kayit()
 	await _test_gorevler_ve_kostum()
 	await _test_parca_sahneleri()
@@ -1671,8 +1672,8 @@ func _test_ritim_desen_gecilebilirligi() -> void:
 			var sira: Array[String] = ["bos", "bos", ad, "bos", ad, "bos", ad, "bos"]
 			var oyun: Node2D = await _ritim_oyunu(sarki, 7, false, sira, true)
 			var sonuc := await _ritim_oyna(oyun, 0.0, 1200)
-			dogrula(bool(sonuc[0]), "%s deseni %s şarkısında (vuruş %.1f px) geçilemedi"
-				% [ad, Ritim.SARKILAR[sarki]["ad"], adim])
+			dogrula(bool(sonuc[0]), "%s deseni %s şarkısında (vuruş %.1f px) geçilemedi (neden %s, x %.0f, y %.0f, ızgara %.0f)"
+				% [ad, Ritim.SARKILAR[sarki]["ad"], adim, str(oyun.oyuncu.olum_nedeni), oyun.oyuncu.global_position.x, oyun.oyuncu.global_position.y, oyun._izgara0])
 			dogrula(int(sonuc[1]) >= 3, "%s / %s: desen en az üç kez olay vermeli (%d)"
 				% [ad, Ritim.SARKILAR[sarki]["ad"], int(sonuc[1])])
 			dogrula(int(sonuc[2]) == int(sonuc[1]),
