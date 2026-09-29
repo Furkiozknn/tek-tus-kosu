@@ -46,6 +46,7 @@ func _calistir() -> void:
 	await _test_yeni_menu_akisi()
 	await _test_duraklat_ve_oyun_sonu()
 	await _test_ilk_oyun_ogretme()
+	await _test_video_gecisleri()
 	await _test_his_pencereleri()
 	print("\n=== SONUÇ: %d geçti, %d hata ===" % [gecen, hatalar])
 	quit(1 if hatalar > 0 else 0)
@@ -1909,13 +1910,15 @@ func _test_yeni_menu_akisi() -> void:
 	dogrula((menu.get_node("%GorevListesi") as Label).text.begins_with("GÖREVLER"), "görev listesi başlığı büyük harf (%s)" % (menu.get_node("%GorevListesi") as Label).text.get_slice("\n", 0))
 	menu.queue_free()
 	await process_frame
-	# Geçiş bandı: kapat -> örter, ac -> açılır (testte süre sıfır)
+	# Geçiş katmanı: kapat -> örter, ac -> açılır (gerçek süreyle; ayrıntı _test_video_gecisleri'nde)
 	var gecis: CanvasLayer = root.get_node("Gecis")
 	dogrula(gecis != null and gecis.layer == 100, "Gecis autoload'u var")
-	await gecis.kapat()
-	dogrula(gecis._bant.visible and gecis._bant.color == Tema.PEMBE, "geçiş bandı ekranı pembeyle örtmeli")
-	await gecis.ac()
-	dogrula(not gecis._bant.visible and not gecis.mesgul_mu(), "geçiş bandı açılınca kapanmalı")
+	GecisKatmani.hizli = false
+	await gecis.kapat(&"iris", 0, 0.05)
+	dogrula(gecis._kaplama.visible and is_equal_approx(float(gecis._mat.get_shader_parameter("p")), 1.0), "geçiş ekranı örtmeli")
+	await gecis.ac(0.05)
+	dogrula(not gecis._kaplama.visible and not gecis.mesgul_mu(), "geçiş açılınca kapanmalı")
+	GecisKatmani.hizli = true
 	_kayit_temizle()
 	Ceviri.zorla = "tr"
 	Ceviri.dil_uygula()
@@ -2103,6 +2106,296 @@ func _test_his_pencereleri() -> void:
 	dogrula(pencere_ms >= 67.0 and pencere_ms <= 100.0, "kenardan sonra tam güç zıplama penceresi ≈ 83 ms (ölçülen %.0f ms, %d kare)" % [pencere_ms, enbuyuk + 1])
 	# Kojot dışında (kenardan çok sonra) basış zayıf ikinci zıplamaya döner: yine de zıplar
 	dogrula(enbuyuk < 11, "kojot penceresi sonsuz değil")
+
+
+# ------------------------------------------------------------------ günlük video imkanları
+## Renk akışı paleti (okunurluk >= 4,5:1), geçiş aileleri (shader), tekrarsız seçim, sade geçiş,
+## menü açılışı, dil glitch'i, duraklat perdesi, ölüm flaşı, mesafe rozeti, rekor damgası, ritimde
+## fizik etkilenmez.
+func _test_video_gecisleri() -> void:
+	print("[gunluk video gecisleri ve renk akisi]")
+	_kayit_temizle()
+	GecisKatmani.hizli = false
+	GecisKatmani.sade_ayar = false
+	var g: GecisKatmani = root.get_node("Gecis")
+	# --- palet: her vurgu üstünde yazı >= 4,5:1 (kodla seçilir) ---
+	var en_dusuk := 99.0
+	var kaynaklar := {}
+	for t in Tema.AKIS.size():
+		var a: Dictionary = Tema.AKIS[t]
+		kaynaklar[a["kaynak"]] = true
+		dogrula(a["vurgu"].size() >= 5 and String(a["kaynak"]) != "", "palet %d akış renkleri (%s, %d renk)" % [t, a["kaynak"], a["vurgu"].size()])
+		dogrula(a["vurgu"][0] in [Tema.PEMBE, Tema.SARI, Tema.MOR], "palet %d oyunun kendi rengiyle başlıyor" % t)
+		for v in a["vurgu"]:
+			en_dusuk = minf(en_dusuk, Tema.kontrast(v, Tema.yazi_rengi(v, t)))
+		dogrula(Tema.kontrast(a["acik"], a["koyu"]) >= 10.0, "palet %d açık/koyu yazı çifti" % t)
+	dogrula(en_dusuk >= Tema.ESIK, "akış renkleri üzerinde yazı en az %.1f:1 (en düşük %.2f)" % [Tema.ESIK, en_dusuk])
+	dogrula(kaynaklar.size() == 3, "üç ayrı video teması (neon, arcade, uzay)")
+	dogrula(is_equal_approx(Tema.kontrast(Color.BLACK, Color.WHITE), 21.0), "kontrast hesabı: siyah/beyaz 21:1")
+	dogrula(Tema.akis_rengi(0, 0).is_equal_approx(Tema.akis_rengi(0, 5)), "akış rengi sarmal döner")
+	var dunya_sayisi: int = ((load("res://scripts/oyun.gd") as GDScript).get_script_constant_map()["TEMALAR"] as Array).size()
+	dogrula(Tema.PALET_ESLEME.size() == dunya_sayisi and Tema.palet(-1) == 0 and Tema.palet(99) == Tema.PALET_ESLEME[-1], "her dünya teması bir palete eşli, sınır dışı güvenli (%d dünya)" % dunya_sayisi)
+	for i in Tema.PALET_ESLEME.size():
+		dogrula(Tema.PALET_ESLEME[i] >= 0 and Tema.PALET_ESLEME[i] < Tema.AKIS.size(), "dünya teması %d geçerli palete gidiyor" % i)
+	# --- aileler shader'da, havuzlar geçerli, art arda tekrar yok, sekiz ailenin hepsi kullanılıyor ---
+	var shader_ad: Array = []
+	for u in GecisKatmani.SHADER.get_shader_uniform_list():
+		shader_ad.append(String(u["name"]))
+	dogrula("tur" in shader_ad and "p" in shader_ad and "renk" in shader_ad and "renk2" in shader_ad and "oran" in shader_ad, "geçiş shader'ı uniform'ları var")
+	dogrula(Tema.GECIS_TURLERI.size() == 8, "sekiz geçiş ailesi")
+	var birlesim := {}
+	for t in Tema.AKIS.size():
+		var havuz: Array = Tema.AKIS[t]["gecis"]
+		var hepsi := true
+		for f in havuz:
+			hepsi = hepsi and f in Tema.GECIS_TURLERI
+			birlesim[f] = true
+		dogrula(hepsi and havuz.size() >= 4, "palet %d geçiş havuzu shader ailesinden (%s)" % [t, havuz])
+		var onceki: StringName = &""
+		var tekrar := 0
+		var disari := 0
+		var gorulen := {}
+		for i in 40:
+			var f: StringName = g.sec(t)
+			if f == onceki:
+				tekrar += 1
+			if not f in havuz:
+				disari += 1
+			gorulen[f] = true
+			onceki = f
+			g.son_tur = f
+		dogrula(tekrar == 0 and disari == 0 and gorulen.size() == havuz.size(), "palet %d: 40 seçimde tekrar yok, hepsi havuzda, hepsi kullanıldı" % t)
+	dogrula(birlesim.size() == Tema.GECIS_TURLERI.size(), "havuzların birleşimi sekiz ailenin hepsi (%d)" % birlesim.size())
+	# --- her aile örtüyor ve açılıyor ---
+	for f in Tema.GECIS_TURLERI:
+		await g.kapat(f, 0, 0.05)
+		var p: float = g._mat.get_shader_parameter("p")
+		dogrula(g._kaplama.visible and is_equal_approx(p, 1.0) and g.son_tur == f, "%s: tam örtüyor (p=%.2f)" % [f, p])
+		await g.ac(0.05)
+		dogrula(not g._kaplama.visible, "%s: açılıyor, kaplama gizli" % f)
+	# --- renk: flaş açık, kararma koyu, özel renk ---
+	await g.kapat(&"flas", 1, 0.05)
+	dogrula((g._mat.get_shader_parameter("renk") as Color).is_equal_approx(Tema.KAGIT), "flaş rengi paletin açığı (kâğıt)")
+	await g.ac(0.05)
+	await g.kapat(&"kararma", 2, 0.05)
+	dogrula((g._mat.get_shader_parameter("renk") as Color).is_equal_approx(Tema.MUREKKEP), "kararma rengi paletin koyusu (mürekkep)")
+	await g.ac(0.05)
+	await g.acilis(&"flas", 0, 0.05, 0.3, Tema.PEMBE)
+	dogrula(g.son_tur == &"flas" and not g._kaplama.visible, "acilis(): özel renkli flaş oynadı ve kapandı")
+	# --- süre: örtme ~260 ms ---
+	var kare_n := 0
+	g.kapat(&"itme", 1)
+	while not is_equal_approx(float(g._mat.get_shader_parameter("p")), 1.0) and kare_n < 200:
+		await process_frame
+		kare_n += 1
+	var ms := kare_n * 1000.0 / 60.0            # --fixed-fps 60: süre kare sayısından
+	dogrula(ms >= 220.0 and ms < 500.0, "örtme %.0f ms (%d kare; rehber ~260)" % [ms, kare_n])
+	await g.ac()
+	# --- ara(): değişim örtünün altında, sonra kapanır; ikinci çağrı bantta yok sayılır ---
+	var cagri := [0]
+	g.ara(&"bloklar", 1, func() -> void: cagri[0] += 1)
+	g.ara(&"bloklar", 1, func() -> void: cagri[0] += 100)
+	await create_timer(0.8).timeout
+	dogrula(cagri[0] == 1 and not g.mesgul_mu() and not g._kaplama.visible, "ara(): değiştir bir kez çağrıldı (%d), geçiş bitti" % cagri[0])
+	# --- git(): sahne değişmeden oynar (test kipi), çift tık yok sayılır ---
+	var sahne_once := current_scene
+	g.git("res://scenes/menu.tscn", 2)
+	dogrula(g.mesgul_mu(), "git(): geçiş sürerken meşgul")
+	g.git("res://scenes/oyun.tscn", 2)
+	await create_timer(0.9).timeout
+	dogrula(not g.mesgul_mu() and not g._kaplama.visible and current_scene == sahne_once, "git(): bant oynadı, sahne değişmedi (test kipi)")
+	# --- meşgulken acilis() yok sayılır (sahne geçişini bozmasın) ---
+	g._mesgul = true
+	await g.acilis(&"iris", 0, 0.05)
+	dogrula(not g._kaplama.visible, "meşgulken acilis() yok sayılır")
+	g._mesgul = false
+	# --- hareket azaltma: anında, bekleme yok (test kipi, ayar ve tarayıcı aynı yol) ---
+	for kip in ["ayar", "test"]:
+		GecisKatmani.sade_ayar = kip == "ayar"
+		GecisKatmani.hizli = kip == "test"
+		dogrula(g.sade(), "sade kip (%s): sade() doğru" % kip)
+		var ilk_kare := Engine.get_process_frames()
+		await g.kapat(&"iris", 0)
+		await g.ara(&"bloklar", 1, func() -> void: cagri[0] += 1)
+		await g.acilis(&"perde", 2)
+		dogrula(Engine.get_process_frames() - ilk_kare <= 1 and not g._kaplama.visible, "sade kip (%s): geçiş anında, kaplama hiç açılmadı (%d kare)" % [kip, Engine.get_process_frames() - ilk_kare])
+	dogrula(cagri[0] == 3, "sade kipte ara() değişikliği yine yaptı")
+	GecisKatmani.sade_ayar = false
+	GecisKatmani.hizli = false
+	# --- ayar: kayıt varsayılanı kapalı, menü anahtarı sade_gecis'i yazar ve katmana bildirir ---
+	dogrula(Kayit.VARSAYILAN["ayarlar"].has("sade_gecis") and not bool(Kayit.VARSAYILAN["ayarlar"]["sade_gecis"]), "kayıt varsayılanı: sade geçiş kapalı")
+	g.acilis_yapildi = true
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _kareler(3)
+	var kutu: Button = menu.get_node("%SadeGecisKutu")
+	dogrula(kutu != null and not kutu.button_pressed and tr(kutu.text) == "Sade geçişler (hareket azaltma)", "ayarlar: Sade geçişler anahtarı var, kapalı başlar")
+	kutu.button_pressed = true
+	await _kareler(2)
+	dogrula(bool(Kayit.yukle()["ayarlar"]["sade_gecis"]) and GecisKatmani.sade_ayar and g.sade(), "anahtar kayda yazıldı ve geçişi sadeleştirdi")
+	kutu.button_pressed = false
+	await _kareler(2)
+	dogrula(not bool(Kayit.yukle()["ayarlar"]["sade_gecis"]) and not g.sade(), "anahtar kapanınca geçişler geri geldi")
+	# --- menü dil düğmesi: glitch örtüsünün altında dil değişir ---
+	g.son_tur = &""
+	var dd: Button = menu.get_node("%DilDugme")
+	dd.pressed.emit()
+	await _kareler(2)
+	dogrula(g.son_tur == &"glitch" and g._kaplama.visible, "menü dil değişimi: glitch örtüsü başladı")
+	await create_timer(0.7).timeout
+	dogrula(dd.text == "EN" and not g._kaplama.visible and not g.mesgul_mu(), "glitch bitti, dil İngilizce, kaplama kapandı")
+	dd.pressed.emit()
+	await create_timer(0.7).timeout
+	dogrula(dd.text == "TR", "dil geri Türkçe")
+	menu.queue_free()
+	await process_frame
+	# --- menü açılışı: ilk açılışta iris, sonrasında yok ---
+	g.acilis_yapildi = false
+	g.son_tur = &""
+	menu = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _kareler(3)
+	dogrula(g.son_tur == &"iris" and g._kaplama.visible and g.acilis_yapildi, "menü ilk açılışta iris ile açılıyor")
+	await create_timer(0.7).timeout
+	dogrula(not g._kaplama.visible, "menü açılış iris'i bitti")
+	menu.queue_free()
+	await process_frame
+	g.son_tur = &""
+	menu = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _kareler(3)
+	dogrula(g.son_tur == &"" and not g._kaplama.visible, "ikinci menü açılışında iris tekrarlanmıyor")
+	menu.queue_free()
+	await process_frame
+	# --- oyun: mesafe rozeti, damga, flaş, duraklat, oyun sonu, dil ---
+	var d := Kayit.yukle()
+	d["rekor"] = 10
+	Kayit.kaydet(d)
+	var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+	oyun.kayit_yap = false
+	oyun.olum_tekrari_acik = false
+	oyun.tohum = 5
+	root.add_child(oyun)
+	await _kareler(4)
+	oyun.oyuncu.olumsuz = true
+	dogrula(g.son_tur == &"kararma", "koşu başı: kararma ailesiyle açılıyor")
+	# Mesafe rozeti: 100 m'de paletin renk akışı, yazı okunur, sonunda şeffaf + eski yazı rengi
+	oyun._rekor_asildi = true                    # rozet sınaması rekor damgasına karışmasın
+	var yazi0: Color = oyun._rozet_yazi
+	oyun._mesafe_vurgusu(99)
+	dogrula(oyun._rozet_kalan <= 0.0 and oyun._rozet.bg_color.a == 0.0, "99 m: rozet vurgulanmıyor")
+	oyun._mesafe_vurgusu(100)
+	dogrula(oyun._rozet_kalan > 0.0, "100 m: rozet akışı başladı")
+	await create_timer(0.25).timeout
+	var v: Color = oyun._rozet.bg_color
+	var yz: Color = oyun.mesafe_etiketi.get_theme_color("font_color")
+	dogrula(v.a == 1.0 and Tema.kontrast(v, yz) >= Tema.ESIK, "rozet rengi paletten, yazısı %.2f:1" % Tema.kontrast(v, yz))
+	var farkli := {}
+	for i in 5:
+		farkli[oyun._rozet.bg_color.to_html()] = true
+		await create_timer(0.1).timeout
+	dogrula(farkli.size() >= 2, "rozet rengi akıyor (%d ayrı renk)" % farkli.size())
+	await create_timer(0.3).timeout
+	dogrula(oyun._rozet.bg_color.a == 0.0 and oyun.mesafe_etiketi.get_theme_color("font_color").is_equal_approx(yazi0), "akış bitti: rozet şeffaf, yazı eski renkte")
+	oyun._mesafe_vurgusu(150)
+	dogrula(oyun._rozet_kalan <= 0.0, "aynı yüz metrede ikinci tetik yok")
+	oyun._mesafe_vurgusu(200)
+	dogrula(oyun._rozet_kalan > 0.0, "200 m: rozet yine akıyor")
+	GecisKatmani.sade_ayar = true
+	oyun._rozet_sifirla()
+	oyun._mesafe_vurgusu(300)
+	dogrula(oyun._rozet_kalan <= 0.0, "sade geçişte rozet akışı kapalı")
+	GecisKatmani.sade_ayar = false
+	# Rekor anı: rekor (10 m) aşılınca bir kez damga + flaş
+	oyun._rekor_asildi = false
+	oyun._damga_hud.gizle()
+	g.son_tur = &""
+	oyun._mesafe_vurgusu(10)
+	dogrula(not oyun._damga_hud.visible, "rekora eşitken damga yok")
+	oyun._mesafe_vurgusu(11)
+	dogrula(oyun._damga_hud.visible and oyun._damga_hud.yazi.text == "YENİ REKOR!", "rekor aşıldı: damga (%s)" % oyun._damga_hud.yazi.text)
+	dogrula(g.son_tur == &"flas", "rekor aşıldı: flaş vuruşu")
+	var dv: Color = oyun._damga_hud.rengi()
+	dogrula(Tema.kontrast(dv, oyun._damga_hud.yazi.get_theme_color("font_color")) >= Tema.ESIK, "damga yazısı okunuyor (%.2f:1)" % Tema.kontrast(dv, oyun._damga_hud.yazi.get_theme_color("font_color")))
+	var ekran: Rect2 = oyun.get_viewport().get_visible_rect()
+	dogrula(ekran.encloses(Rect2(oyun._damga_hud.position, oyun._damga_hud.size)), "damga ekrana sığıyor")
+	g.son_tur = &""
+	oyun._mesafe_vurgusu(12)
+	dogrula(g.son_tur == &"", "damga ve flaş bir koşuda bir kez")
+	await create_timer(0.9).timeout
+	dogrula(oyun._damga_hud.rengi().is_equal_approx(Tema.akis_rengi(oyun._palet(), 0)), "damga renk akışından sonra ilk renkte durdu")
+	await create_timer(1.1).timeout
+	dogrula(not oyun._damga_hud.visible, "damga 1,8 sn sonra kayboldu")
+	# Ölüm flaşı: pembe, yalnız sarsıntı ayarı açıkken
+	g.son_tur = &""
+	oyun.sarsinti_acik = false
+	oyun._flas()
+	dogrula(g.son_tur == &"", "sarsıntı kapalı: ölüm flaşı yok")
+	oyun.sarsinti_acik = true
+	oyun._flas()
+	dogrula(g.son_tur == &"flas" and (g._mat.get_shader_parameter("renk") as Color).is_equal_approx(Tema.PEMBE), "ölüm flaşı pembe (oyuncu rengi)")
+	await create_timer(0.3).timeout
+	# Duraklat: perde açılır, oyun durmuşken de çalışır
+	oyun.duraklat()
+	dogrula(paused and g._kaplama.visible and g.son_tur == &"perde", "duraklat: perde geçişi başladı")
+	await create_timer(0.45).timeout
+	dogrula(not g._kaplama.visible, "duraklat: perde açıldı (oyun durmuşken de çalışıyor)")
+	# Duraklattaki dil düğmesi: glitch
+	oyun._dil_degistir()
+	await create_timer(0.1).timeout
+	dogrula(g.son_tur == &"glitch", "duraklatta dil değişimi glitch ile")
+	await create_timer(0.7).timeout
+	dogrula(Ceviri.dil_kodu() == "en" and not g.mesgul_mu(), "duraklatta dil İngilizceye döndü")
+	oyun._dil_degistir()
+	await create_timer(0.7).timeout
+	dogrula(Ceviri.dil_kodu() == "tr", "duraklatta dil geri Türkçe")
+	oyun.devam()
+	# Oyun sonu: kart palet ailesiyle açılır; rekorda köşe damgası
+	oyun.baslangic_x -= 150.0 * Ayarlar.PIKSEL_METRE
+	oyun.oyuncu.olumsuz = false
+	g.son_tur = &""
+	oyun.oyuncu.ol()
+	await _kareler(3)
+	dogrula(oyun.son_paneli.visible and g.son_tur in Tema.AKIS[oyun._palet()]["gecis"], "oyun sonu: kart palet havuzundan bir aileyle açılıyor (%s)" % g.son_tur)
+	dogrula(oyun._damga_son.visible and oyun._damga_son.yazi.text == "YENİ REKOR!", "oyun sonu: rekorda köşe damgası")
+	var kart: Rect2 = oyun.son_paneli.get_global_rect()
+	dogrula(kart.grow(20).encloses(Rect2(oyun._damga_son.position, oyun._damga_son.size)) and oyun._damga_son.position.y < kart.position.y + 4.0, "damga kartın üst köşesinde")
+	await create_timer(0.6).timeout
+	dogrula(not g._kaplama.visible, "oyun sonu geçişi bitti")
+	oyun._yeniden_baslat_izni = 0.0
+	oyun.yeniden_baslat()
+	await _kareler(2)
+	dogrula(not oyun._damga_son.visible and not oyun.son_paneli.visible, "yeniden başlayınca damga kalkıyor")
+	oyun.baslangic_x -= 2.0 * Ayarlar.PIKSEL_METRE
+	oyun.oyuncu.ol()
+	await _kareler(3)
+	dogrula(oyun.son_paneli.visible and not oyun._damga_son.visible, "rekor yoksa köşe damgası yok")
+	oyun.queue_free()
+	await create_timer(0.7).timeout
+	# --- ritim: geçiş katmanı fiziği ve vuruş ızgarasını etkilemez ---
+	var rit: Node2D = (load(OYUN) as PackedScene).instantiate()
+	rit.kayit_yap = false
+	rit.olum_tekrari_acik = false
+	rit.bot_modu = true
+	rit.ritim = true
+	rit.tohum = 3
+	root.add_child(rit)
+	await _kareler(3)
+	var izgara := float(rit._izgara0)
+	g.acilis(&"zoom", 0, 0.5)
+	await _kareler(10)
+	dogrula(g._kaplama.visible, "ritim: geçiş oynarken koşu sürüyor")
+	await _kareler(300)
+	dogrula(not rit.bitti and float(rit._izgara0) == izgara, "ritim: geçiş katmanı vuruş ızgarasını ve koşuyu bozmadı")
+	dogrula(rit._damga_hud != null and not rit._damga_hud.visible, "ritimde koşarken damga yok (rekor 0)")
+	rit.queue_free()
+	await create_timer(0.6).timeout
+	GecisKatmani.hizli = true
+	GecisKatmani.sade_ayar = false
+	paused = false
+	Ceviri.zorla = "tr"
+	Ceviri.dil_uygula()
+	_kayit_temizle()
 
 
 class YakinDinleyici extends Node:

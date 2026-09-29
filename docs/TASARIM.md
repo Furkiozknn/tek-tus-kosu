@@ -86,6 +86,43 @@ oyunun insan hissi ayrıca elle oynanarak (tarayıcıda) doğrulandı, ama gerç
 Görseller: `docs/tasarim/once-*.png` (önce) ve `yayin/ekran-*.png`, `yayin/tanitim.gif` (sonra).
 Efektler `intel-uhd-2d-tavani` sınırının altında: parçacıklar bedava, glow/bloom yok, gölge yok.
 
+## 7. Günlük video imkânlarından alınanlar
+
+Kaynak: `sosyal/uret/tema.mjs` (`TEMALAR`, renk akışı, eşik) ve `sosyal/uret/sahne.js` (`GECIS`).
+Oyunun kendi kimliği ağır bastı: dünya düz kaldı, paletlerin ilk renkleri oyunun videosundan
+(pembe, sarı, cam göbeği, mor, kâğıt); videodan yalnız yardımcı renkler eklendi.
+
+| Ne | Nereden | Oyunda nerede |
+|---|---|---|
+| Palet `neon` (pembe, cam göbeği, sarı, mor, nane) | `TEMALAR.neon` akış | Gece ve Yağış dünyaları |
+| Palet `arcade` (sarı, pembe, cam göbeği, limon, turuncu) | `TEMALAR.arcade` | Şarap ve Fırtına |
+| Palet `uzay` (mor, kehribar, buz, pembe, nane) | `TEMALAR.uzay` | Menekşe |
+| Renk akışı sırayla döner, yazı rengi kodla seçilir | `renkAkisi`, `ESIK` (videoda 5:1) | `Tema.akis_rengi/yazi_rengi`; eşik burada 4,5:1, testte en düşük ölçüm doğrulanıyor |
+| iris, glitch, bloklar, itme, perde, flaş, kararma, zoom | `GECIS` aileleri | `assets/gecis.gdshader` (tek canvas_item shader, ekran dokusu yalnız glitch/zoom) |
+| Paletin geçiş havuzu, art arda tekrar yok | `gecisHavuz` | `Gecis.sec`: neon glitch/iris/zoom/bloklar, arcade bloklar/flaş/itme/glitch, uzay iris/perde/kararma/zoom |
+| Örtme ~260 ms, açma ~200 ms | stil rehberi | `Gecis.ORTME/ACMA` |
+
+Kullanım yerleri: menü açılışı (iris), menü → oyun / oyun → menü (havuzdan), koşu başı (kararma, eski
+mürekkep solmasıyla aynı görünüm), ölüm (pembe flaş, sarsıntı açıkken), oyun sonu kartı (havuzdan),
+duraklat (perde), dil değişimi (glitch; menü, Ayarlar, duraklat), mesafe rozeti (her 100 m'de palet renk
+akışı, 0,6 sn), rekor anı (koşarken rekor aşılınca damga + flaş; oyun sonunda köşe damgası).
+Ritim modunda koşarken tam ekran flaş yok (yalnız damga); geçiş katmanı fiziğe dokunmaz, testle doğrulandı.
+
+Hareket azaltma: Ayarlar "Sade geçişler" ya da tarayıcıda `prefers-reduced-motion` → geçiş anında, örtü
+hiç açılmaz, rozet/damga akışı yok (kayıt `ayarlar.sade_gecis`, eski kayıtlarda yok = kapalı).
+
+Ölçüm (Intel UHD, opengl3, bot, 1280x720, vsync kapalı; makinede başka Godot süreçleri çalışıyordu, ±%10 gürültü):
+
+| | önce | sonra |
+|---|---|---|
+| Normal | 2,25 ms · 445 FPS | 2,41 ms · 415 FPS |
+| Ritim | 2,24 ms · 447 FPS | 2,08 ms · 482 FPS |
+| Geçiş örtüsü görünürken (normal / ritim) | — | 2,80 ms · 358 FPS / 2,94 ms · 340 FPS (en kötü tek kare 10-12 ms) |
+
+Kontrast: paletlerin her rengi üstünde kâğıt ya da mürekkep yazıdan iyisi ≥ 4,5:1 (test).
+Yol boyunca bulunan hata: kapalı ayar anahtarı kâğıt kartta kâğıt renkliydi (görünmüyordu); mürekkep tonuna çekildi.
+Kareler: `kanit/tek-tus-kosu/sonra/gecis-*.png`, `rozet-akis-*`, `rekor-*`, `oyun-sonu-*`, `menu-*`.
+
 ## 6. Araçlar
 
 `tools/tema_uret.gd` (→ `assets/tema.tres`), `tools/varlik_uret.gd` (düz sprite), `tools/sahne_uret.gd`

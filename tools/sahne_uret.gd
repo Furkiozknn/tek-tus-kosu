@@ -573,16 +573,7 @@ func _oyun() -> Node:
 		sk.get_node(ad).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	sk.get_node("SonIpucu").modulate.a = 0.6
 
-	var gc := CanvasLayer.new()
-	gc.name = "Gecis"
-	gc.layer = 100
-	kok.add_child(gc)
-	var perde := ColorRect.new()
-	perde.name = "Perde"
-	perde.color = Color(Tema.MUREKKEP, 0.0)
-	perde.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	perde.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	gc.add_child(perde)
+	# Ekran geçişleri sahnede değil: autoload "Gecis" (scripts/gecis.gd, shader) ekranı örter.
 	return kok
 
 
@@ -846,7 +837,7 @@ func _menu() -> Node:
 	dil_satir.add_child(dl)
 	dil_satir.add_child(_dugme("AyarDilDugme", "Türkçe", Vector2(120, 26), "KartDugme"))
 	av.add_child(dil_satir)
-	for cift in [["TamEkranKutu", "Tam ekran"], ["SarsintiKutu", "Ekran sarsıntısı"], ["TitresimKutu", "Titreşim (telefon)"], ["KontrastKutu", "Yüksek kontrast (tehlike çerçevesi)"], ["RahatKutu", "Rahat mod (%80 hız, ayrı rekor)"]]:
+	for cift in [["TamEkranKutu", "Tam ekran"], ["SarsintiKutu", "Ekran sarsıntısı"], ["TitresimKutu", "Titreşim (telefon)"], ["KontrastKutu", "Yüksek kontrast (tehlike çerçevesi)"], ["RahatKutu", "Rahat mod (%80 hız, ayrı rekor)"], ["SadeGecisKutu", "Sade geçişler (hareket azaltma)"]]:
 		av.add_child(_anahtar(cift[0], cift[1]))
 	av.add_child(_dugme("AyarlarGeri", "Geri", Vector2(160, 32), "KartDugme"))
 	av.get_node("AyarlarBaslik").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

@@ -17,6 +17,14 @@ func _calistir() -> void:
 	Kayit.yol = "user://ekran_kayit.cfg"
 	Ceviri.zorla = "tr"
 	Ceviri.dil_uygula()
+	var arg := OS.get_cmdline_user_args()
+	if arg.has("gecis"):
+		# Günlük video geçişleri: yalnız geçiş karelerini alır (itch görüntülerine dokunmaz).
+		#   ... -s res://tools/ekran_goruntusu.gd -- gecis <cikti_klasoru>
+		var cikti: String = String(arg[arg.find("gecis") + 1]) if arg.size() > arg.find("gecis") + 1 else "res://build/kontrol/"
+		await _gecis_cek(cikti)
+		quit()
+		return
 	var d := Kayit.yukle()
 	d["rekor"] = 180
 	d["toplam_altin"] = 240
@@ -53,9 +61,11 @@ func _bekle(n: int) -> void:
 		await process_frame
 
 
-func _kaydet(ad: String, klasor := CIKTI) -> void:
+func _kaydet(ad: String, klasor := CIKTI, bolge := Rect2i()) -> void:
 	await RenderingServer.frame_post_draw
 	var img := root.get_texture().get_image()
+	if bolge.size != Vector2i.ZERO:
+		img = img.get_region(bolge)
 	img.save_png(ProjectSettings.globalize_path(klasor + ad))
 	print("  ", ad, " ", img.get_size())
 
@@ -493,3 +503,97 @@ func _kapak() -> void:
 	img.save_png(ProjectSettings.globalize_path(CIKTI + "kapak.png"))
 	print("  kapak.png ", img.get_size())
 	sv.queue_free()
+
+
+# ------------------------------------------------------------------ günlük video geçişleri
+## Geçişi elle kurar ve örtüyü p'de dondurur (kare dosyası için).
+func _gecis_dondur(tur: StringName, pal: int, p: float) -> void:
+	var g: GecisKatmani = root.get_node("Gecis")
+	g._kur(tur, pal)
+	g._kaplama.visible = true
+	g._p_yaz(p)
+	await _bekle(2)
+	g._p_yaz(p)
+
+
+func _gecis_kapat() -> void:
+	(root.get_node("Gecis") as GecisKatmani)._kaplama.visible = false
+
+
+## `cikti_klasoru`ne: sekiz aile (üç palet), mesafe rozeti akışı, rekor damgası, duraklat perdesi,
+## menü açılışı, dil glitch'i, oyun sonu geçişi + köşe damgası, ayarlar (yeni anahtar).
+func _gecis_cek(cikti_klasoru: String) -> void:
+	var k := cikti_klasoru if cikti_klasoru.ends_with("/") else cikti_klasoru + "/"
+	DirAccess.make_dir_recursive_absolute(k)
+	var d := Kayit.yukle()
+	d["rekor"] = 180
+	d["kosu_sayisi"] = 6
+	d["gorevler"] = []
+	Kayit.kaydet(d)
+	var g: GecisKatmani = root.get_node("Gecis")
+	g.acilis_yapildi = true
+	var oyun := await _oyun(["res://scenes/parcalar/13_nefes_altin.tscn", "res://scenes/parcalar/02_tek_diken.tscn"] as Array[String], 260.0, 0, 5)
+	oyun.olum_tekrari_acik = false
+	oyun.oyuncu.olumsuz = true
+	await _bekle(40)
+	var plan := [[&"iris", 0], [&"glitch", 0], [&"bloklar", 1], [&"itme", 1], [&"flas", 1], [&"perde", 2], [&"kararma", 2], [&"zoom", 0]]
+	for pl in plan:
+		await _gecis_dondur(pl[0], pl[1], 0.55)
+		await _kaydet("gecis-%s.png" % pl[0], k)
+		_gecis_kapat()
+	await _gecis_dondur(&"bloklar", 1, 0.85)
+	await _kaydet("gecis-bloklar-yogun.png", k)
+	_gecis_kapat()
+	# Mesafe rozeti renk akışı (sol üst kesit)
+	oyun._rekor_asildi = true
+	oyun._mesafe_vurgusu(100)
+	for i in 3:
+		await _bekle(6)
+		await _kaydet("rozet-akis-%d.png" % (i + 1), k, Rect2i(0, 0, 420, 70))
+	await _bekle(40)
+	# Rekor anı: damga + flaş vuruşu
+	oyun._rekor = 10
+	oyun._rekor_asildi = false
+	oyun._mesafe_vurgusu(11)
+	await _bekle(4)
+	await _kaydet("rekor-flas.png", k)
+	await _bekle(16)
+	await _kaydet("rekor-damga.png", k)
+	await _bekle(90)
+	# Duraklat: perde yarım açıkken
+	oyun.duraklat()
+	await _bekle(5)
+	await _kaydet("duraklat-perde.png", k)
+	await _bekle(30)
+	oyun.devam()
+	# Oyun sonu: kart palet ailesiyle açılırken, sonra tam açık (rekor köşe damgası)
+	oyun.baslangic_x -= 200.0 * Ayarlar.PIKSEL_METRE
+	oyun.oyuncu.olumsuz = false
+	oyun.oyuncu.ol()
+	await _bekle(8)
+	await _kaydet("oyun-sonu-gecis.png", k)
+	await _bekle(40)
+	await _kaydet("oyun-sonu-damga.png", k)
+	oyun.queue_free()
+	await _bekle(4)
+	# Menü: açılış iris'i ve dil glitch'i
+	g.acilis_yapildi = false
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _bekle(10)
+	await _kaydet("menu-acilis-iris.png", k)
+	await _bekle(40)
+	(menu.get_node("%DilDugme") as Button).pressed.emit()
+	await _bekle(8)
+	await _kaydet("menu-dil-glitch.png", k)
+	await _bekle(60)
+	(menu.get_node("%DilDugme") as Button).pressed.emit()      # geri Türkçe
+	await _bekle(60)
+	(menu.get_node("%AyarlarDugme") as Button).pressed.emit()
+	await _bekle(40)
+	await _kaydet("menu-ayarlar-sade.png", k)
+	menu.queue_free()
+	await _bekle(2)
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Kayit.yol))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(Kayit.yedek_yolu()))
+	print("geçiş görüntüleri hazır: ", k)

@@ -62,6 +62,7 @@ func _ready() -> void:
 	%TitresimKutu.button_pressed = bool(a.get("titresim", true))
 	%KontrastKutu.button_pressed = bool(a["kontrast"])
 	%RahatKutu.button_pressed = bool(a["rahat"])
+	%SadeGecisKutu.button_pressed = bool(a.get("sade_gecis", false))
 	%MuzikKaydirici.value_changed.connect(func(v: float) -> void: _ayar("muzik", v / 100.0))
 	%EfektKaydirici.value_changed.connect(func(v: float) -> void: _ayar("efekt", v / 100.0); Ses.cal("tik"))
 	%TamEkranKutu.toggled.connect(func(v: bool) -> void: _ayar("tam_ekran", v); _tam_ekran_uygula(v))
@@ -69,6 +70,7 @@ func _ready() -> void:
 	%TitresimKutu.toggled.connect(func(v: bool) -> void: _ayar("titresim", v); if v: Input.vibrate_handheld(40))
 	%KontrastKutu.toggled.connect(func(v: bool) -> void: _ayar("kontrast", v))
 	%RahatKutu.toggled.connect(func(v: bool) -> void: _ayar("rahat", v); _yenile())
+	%SadeGecisKutu.toggled.connect(func(v: bool) -> void: _ayar("sade_gecis", v); GecisKatmani.sade_ayar = v)
 
 	%Onizleme.sprite_frames = Kostumler.kareler(str(d["kostum"]))
 	%Onizleme.play("kos")
@@ -82,6 +84,10 @@ func _ready() -> void:
 	ogeler.append_array(%AnaPanel.get_children().filter(func(c: Node) -> bool: return c is HBoxContainer))
 	UI.sirayla_gir(ogeler)
 	%Perde.color.a = 0.0
+	# Menü açılışı: iris ortadan açılır (yalnız ilk açılışta; geri dönüşlerde Gecis.git zaten açıyor)
+	if not Gecis.acilis_yapildi and not Gecis.mesgul_mu():
+		Gecis.acilis(&"iris", 0, 0.5)
+	Gecis.acilis_yapildi = true
 
 
 ## Menü arka planı: gece teması (oyundaki ilk tema ile aynı renkler).
@@ -108,12 +114,14 @@ func _ayar(ad: String, deger) -> void:
 
 
 func _dil_degistir() -> void:
-	Ceviri.dil_degistir()
-	Ses.cal("tik")
-	d = Kayit.yukle()
-	_kostum_listesi()
-	_basarim_listesi()
-	_yenile()
+	# Dil değişimi: glitch örtüsünün altında yeni metin
+	Gecis.ara(&"glitch", 0, func() -> void:
+		Ceviri.dil_degistir()
+		Ses.cal("tik")
+		d = Kayit.yukle()
+		_kostum_listesi()
+		_basarim_listesi()
+		_yenile())
 
 
 func _tam_ekran_uygula(acik: bool) -> void:
@@ -319,5 +327,5 @@ func basla(gunluk := false, ritim := false, sarki := 0, ritim_gunluk := false) -
 	Ritim.gunluk_secili = ritim and ritim_gunluk
 	set_process_unhandled_input(false)
 	_telefonda_tam_ekran()
-	# Renk bandı geçişi (Gecis autoload): ~260 ms örtme, sahne değişir, ~200 ms açma
-	Gecis.git("res://scenes/oyun.tscn")
+	# Video geçiş ailesi (Gecis autoload, palet 0): ~260 ms örtme, sahne değişir, ~200 ms açma
+	Gecis.git("res://scenes/oyun.tscn", 0)

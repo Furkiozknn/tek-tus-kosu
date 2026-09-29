@@ -47,7 +47,6 @@ const SIMSEK_OLASILIK := 0.4          ## fırtına temasında her 2 ölçüde bi
 @onready var katman_yildiz: Parallax2D = $Yildizlar
 @onready var katman_uzak: Parallax2D = $SehirUzak
 @onready var katman_yakin: Parallax2D = $SehirYakin
-@onready var gecis: ColorRect = $Gecis/Perde
 @onready var mesafe_etiketi: Label = %Mesafe
 @onready var altin_etiketi: Label = %AltinSayisi
 @onready var rekor_etiketi: Label = %Rekor
@@ -122,6 +121,19 @@ var _simsek_rect: ColorRect                       ## şimşek perdesi (gökyüz�
 var _simsek_sayisi := 0                           ## test/istatistik: bu koşuda çakan şimşek
 var _ritim_ipucu_sayisi := 0            ## ritim: çalınan ipucu sesi sayısı (test)
 
+## Günlük video imkânları (docs/TASARIM.md §7): mesafe rozeti renk akışı, rekor anı damgası
+const ROZET_SURESI := 0.6                ## 100 m'de rozet bu kadar sürede paletin renklerinden geçer
+const ROZET_ADIM := 0.1
+const ROZET_METRE := 100
+var _rozet: StyleBoxFlat                 ## mesafe etiketinin arka planı (normalde şeffaf)
+var _rozet_kalan := 0.0
+var _rozet_pal := 0
+var _rozet_yazi := Color.WHITE
+var _rozet_son_m := 0                    ## en son vurgulanan 100 m katı
+var _rekor_asildi := false               ## bu koşuda rekor geçildi mi (damga bir kez)
+var _damga_hud: Damga                    ## koşarken "YENİ REKOR!" damgası
+var _damga_son: Damga                    ## oyun sonu kartının köşe damgası
+
 
 func _ready() -> void:
 	Simgeler.kur()
@@ -149,6 +161,14 @@ func _ready() -> void:
 	gt.width = 4
 	gt.height = 64
 	gok.texture = gt
+
+	_rozet = Tema.kutu(Color(0, 0, 0, 0), 3, 6, 0)
+	mesafe_etiketi.add_theme_stylebox_override("normal", _rozet)
+	_rozet_yazi = mesafe_etiketi.get_theme_color("font_color")
+	_damga_hud = Damga.new()
+	_damga_son = Damga.new()
+	son_paneli.get_parent().add_child(_damga_hud)
+	son_paneli.get_parent().add_child(_damga_son)
 
 	oyuncu.oldu.connect(_oyuncu_oldu)
 	oyuncu.ziplandi.connect(_ziplandi)
@@ -249,6 +269,11 @@ func yeniden_baslat() -> void:
 	mesafe_etiketi.text = "0 m"
 	duraklat_paneli.hide()
 	son_paneli.hide()
+	_damga_hud.gizle()
+	_damga_son.gizle()
+	_rozet_sifirla()
+	_rozet_son_m = 0
+	_rekor_asildi = false
 	tekrar_etiketi.hide()
 	gorev_bildirimi.hide()
 	_ogretme_kur(d)
@@ -271,8 +296,13 @@ func yeniden_baslat() -> void:
 		Ses.muzik(str(Ritim.SARKILAR[ritim_sarki]["muzik"]), true)  # vuruş ızgarası müziğin başıyla hizalı
 	elif not bot_modu:
 		Ses.muzik("muzik_oyun")
-	gecis.color = Color(Tema.MUREKKEP, 1.0)
-	create_tween().tween_property(gecis, "color:a", 0.0, 0.22)
+	# Koşu başı: mürekkepten açılır ("kararma" ailesi). Sahne geçişinin (Gecis.git) altında zaten kapalı.
+	Gecis.acilis(&"kararma", _palet(), 0.22)
+
+
+## Dünya temasının palet dizini (Tema.AKIS).
+func _palet() -> int:
+	return Tema.palet(maxi(tema, 0))
 
 
 func _hiz_hesapla() -> float:
@@ -302,6 +332,7 @@ func _physics_process(delta: float) -> void:
 	var m := mesafe()
 	istatistik["mesafe"] = m
 	mesafe_etiketi.text = "%d m" % m
+	_mesafe_vurgusu(m)
 	_ogretme_adim()
 	_altin_seri = maxf(_altin_seri - delta, 0.0)
 	_gecisleri_say()
@@ -654,6 +685,42 @@ func _tema_secimi() -> int:
 	return int(mesafe() / Ayarlar.TEMA_ARALIGI_M) % TEMA_DONGU
 
 
+## Mesafe sayacı: her 100 m'de rozet paletin video renk akışından geçer (yazı rengi vurgunun
+## üstünde kodla seçilir, >= Tema.ESIK); rekor geçilince bir kez damga + flaş vurur.
+func _mesafe_vurgusu(m: int) -> void:
+	var kat: int = floori(m / float(ROZET_METRE))
+	if kat > _rozet_son_m:
+		_rozet_son_m = kat
+		if not Gecis.sade():
+			_rozet_kalan = ROZET_SURESI
+			_rozet_pal = _palet()
+	if not _rekor_asildi and _rekor > 0 and m > _rekor and not bot_modu:
+		_rekor_asildi = true
+		_damga_hud.goster(tr("YENİ REKOR!"), _palet(), Vector2(get_viewport().get_visible_rect().size.x * 0.5, 84.0), Gecis.sade(), Vector2(0.5, 0.0))
+		get_tree().create_timer(1.8).timeout.connect(_damga_hud.gizle)
+		# Tek vuruş: ritimde ekrana ışık bindirilmez (vuruşa bakan göz), yalnız damga
+		if sarsinti_acik and not ritim:
+			Gecis.acilis(&"flas", _palet(), 0.16, 0.22)
+
+
+func _process(delta: float) -> void:
+	if _rozet_kalan > 0.0:
+		_rozet_kalan -= delta
+		if _rozet_kalan <= 0.0:
+			_rozet_sifirla()
+		else:
+			var v: Color = Tema.akis_rengi(_rozet_pal, int((ROZET_SURESI - _rozet_kalan) / ROZET_ADIM))
+			_rozet.bg_color = v
+			mesafe_etiketi.add_theme_color_override("font_color", Tema.yazi_rengi(v, _rozet_pal))
+
+
+func _rozet_sifirla() -> void:
+	_rozet_kalan = 0.0
+	if _rozet != null:
+		_rozet.bg_color = Color(0, 0, 0, 0)
+		mesafe_etiketi.add_theme_color_override("font_color", _rozet_yazi)
+
+
 func _tema_guncelle(aninda: bool) -> void:
 	var yeni := _tema_secimi()
 	if yeni == tema:
@@ -751,13 +818,11 @@ func _oyuncu_oldu() -> void:
 		_son_paneli_goster()
 
 
-## Ölümde kısa pembe flaş (140 ms): geri bildirim; koşu yeniden başlarken perde mürekkebe döner.
+## Ölümde kısa pembe flaş (140 ms, "flas" ailesi): geri bildirim; koşu yeniden başlarken mürekkepten açılır.
 func _flas() -> void:
 	if bot_modu or not sarsinti_acik:
 		return
-	gecis.color = Color(Tema.PEMBE, 0.30)
-	var tw := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
-	tw.tween_property(gecis, "color:a", 0.0, 0.14)
+	Gecis.acilis(&"flas", _palet(), 0.14, 0.3, Tema.PEMBE)
 
 
 func _kosu_sonucunu_isle() -> void:
@@ -942,6 +1007,13 @@ func _son_paneli_goster() -> void:
 	son_paneli.set_anchors_and_offsets_preset(Control.PRESET_CENTER, Control.PRESET_MODE_MINSIZE)
 	son_paneli.show()
 	%TekrarDugme.grab_focus()
+	# Oyun sonu: kart, paletin sıradaki geçiş ailesiyle açılır; rekorda köşe damgası
+	Gecis.acilis(&"", _palet(), 0.4)
+	if bool(s.get("yeni_rekor", false)):
+		var kr: Rect2 = son_paneli.get_global_rect()
+		_damga_son.goster(tr("YENİ REKOR!"), _palet(), Vector2(kr.end.x - 8.0, kr.position.y - 9.0), Gecis.sade(), Vector2(1.0, 0.0))
+	else:
+		_damga_son.gizle()
 
 
 ## Ritim: önerilen ses gecikmesini ayara yaz (sonraki koşuda geçerli).
@@ -1162,6 +1234,7 @@ func duraklat() -> void:
 	%DuraklatPerde.show()
 	duraklat_paneli.show()
 	%DevamDugme.grab_focus()
+	Gecis.acilis(&"perde", _palet(), 0.22)      # duraklatma: perde açılır (oyun durmuşken de çalışır)
 
 
 func devam() -> void:
@@ -1172,11 +1245,13 @@ func devam() -> void:
 
 
 func _dil_degistir() -> void:
-	Ceviri.dil_degistir()
-	Ses.cal("tik")
-	_dil_etiketi_yenile()
-	if not bitti:
-		rekor_etiketi.text = _rekor_metni(_rekor)
+	# Dil değişimi: glitch örtüsünün altında yeni metin
+	Gecis.ara(&"glitch", _palet(), func() -> void:
+		Ceviri.dil_degistir()
+		Ses.cal("tik")
+		_dil_etiketi_yenile()
+		if not bitti:
+			rekor_etiketi.text = _rekor_metni(_rekor))
 
 
 func _dil_etiketi_yenile() -> void:
@@ -1185,7 +1260,7 @@ func _dil_etiketi_yenile() -> void:
 
 func menuye_don() -> void:
 	get_tree().paused = false
-	Gecis.git("res://scenes/menu.tscn")
+	Gecis.git("res://scenes/menu.tscn", _palet())
 
 
 # ------------------------------------------------------------------ ilk oyunda öğretme

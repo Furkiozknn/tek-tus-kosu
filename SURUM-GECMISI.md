@@ -22,6 +22,12 @@ Güncel sürümün notları GitHub'da da duruyor:
 - İlk oyunda adım adım öğretme; ölümde pembe flaş.
 - Araçlar: `tools/his_olc.gd` (girdi gecikmesi, kojot, tampon), `tools/fps.gd`, `tools/kayit.*` (ham klip),
   `Bot.gecikme_aralik` (insan tepki bandı; varsayılan 0 = testlerle aynı).
+- Günlük video imkânları: sekiz geçiş ailesi (iris, glitch, bloklar, itme, perde, flaş, kararma, zoom;
+  `assets/gecis.gdshader`, GL Compatibility), üç paletin renk akışı (neon / arcade / uzay), menü açılışı,
+  oyun sonu, duraklat perdesi, dil glitch'i, 100 m'de mesafe rozeti akışı, rekor anı damgası + flaş.
+  Ayarlarda "Sade geçişler" (ve tarayıcıda prefers-reduced-motion) geçişleri anında yapar. Ritim modunda
+  koşu sırasında ekrana ışık bindirilmez. Kapalı ayar anahtarları kâğıt kartta görünür yapıldı.
+  Kaynak eşlemesi: `docs/TASARIM.md` §7. Testler 1048 → 1148.
 - Testler 961 → 1048; web `index.pck` 863 548 → 1 109 080 B; kare süresi 442 → 504 FPS (bot, Intel UHD).
 
 Oynanış değişmedi; yeni bir sürüm etiketi yok.

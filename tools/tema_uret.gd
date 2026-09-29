@@ -245,8 +245,9 @@ func _daire_simge(boy: int, renk: Color) -> ImageTexture:
 func _anahtar_simge(acik: bool, pasif: bool) -> ImageTexture:
 	var g := 30
 	var y := 16
-	var iz := AMBER if acik else Color(KAGIT, 0.22)
-	var dugme := MUREKKEP if acik else KAGIT
+	# Kapali: kagit kart uzerinde gorunsun (onceden kagit-uzeri-kagit, silikti); acikken pembe iz.
+	var iz := AMBER if acik else Color(MUREKKEP, 0.30)
+	var dugme := MUREKKEP if acik else Color(MUREKKEP, 0.65)
 	if pasif:
 		iz = Color(iz, iz.a * 0.4)
 		dugme = Color(dugme, 0.5)

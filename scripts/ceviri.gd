@@ -51,6 +51,7 @@ const EN := {
 	"Titreşim (telefon)": "Vibration (phone)",
 	"Yüksek kontrast (tehlike çerçevesi)": "High contrast (hazard outline)",
 	"Rahat mod (%80 hız, ayrı rekor)": "Relaxed mode (slower, separate record)",
+	"Sade geçişler (hareket azaltma)": "Simple transitions (reduced motion)",
 	"Ritim koşusu": "Rhythm run",
 	"Engeller müziğin vuruşuna hizalı. Pembe oklu çizgide zıpla.": "Obstacles follow the beat. Jump on the pink arrow line.",
 	"Ses gecikmesi": "Audio delay",

@@ -65,3 +65,56 @@ static func etiket(metin: String, boyut: int, renk: Color, mono := true, kalin :
 	e.add_theme_color_override("font_color", renk)
 	e.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return e
+
+
+## --- Günlük video imkânlarından alınan renk akışı ve geçiş aileleri ---
+## Kaynak: sosyal/uret/tema.mjs TEMALAR (neon, arcade, uzay). Oyunun kendi videosundaki renkler
+## (pembe / sarı / cam göbeği / mor / kâğıt) her paletin ilk sırasında; kaynak temanın yardımcı
+## rengi yalnız sona eklendi. Dünya DÜZ kalır; akış yalnız geçişlerde, mesafe rozetinde ve
+## rekor damgasında. Yazı rengi vurgunun üstünde kodla seçilir (en az ESIK).
+const GECIS_TURLERI: Array[StringName] = [&"iris", &"glitch", &"bloklar", &"itme", &"perde", &"flas", &"kararma", &"zoom"]
+const ESIK := 4.5                  ## okunurluk alt sınırı (videoda 5:1, burada WCAG AA 4,5:1)
+## Dünya teması (oyun.gd TEMALAR: Gece, Şarap, Yağış, Menekşe, Fırtına) -> palet dizini.
+const PALET_ESLEME: Array[int] = [0, 1, 0, 2, 1]
+const AKIS: Array = [
+	{"kaynak": "neon", "acik": KAGIT, "koyu": MUREKKEP,
+		"vurgu": [PEMBE, CAM, SARI, MOR, Color("3dffb0")],
+		"gecis": [&"glitch", &"iris", &"zoom", &"bloklar"]},
+	{"kaynak": "arcade", "acik": KAGIT, "koyu": MUREKKEP,
+		"vurgu": [SARI, PEMBE, CAM, Color("b6ff3b"), Color("ff9f1c")],
+		"gecis": [&"bloklar", &"flas", &"itme", &"glitch"]},
+	{"kaynak": "uzay", "acik": KAGIT, "koyu": MUREKKEP,
+		"vurgu": [MOR, Color("ffab40"), Color("7fe7ff"), PEMBE, Color("7dffc8")],
+		"gecis": [&"iris", &"perde", &"kararma", &"zoom"]},
+]
+
+
+## Dünya temasına karşılık gelen palet dizini.
+static func palet(dunya_tema: int) -> int:
+	return PALET_ESLEME[clampi(dunya_tema, 0, PALET_ESLEME.size() - 1)]
+
+
+## WCAG göreli parlaklık.
+static func parlaklik(c: Color) -> float:
+	var k: Array[float] = []
+	for v in [c.r, c.g, c.b]:
+		k.append(v / 12.92 if v <= 0.04045 else pow((v + 0.055) / 1.055, 2.4))
+	return 0.2126 * k[0] + 0.7152 * k[1] + 0.0722 * k[2]
+
+
+static func kontrast(a: Color, b: Color) -> float:
+	var x := parlaklik(a)
+	var y := parlaklik(b)
+	return (maxf(x, y) + 0.05) / (minf(x, y) + 0.05)
+
+
+## Vurgu rengi üzerindeki yazı: açık ya da koyu, hangisi daha okunuyorsa.
+static func yazi_rengi(zemin: Color, pal: int) -> Color:
+	var a: Dictionary = AKIS[clampi(pal, 0, AKIS.size() - 1)]
+	return a["acik"] if kontrast(zemin, a["acik"]) >= kontrast(zemin, a["koyu"]) else a["koyu"]
+
+
+## Akış paletinden k. renk (sarmal).
+static func akis_rengi(pal: int, k: int) -> Color:
+	var v: Array = AKIS[clampi(pal, 0, AKIS.size() - 1)]["vurgu"]
+	return v[posmod(k, v.size())]

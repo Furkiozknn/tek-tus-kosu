@@ -7,7 +7,7 @@
 <p align="center"><img src="docs/reel/reel.gif" alt="tek-tus-kosu - 15 saniyelik tanıtım videosu" width="720"></p>
 <p align="center"><sub><a href="docs/reel/reel.mp4">Sesli MP4 sürümü</a></sub></p>
 
-*One-button endless rooftop runner (Godot 4, Turkish and English UI, flat-colour look matching the trailer). Its rhythm mode lays every obstacle on the music's beat grid, then shows you how you were off: a five-bucket timing histogram after the run, and an audio-delay correction the game derives from your own jumps. 1048 headless tests, including a beat-perfect bot that has to clear every bar pattern at every song's beat spacing.*
+*One-button endless rooftop runner (Godot 4, Turkish and English UI, flat-colour look matching the trailer). Its rhythm mode lays every obstacle on the music's beat grid, then shows you how you were off: a five-bucket timing histogram after the run, and an audio-delay correction the game derives from your own jumps. 1148 headless tests, including a beat-perfect bot that has to clear every bar pattern at every song's beat spacing.*
 
 [![CI](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml/badge.svg)](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml)
 
@@ -18,7 +18,7 @@
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** arayüz yenilemesi (son yayın v1.7.3) — MIT lisansı, her push'ta ve her PR'da **1048 testin**
+**Durum:** arayüz yenilemesi (son yayın v1.7.3) — MIT lisansı, her push'ta ve her PR'da **1148 testin**
 koştuğu CI. Çekirdek mekanik, ritim modu, desenler ve bot eşikleri v1.7.3 ile aynı; yenilenen şey
 görünüm (tanıtım videosundaki düz renkli dünya), arayüz, **Türkçe/İngilizce dil**, ilk oyun öğretmesi ve
 geri bildirim. Denetim ve tasarım kararları: [`docs/DENETIM.md`](docs/DENETIM.md), [`docs/TASARIM.md`](docs/TASARIM.md).
@@ -292,7 +292,7 @@ Ayrıntılar: `CLAUDE.md` → Doğrulama.
 çıkıyor; oysa bir test fonksiyonundaki çalışma zamanı hatası (null erişimi, `int == bool`)
 yalnızca o fonksiyonu keser — motor `SCRIPT ERROR` yazar, kalan doğrulamalar hiç sayılmaz ve
 takım yine "0 hata" ile biter. CI günlüğü `tests/kapi.sh`'a veriyor: `=== SONUÇ ===` satırı
-olmalı, geçen sayı tabanın (`ci.yml` → `TEST_TABANI`, şu an 1048) altına düşmemeli, günlükte
+olmalı, geçen sayı tabanın (`ci.yml` → `TEST_TABANI`, şu an 1148) altına düşmemeli, günlükte
 `SCRIPT ERROR` / `Parse Error` olmamalı. Kapının kendisi `tests/kapi_sinama.sh` ile dokuz örnek
 günlükte sınanıyor (Godot'suz, `bash tests/kapi_sinama.sh`). Test ekleyince tabanı da yükselt.
 
