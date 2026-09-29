@@ -4,10 +4,10 @@ extends RefCounted
 
 const LISTE := [
 	{"ad": "klasik", "isim": "Klasik", "fiyat": 0, "iz": "", "iz_surekli": false},
-	{"ad": "kizil", "isim": "Kızıl Bere", "fiyat": 60, "iz": "e43b44", "iz_surekli": false},
-	{"ad": "orman", "isim": "Orman", "fiyat": 150, "iz": "63c74d", "iz_surekli": false},
-	{"ad": "neon", "isim": "Neon", "fiyat": 300, "iz": "2ce8f5", "iz_surekli": true},
-	{"ad": "altin", "isim": "Altın Taç", "fiyat": 600, "iz": "fee761", "iz_surekli": true},
+	{"ad": "kizil", "isim": "Kızıl", "fiyat": 60, "iz": "ff5a36", "iz_surekli": false},
+	{"ad": "orman", "isim": "Yeşil", "fiyat": 150, "iz": "3ddc97", "iz_surekli": false},
+	{"ad": "neon", "isim": "Menekşe", "fiyat": 300, "iz": "b399ff", "iz_surekli": true},
+	{"ad": "altin", "isim": "Taç", "fiyat": 600, "iz": "f5edfe", "iz_surekli": true},
 ]
 const KARE := Vector2i(20, 26)
 

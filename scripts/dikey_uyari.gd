@@ -18,7 +18,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	perde = ColorRect.new()
 	perde.name = "Perde"
-	perde.color = Color("181425", 0.95)
+	perde.color = Color(Tema.MUREKKEP, 0.96)
 	perde.set_anchors_preset(Control.PRESET_FULL_RECT)
 	perde.mouse_filter = Control.MOUSE_FILTER_STOP
 	perde.visible = false
@@ -33,10 +33,11 @@ func _ready() -> void:
 	simge.custom_minimum_size = Vector2(220, 110)
 	simge.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	kutu.add_child(simge)
-	for satir in [["Telefonu yan çevir", 50, Color("2ce8f5")], ["Tek Tuş Koşu yatay oynanır", 26, Color("c0cbdc")]]:
+	for satir in [[Ceviri.t("Telefonu yan çevir"), 40, Tema.PEMBE], [Ceviri.t("Tek Tuş Koşu yatay oynanır"), 20, Tema.KAGIT]]:
 		var l := Label.new()
 		l.text = satir[0]
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		l.theme_type_variation = &"Baslik"
 		l.add_theme_font_size_override("font_size", satir[1])
 		l.add_theme_color_override("font_color", satir[2])
 		kutu.add_child(l)
@@ -63,12 +64,12 @@ class Simge extends Control:
 	func _draw() -> void:
 		# Perde yalnız dikeyde görünür; orada oyun alanı küçüldüğü için simge iri çizilir.
 		draw_set_transform(size / 2.0, 0.0, Vector2(2.0, 2.0))
-		var r := Color("c0cbdc")
+		var r := Tema.KAGIT
 		var c := Vector2.ZERO
 		draw_rect(Rect2(c.x - 52, c.y - 22, 22, 40), r, false, 2.0)
 		draw_rect(Rect2(c.x - 44, c.y + 13, 6, 2), r)
 		draw_rect(Rect2(c.x + 12, c.y - 12, 40, 22), r, false, 2.0)
 		draw_rect(Rect2(c.x + 45, c.y - 4, 2, 6), r)
-		var ok := Color("fee761")
+		var ok := Tema.PEMBE
 		draw_line(Vector2(c.x - 20, c.y), Vector2(c.x + 4, c.y), ok, 3.0)
 		draw_colored_polygon(PackedVector2Array([Vector2(c.x + 4, c.y - 6), Vector2(c.x + 10, c.y), Vector2(c.x + 4, c.y + 6)]), ok)

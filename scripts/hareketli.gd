@@ -3,8 +3,6 @@ class_name Hareketli
 extends AnimatableBody2D
 ## Gidip gelen tek yönlü platform. Konum = başlangıç sol üst köşesi.
 
-const DOKU := preload("res://assets/sprites/platform.png")
-
 @export var genislik := 64.0:
 	set(v):
 		genislik = v
@@ -51,11 +49,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _draw() -> void:
-	var adet := int(ceil(genislik / 16.0))
-	for i in adet:
-		var w := minf(16.0, genislik - i * 16.0)
-		draw_texture_rect_region(DOKU, Rect2(i * 16, 0, w, 8), Rect2(0, 0, w, 8))
-	# Taşıyıcı pervaneler
-	for x in [4.0, genislik - 8.0]:
-		draw_rect(Rect2(x, -3, 4, 3), Color("5a6988"))
-		draw_rect(Rect2(x - 3, -4, 10, 1), Color("c0cbdc"))
+	draw_rect(Rect2(0, 0, genislik, 5), Tema.MOR)
+	# Tasiyici: iki kisa ayak (hareketli oldugu okunsun)
+	for x in [5.0, genislik - 9.0]:
+		draw_rect(Rect2(x, 5, 4, 3), Tema.MOR)

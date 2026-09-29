@@ -12,8 +12,15 @@ var tavanlar: Callable
 ## x -> rüzgâr gücü (isteğe bağlı). Havadaki yatay hız = oyuncu.hiz + rüzgâr.
 var ruzgar: Callable
 
+## Tepki gecikmesi aralığı (sn). (0, 0) = anında: testler ve bot stresi bit bit aynı kalır.
+## Video kaydı (tools/kayit.gd) insan bandı için 0,04-0,12 sn verir.
+var gecikme_aralik := Vector2.ZERO
+
 var _basili := false
 var _kisa := false
+var _rng := RandomNumberGenerator.new()
+var _t := 0.0
+var _kuyruk: Array = []   ## [uygulama zamanı, "bas" | "birak"]
 
 
 func _init(o: Oyuncu, a: Callable, t: Callable = Callable()) -> void:
@@ -25,10 +32,18 @@ func _init(o: Oyuncu, a: Callable, t: Callable = Callable()) -> void:
 func adim() -> void:
 	var p := oyuncu
 	if not p.canli:
+		_kuyruk.clear()
 		return
+	_t += 1.0 / float(Engine.physics_ticks_per_second)
+	while not _kuyruk.is_empty() and float(_kuyruk[0][0]) <= _t:
+		var e: Array = _kuyruk.pop_front()
+		if e[1] == "bas":
+			p.zipla_bas()
+		else:
+			p.zipla_birak()
 	# Kısa zıplama: basıldıktan bir kare sonra bırak.
 	if _kisa and _basili and not p.is_on_floor():
-		p.zipla_birak()
+		_eylem("birak")
 		_basili = false
 		_kisa = false
 	var liste: Array = araliklar.call()
@@ -42,10 +57,10 @@ func adim() -> void:
 			break
 
 	if p.is_on_floor():
-		if _basili and p.velocity.y >= 0.0:
-			p.zipla_birak()
+		if _basili and p.velocity.y >= 0.0 and not _bekliyor("bas"):
+			_eylem("birak")
 			_basili = false
-		if hedef == null:
+		if hedef == null or _bekliyor("bas"):
 			return
 		var orta: float = (hedef.x + hedef.y) / 2.0
 		var w := _ortalama_ruzgar(orta - p.hiz * 0.4, orta + p.hiz * 0.4)
@@ -57,14 +72,14 @@ func adim() -> void:
 		var menzil := kisa_menzil if kisa_gerek else tam_menzil
 		var kalkis: float = minf(orta - menzil / 2.0, hedef.x - 6.0)
 		if on >= kalkis and arka < hedef.y:
-			p.zipla_bas()
+			_eylem("bas")
 			_basili = true
 			_kisa = kisa_gerek
 		return
 
 	# Havada: tepe noktasından sonra iniş yeri tehlikeye denk geliyorsa ikinci zıplama
 	# (tavanın altında değilsek).
-	if p.velocity.y > 0.0 and p.havada_ziplama_hakki_var():
+	if p.velocity.y > 0.0 and p.havada_ziplama_hakki_var() and not _bekliyor("bas"):
 		var inis := _inis_x(p)
 		if _tavan_var(tavan, p.global_position.x - 10.0, inis + 120.0, p):
 			return
@@ -72,11 +87,29 @@ func adim() -> void:
 			if a.y < arka - 4.0:
 				continue
 			if inis + Oyuncu.YARIM_GENISLIK > a.x - 2.0 and inis - Oyuncu.YARIM_GENISLIK < a.y + 2.0:
-				p.zipla_bas()
+				_eylem("bas")
 				_basili = true
 				break
 			if a.x > inis + 40.0:
 				break
+
+
+## Eylemi hemen ya da tepki gecikmesi kadar sonra uygular.
+func _eylem(ad: String) -> void:
+	if gecikme_aralik.y <= 0.0:
+		if ad == "bas":
+			oyuncu.zipla_bas()
+		else:
+			oyuncu.zipla_birak()
+		return
+	_kuyruk.append([_t + _rng.randf_range(gecikme_aralik.x, gecikme_aralik.y), ad])
+
+
+func _bekliyor(ad: String) -> bool:
+	for e in _kuyruk:
+		if e[1] == ad:
+			return true
+	return false
 
 
 ## [x0, x1] aralığında, tam zıplamada kafanın değeceği yükseklikte tavan var mı?

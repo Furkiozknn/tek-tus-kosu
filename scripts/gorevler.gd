@@ -115,4 +115,14 @@ static func kosu_sonu(d: Dictionary, ist: Dictionary, rng: RandomNumberGenerator
 
 static func metin(g: Dictionary, ist := {}) -> String:
 	var deger := mini(anlik_deger(g, ist), int(g["hedef"]))
-	return "%s  (%d/%d)" % [g["metin"], deger, int(g["hedef"])]
+	return "%s  (%d/%d)" % [metin_ad(g), deger, int(g["hedef"])]
+
+
+## Görevin gösterilen metni: kayıtta biçimlenmiş Türkçe metin saklanır (eski kayıtlar bozulmasın);
+## gösterirken şablon kimliğinden bulunup seçili dile çevrilir. Kimlik bilinmiyorsa kayıtlı metin.
+static func metin_ad(g: Dictionary) -> String:
+	for sure in SABLONLAR:
+		for sb in SABLONLAR[sure]:
+			if sb["id"] == g.get("id", ""):
+				return Ceviri.t(String(sb["metin"])) % int(g.get("hedef", 0))
+	return String(g.get("metin", ""))

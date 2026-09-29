@@ -15,6 +15,8 @@ func _initialize() -> void:
 
 func _calistir() -> void:
 	Kayit.yol = "user://ekran_kayit.cfg"
+	Ceviri.zorla = "tr"
+	Ceviri.dil_uygula()
 	var d := Kayit.yukle()
 	d["rekor"] = 180
 	d["toplam_altin"] = 240
@@ -36,6 +38,7 @@ func _calistir() -> void:
 	await _ritim()
 	await _firtina()
 	await _menu_paneller()
+	await _yenileme_ekranlari()
 	await _kapak()
 	Gunluk.tarih_ezme = ""
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(Hayalet.dosya_yolu()))
@@ -344,6 +347,58 @@ func _menu_paneller() -> void:
 	await _bekle(2)
 
 
+## Yenileme: ilk oyun ipucu, duraklat kartı, İngilizce menü/oyun sonu (KONTROL klasörüne).
+func _yenileme_ekranlari() -> void:
+	# İlk oyun: kayıtta koşu sayısı 0 (öğretme dizisi)
+	var d := Kayit.yukle()
+	var eski_kosu: int = d["kosu_sayisi"]
+	d["kosu_sayisi"] = 0
+	Kayit.kaydet(d)
+	var sira: Array[String] = ["res://scenes/parcalar/13_nefes_altin.tscn", "res://scenes/parcalar/02_tek_diken.tscn"]
+	var oyun := await _oyun(sira, 220.0, 0, 3)
+	oyun.ipucu.show()
+	oyun._ogretme_kur(Kayit.yukle())
+	oyun._bot = null
+	await _bekle(60)
+	await _kaydet("ilk-oyun.png", KONTROL)
+	oyun.oyuncu.zipla_bas()
+	await _bekle(12)
+	await _kaydet("ilk-oyun-2.png", KONTROL)
+	# Duraklat kartı (ayarlar bölümü açık)
+	oyun.duraklat()
+	(oyun.get_node("%DurAyarDugme") as Button).pressed.emit()
+	await _bekle(6)
+	await _kaydet("duraklat.png", KONTROL)
+	oyun.devam()
+	oyun.queue_free()
+	await _bekle(2)
+	d = Kayit.yukle()
+	d["kosu_sayisi"] = eski_kosu
+	Kayit.kaydet(d)
+	# İngilizce menü ve oyun sonu
+	Ceviri.zorla = "en"
+	Ceviri.dil_uygula()
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _bekle(60)
+	await _kaydet("menu-en.png", KONTROL)
+	menu.queue_free()
+	await _bekle(2)
+	var o2 := await _oyun(["res://scenes/parcalar/13_nefes_altin.tscn", "res://scenes/parcalar/17_piston.tscn"] as Array[String], 340.0, 1500, 11)
+	o2._bot = null
+	var sinir := 60 * 10
+	o2.olum_tekrari_acik = false
+	while not o2.bitti and sinir > 0:
+		sinir -= 1
+		await process_frame
+	await _bekle(30)
+	await _kaydet("oyun-sonu-en.png", KONTROL)
+	o2.queue_free()
+	await _bekle(2)
+	Ceviri.zorla = "tr"
+	Ceviri.dil_uygula()
+
+
 # ------------------------------------------------------------------ kapak
 func _doku(yol: String, bolge := Rect2i()) -> Texture2D:
 	var t: Texture2D = load(yol)
@@ -364,6 +419,8 @@ func _sprite(kok: Node, doku: Texture2D, konum: Vector2, olcek: float, merkez :=
 
 
 func _kapak() -> void:
+	# Düz renkli kapak (630x500): gece gökyüzü, iki basamaklı siluet, zemin bloğu + çizgi,
+	# pembe koşucu, sarı dikenler, camgöbeği altınlar, sarı tabela, başlık.
 	var boyut := Vector2i(630, 500)
 	var sv := SubViewport.new()
 	sv.size = boyut
@@ -372,78 +429,62 @@ func _kapak() -> void:
 	sv.canvas_item_default_texture_filter = Viewport.DEFAULT_CANVAS_ITEM_TEXTURE_FILTER_NEAREST
 	root.add_child(sv)
 
-	var gok := TextureRect.new()
-	var g := Gradient.new()
-	g.colors = PackedColorArray([Color("262b44"), Color("68386c"), Color("f77622")])
-	g.offsets = PackedFloat32Array([0.0, 0.55, 1.0])
-	var gt := GradientTexture2D.new()
-	gt.gradient = g
-	gt.fill_from = Vector2(0, 0)
-	gt.fill_to = Vector2(0, 1)
-	gt.width = 4
-	gt.height = 128
-	gok.texture = gt
+	var gok := ColorRect.new()
+	gok.color = Tema.GOK
 	gok.size = Vector2(boyut)
-	gok.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	gok.stretch_mode = TextureRect.STRETCH_SCALE
 	sv.add_child(gok)
-
-	var yildiz := _sprite(sv, _doku("res://assets/sprites/yildizlar.png"), Vector2.ZERO, 2.0)
-	yildiz.modulate.a = 0.7
-	_sprite(sv, _doku("res://assets/sprites/ay.png"), Vector2(500, 120), 3.0)
-	var uzak := _sprite(sv, _doku("res://assets/sprites/sehir_uzak.png"), Vector2(-120, 200), 1.5)
-	uzak.modulate = Color(1, 0.85, 0.8)
-	var yakin := _sprite(sv, _doku("res://assets/sprites/sehir_yakin.png"), Vector2(-60, 180), 1.5)
-	yakin.modulate = Color(1, 0.9, 0.9)
-
-	# Çatı: kenar karosu + tuğla/pencere
-	var olcek := 3.0
-	var karo := 16.0 * olcek
+	var uzak := _sprite(sv, _doku("res://assets/sprites/sehir_uzak.png"), Vector2(-120, 180), 1.6)
+	uzak.modulate = Color("272238")
+	var yakin := _sprite(sv, _doku("res://assets/sprites/sehir_yakin.png"), Vector2(-60, 150), 1.6)
+	yakin.modulate = Color("2d283f")
 	var cati_y := 410.0
-	var kenar := _doku("res://assets/sprites/zemin.png", Rect2i(0, 0, 16, 16))
-	var tugla := _doku("res://assets/sprites/zemin.png", Rect2i(16, 0, 16, 16))
-	var pencere := _doku("res://assets/sprites/zemin.png", Rect2i(32, 0, 16, 16))
-	for i in 14:
-		var x := i * karo
-		_sprite(sv, kenar, Vector2(x, cati_y), olcek)
-		_sprite(sv, pencere if i % 4 == 1 else tugla, Vector2(x, cati_y + karo), olcek)
-	# Engeller
-	var diken := _doku("res://assets/sprites/diken.png")
+	var zemin := ColorRect.new()
+	zemin.color = Tema.MUREKKEP
+	zemin.position = Vector2(0, cati_y)
+	zemin.size = Vector2(boyut.x, boyut.y - cati_y)
+	sv.add_child(zemin)
+	var cizgi := ColorRect.new()
+	cizgi.color = Tema.KAGIT
+	cizgi.position = Vector2(0, cati_y)
+	cizgi.size = Vector2(boyut.x, 4)
+	sv.add_child(cizgi)
+	# Engeller: sarı üçgenler
 	for i in 3:
-		_sprite(sv, diken, Vector2(400 + i * 36, cati_y - 36), 3.0)
-	var tabela := _sprite(sv, _doku("res://assets/sprites/tavan_engeli.png"), Vector2(528, 244), 3.0)
-	tabela.modulate = Color(1, 1, 1)
+		var x := 400.0 + i * 40.0
+		var p := Polygon2D.new()
+		p.color = Tema.SARI
+		p.polygon = PackedVector2Array([Vector2(x, cati_y), Vector2(x + 20, cati_y - 40), Vector2(x + 40, cati_y)])
+		sv.add_child(p)
+	# Tabela
+	var tabela := ColorRect.new()
+	tabela.color = Tema.SARI
+	tabela.position = Vector2(500, 240)
+	tabela.size = Vector2(110, 40)
+	sv.add_child(tabela)
 	# Altın kavisi
 	var altin := _doku("res://assets/sprites/altin.png", Rect2i(0, 0, 12, 12))
 	for i in 6:
 		var t := float(i) / 5.0
-		var ax := 250.0 + t * 250.0
-		var ay := 330.0 - sin(t * PI) * 110.0
-		_sprite(sv, altin, Vector2(ax, ay), 2.5, true)
+		_sprite(sv, altin, Vector2(250.0 + t * 250.0, 330.0 - sin(t * PI) * 110.0), 3.0, true)
 	# Oyuncu: zıplama karesi
 	var oyuncu := _doku("res://assets/sprites/oyuncu_klasik.png", Rect2i(8 * 20, 0, 20, 26))
-	_sprite(sv, oyuncu, Vector2(190, 240), 6.0, true)
-
-	# Başlık
+	_sprite(sv, oyuncu, Vector2(190, 330), 7.0, true)
 	var baslik := Label.new()
-	baslik.text = "TEK TUŞ KOŞU"
+	baslik.text = "Tek Tuş Koşu"
+	baslik.theme_type_variation = &"Baslik"
 	baslik.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	baslik.position = Vector2(0, 22)
+	baslik.position = Vector2(0, 30)
 	baslik.size = Vector2(boyut.x, 90)
-	baslik.add_theme_font_size_override("font_size", 72)
-	baslik.add_theme_color_override("font_color", Color("2ce8f5"))
-	baslik.add_theme_color_override("font_outline_color", Color("181425"))
-	baslik.add_theme_constant_override("outline_size", 16)
+	baslik.add_theme_font_size_override("font_size", 64)
 	sv.add_child(baslik)
 	var alt := Label.new()
-	alt.text = "tek tuş  •  sonsuz çatı koşusu"
+	alt.text = "TEK TUŞ · TAM RİTİM"
+	alt.theme_type_variation = &"EtiketKalin"
 	alt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	alt.position = Vector2(0, 108)
+	alt.position = Vector2(0, 118)
 	alt.size = Vector2(boyut.x, 30)
-	alt.add_theme_font_size_override("font_size", 24)
-	alt.add_theme_color_override("font_color", Color("fee761"))
-	alt.add_theme_color_override("font_outline_color", Color("181425"))
-	alt.add_theme_constant_override("outline_size", 8)
+	alt.add_theme_font_size_override("font_size", 18)
+	alt.add_theme_color_override("font_color", Tema.MOR)
 	sv.add_child(alt)
 
 	await _bekle(5)

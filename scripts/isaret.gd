@@ -12,10 +12,9 @@ func _ready() -> void:
 	var l := Label.new()
 	l.text = metin
 	l.position = Vector2(5, ust_y - 15)
-	l.add_theme_font_size_override("font_size", 10)
+	l.theme_type_variation = &"EtiketKalin"
+	l.add_theme_font_size_override("font_size", 8)
 	l.add_theme_color_override("font_color", renk)
-	l.add_theme_color_override("font_outline_color", Color("181425"))
-	l.add_theme_constant_override("outline_size", 3)
 	add_child(l)
 
 
@@ -26,4 +25,4 @@ func _draw() -> void:
 		y += 10.0
 	# Bayrak
 	draw_line(Vector2(0, ust_y - 16), Vector2(0, ust_y), renk, 2.0)
-	draw_colored_polygon(PackedVector2Array([Vector2(1, ust_y - 16), Vector2(1, ust_y - 8), Vector2(-1 + 4.0 + metin.length() * 6.2 + 4.0, ust_y - 8), Vector2(-1 + 4.0 + metin.length() * 6.2 + 4.0, ust_y - 16)]), Color("181425", 0.7))
+	draw_colored_polygon(PackedVector2Array([Vector2(1, ust_y - 16), Vector2(1, ust_y - 8), Vector2(-1 + 4.0 + metin.length() * 6.2 + 4.0, ust_y - 8), Vector2(-1 + 4.0 + metin.length() * 6.2 + 4.0, ust_y - 16)]), Color(Tema.MUREKKEP, 0.85))

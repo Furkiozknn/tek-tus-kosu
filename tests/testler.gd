@@ -14,6 +14,10 @@ func _initialize() -> void:
 
 func _calistir() -> void:
 	Kayit.yol = "user://test_kayit.cfg"
+	# Testler Türkçe metinleri doğrular: dil sabitlenir (CI'nin işletim sistemi dili İngilizce olabilir).
+	Ceviri.zorla = "tr"
+	Ceviri.dil_uygula()
+	GecisKatmani.hizli = true
 	await _test_kayit()
 	await _test_gorevler_ve_kostum()
 	await _test_parca_sahneleri()
@@ -36,6 +40,12 @@ func _calistir() -> void:
 	await _test_gunun_ritmi()
 	await _test_v17_histogram_ve_basarimlar()
 	await _test_ritim_desen_gecilebilirligi()
+	await _test_tema_ve_ceviri()
+	await _test_dil_kaydi()
+	await _test_yeni_menu_akisi()
+	await _test_duraklat_ve_oyun_sonu()
+	await _test_ilk_oyun_ogretme()
+	await _test_his_pencereleri()
 	print("\n=== SONUÇ: %d geçti, %d hata ===" % [gecen, hatalar])
 	quit(1 if hatalar > 0 else 0)
 
@@ -351,8 +361,9 @@ func _test_menu() -> void:
 	await _kareler(3)
 	var ekran: Rect2 = menu.get_viewport().get_visible_rect()
 	var alt_etiket: Control = menu.get_node("%AltinEtiketi")
-	dogrula(alt_etiket.get_global_rect().end.y <= 296.0,
-		"menü sol sütunu çatıya taşmamalı (alt kenar %.0f)" % alt_etiket.get_global_rect().end.y)
+	# Yenileme: rekor/altın etiketleri zemin bloğunun (y >= 296) üstüne yazılır; ekran içinde kalmalı.
+	dogrula(alt_etiket.get_global_rect().end.y <= ekran.end.y and alt_etiket.get_global_rect().position.y >= 290.0,
+		"menü rekor/altın etiketleri zemin bloğunda ve ekran içinde olmalı (%s)" % alt_etiket.get_global_rect())
 	(menu.get_node("%KarakterDugme") as Button).pressed.emit()
 	await _kareler(3)
 	var kp: Control = menu.get_node("%KarakterPaneli")
@@ -1167,7 +1178,7 @@ func _test_ritim() -> void:
 	for gecikme in [0.0, 25.0]:
 		var oyun := await _ritim_oyunu(0, 5, false)
 		dogrula(oyun.ritim and not oyun.gunluk and not oyun.rahat and is_equal_approx(oyun.oyuncu.hiz, Ritim.HIZ), "ritim koşusu sabit 300 px/sn")
-		dogrula(oyun.ipucu.visible and oyun.ipucu.text.contains("lamba"), "ritim koşusunda ipucu lambaları anlatmalı")
+		dogrula(oyun.ipucu.visible and oyun.ipucu.text.contains("çizgi"), "ritim koşusunda ipucu pembe çizgiyi anlatmalı")
 		sonuclar[gecikme] = await _ritim_oyna(oyun, gecikme, 60 * 75)
 		oyun.queue_free()
 		await process_frame
@@ -1547,7 +1558,8 @@ func _test_v17_histogram_ve_basarimlar() -> void:
 	await _kareler(2)
 	var kp: Rect2 = go.get_node("%SonPaneli").get_global_rect()
 	dogrula(ekr.encloses(kp), "en kalabalık ritim sonuç paneli ekrana sığmalı (%s)" % kp)
-	dogrula(not grafik.visible, "sığmayan panelde histogram gizlenmeli")
+	# Yenileme: küçük mono yazılarla 8 satırlık panel de sığıyor; kural aynı: histogram yalnız panel sığıyorsa görünür.
+	dogrula(grafik.visible == (go.get_node("%SonPaneli").get_combined_minimum_size().y <= ekr.size.y), "histogram yalnız panel sığıyorsa görünmeli")
 	dogrula(go.get_node("%SonGorevler").text.split("\n").size() == 8, "en kalabalık panelde 8 görev satırı")
 	go.queue_free()
 	await process_frame
@@ -1721,6 +1733,376 @@ func _ritim_oyna(oyun: Node2D, gecikme: float, kare_sayisi: int, taban := NAN) -
 			o.zipla_bas()
 			birak = 1 if tavan else 24
 	return [o.canli, olay_sayisi, int(oyun.istatistik["ritim"]), oyun.mesafe()]
+
+# ------------------------------------------------------------------ yenileme: tema, dil, menü, duraklat, oyun sonu, öğretme
+func _metin_dosyalari(klasor: String = "res://") -> Array[String]:
+	var sonuc: Array[String] = []
+	for ad in DirAccess.get_directories_at(klasor):
+		if ad.begins_with(".") or ad in ["build", "_eski", "dev"]:
+			continue
+		sonuc.append_array(_metin_dosyalari(klasor.path_join(ad)))
+	for ad in DirAccess.get_files_at(klasor):
+		if ad.ends_with(".gd") or ad.ends_with(".tscn"):
+			sonuc.append(klasor.path_join(ad))
+	return sonuc
+
+
+func _test_tema_ve_ceviri() -> void:
+	print("[tema ve çeviri]")
+	# Proje teması: yazı tipleri ve varyasyonlar
+	var tema := ThemeDB.get_project_theme()
+	dogrula(tema != null, "proje teması (assets/tema.tres) yüklü olmalı")
+	if tema:
+		for v in ["Govde", "Baslik", "Etiket", "EtiketKalin", "KartBaslik", "KartYazi", "KartEtiket"]:
+			dogrula(String(tema.get_type_variation_base(v)) == "Label", "tema Label varyasyonu: " + v)
+		for v in ["Birincil", "KartDugme", "Kucuk"]:
+			dogrula(String(tema.get_type_variation_base(v)) == "Button", "tema Button varyasyonu: " + v)
+		dogrula(String(tema.get_type_variation_base("KagitKart")) == "PanelContainer", "tema KagitKart varyasyonu")
+		var f: Font = tema.get_font("font", "Baslik")
+		dogrula(f != null and f.get_font_name() != "", "başlık yazı tipi tanımlı (Instrument Sans)")
+	dogrula(Tema.buyuk("işık") == "İŞIK" and Tema.buyuk("ıslak") == "ISLAK", "Türkçe büyük harf: i→İ, ı→I (%s)" % Tema.buyuk("işık"))
+	# Düz renk dünya: temalarda degrade yok (ust == alt), siluet katmanları renkleniyor
+	var oyun_betik: GDScript = load("res://scripts/oyun.gd")
+	var temalar: Array = oyun_betik.get_script_constant_map()["TEMALAR"]
+	var duz := true
+	for t in temalar:
+		duz = duz and t["ust"] == t["alt"]
+	dogrula(duz and temalar.size() == 5, "5 dünya teması, hepsi tek renk gökyüzü (degradesiz)")
+	# Çeviri: koddaki her tr()/Ceviri.t() anahtarı EN tablosunda; biçim belirteçleri aynı
+	var eksik := PackedStringArray()
+	var bicim := PackedStringArray()
+	var r := RegEx.new()
+	r.compile("(?<![A-Za-z_])(?:Ceviri\\.t|tr)\\(\\s*\"((?:[^\"\\\\]|\\\\.)*)\"")
+	var kaynak := 0
+	for yol in _metin_dosyalari():
+		if not yol.ends_with(".gd") or yol.ends_with("ceviri.gd") or yol.contains("/tests/"):
+			continue
+		for m in r.search_all(FileAccess.get_file_as_string(yol)):
+			var k: String = m.get_string(1)
+			kaynak += 1
+			if not Ceviri.EN.has(k):
+				eksik.append("%s: %s" % [yol.get_file(), k])
+	dogrula(kaynak > 40 and eksik.is_empty(), "koddaki %d tr() metninin hepsi İngilizce tabloda (%s)" % [kaynak, "; ".join(eksik)])
+	# Sahnelerdeki düğme/etiket metinleri de anahtar
+	var sahne_eksik := PackedStringArray()
+	var rs := RegEx.new()
+	rs.compile("\\ntext = \"((?:[^\"\\\\]|\\\\.)*)\"")
+	for yol in ["res://scenes/menu.tscn", "res://scenes/oyun.tscn"]:
+		for m in rs.search_all(FileAccess.get_file_as_string(yol)):
+			var k: String = m.get_string(1).replace("\\n", "\n")
+			if k == "" or k.is_valid_int() or k in ["II", "TR", "0 m"] or not Ceviri.EN.has(k) and _sahne_metni_calisma_aninda(k):
+				continue
+			if not Ceviri.EN.has(k):
+				sahne_eksik.append(k)
+	dogrula(sahne_eksik.is_empty(), "sahne metinlerinin çevirisi var (%s)" % "; ".join(sahne_eksik))
+	# Veri kaynaklı metinler: görev şablonları, başarımlar, şarkılar, kostümler, temalar, histogram
+	var veri_eksik := PackedStringArray()
+	for sure in Gorevler.SABLONLAR:
+		for sb in Gorevler.SABLONLAR[sure]:
+			if not Ceviri.EN.has(String(sb["metin"])):
+				veri_eksik.append(String(sb["metin"]))
+	for b in Basarimlar.LISTE:
+		for alan in ["ad", "metin"]:
+			if not Ceviri.EN.has(String(b[alan])):
+				veri_eksik.append(String(b[alan]))
+	for sk in Ritim.SARKILAR:
+		for alan in ["ad", "aciklama"]:
+			if not Ceviri.EN.has(String(sk[alan])):
+				veri_eksik.append(String(sk[alan]))
+	for k in Kostumler.LISTE:
+		if not Ceviri.EN.has(String(k["isim"])):
+			veri_eksik.append(String(k["isim"]))
+	for t in temalar:
+		if not Ceviri.EN.has(String(t["ad"])) and String(t["ad"]) != "Gece":
+			veri_eksik.append(String(t["ad"]))
+	for ad in SapmaGrafigi.KUTU_ADLARI:
+		if not Ceviri.EN.has(ad):
+			veri_eksik.append(ad)
+	dogrula(veri_eksik.is_empty(), "görev/başarım/şarkı/kostüm/tema/histogram metinlerinin çevirisi var (%s)" % "; ".join(veri_eksik))
+	var uyusmaz := PackedStringArray()
+	for k in Ceviri.EN:
+		if Ceviri.belirtecler(k) != Ceviri.belirtecler(Ceviri.EN[k]):
+			uyusmaz.append(k)
+	dogrula(uyusmaz.is_empty(), "çeviride biçim belirteçleri kaynakla aynı (%s)" % "; ".join(uyusmaz))
+	dogrula(not Ceviri.EN.has("") and Ceviri.EN.size() > 100, "çeviri tablosu dolu (%d anahtar)" % Ceviri.EN.size())
+
+
+## Sahne .tscn'lerinde varsayılan metni çalışma anında ezilen düğmeler (yer tutucu) çeviri istemez.
+func _sahne_metni_calisma_aninda(k: String) -> bool:
+	return k.begins_with("Mesafe: ") or k.begins_with("Rekor: ") or k.begins_with("Altın: ") or k == "GÖREVLER" \
+		or k.begins_with("Şarkı ") or k in ["Dil: Türkçe", "Türkçe", "Gecikme"] or k.ends_with(" ms") or k == "Zıpla: Boşluk ya da dokun"
+
+
+func _test_dil_kaydi() -> void:
+	print("[dil seçimi ve kayıt uyumu]")
+	_kayit_temizle()
+	Ceviri.zorla = ""
+	# Kayıtlı seçim yoksa işletim sistemi dili: yalnız "tr" Türkçe, gerisi İngilizce
+	var beklenen := "tr" if OS.get_locale_language() == "tr" else "en"
+	dogrula(Ceviri.dil_etkin("") == beklenen, "varsayılan dil işletim sistemi/tarayıcı diline bağlı (%s)" % beklenen)
+	dogrula(Ceviri.dil_etkin("en") == "en" and Ceviri.dil_etkin("tr") == "tr", "kayıtlı dil tercihi önceliklidir")
+	dogrula(Ceviri.dil_etkin("fr") == beklenen, "geçersiz kayıtlı dil yok sayılır")
+	# Eski kayıt (dil anahtarı yok) bozulmadan yüklenir, yeni anahtar varsayılanla gelir
+	var eski := ConfigFile.new()
+	eski.set_value("oyuncu", "rekor", 412)
+	eski.set_value("oyuncu", "toplam_altin", 77)
+	eski.set_value("oyuncu", "ayarlar", {"muzik": 0.4, "efekt": 0.5, "tam_ekran": false, "sarsinti": true, "kontrast": false, "rahat": false})
+	eski.save(Kayit.yol)
+	var d := Kayit.yukle()
+	dogrula(int(d["rekor"]) == 412 and int(d["toplam_altin"]) == 77 and is_equal_approx(float(d["ayarlar"]["muzik"]), 0.4), "eski kayıt (dil yok) bozulmadan yüklenmeli")
+	dogrula(String(d["ayarlar"]["dil"]) == "", "yeni 'dil' anahtarı varsayılan boş (otomatik)")
+	# Dil değiştir: tercih kaydedilir, rekor korunur, metinler değişir
+	Ceviri.zorla = "tr"
+	Ceviri.dil_uygula()
+	dogrula(tr("Oyna") == "Oyna" and Ceviri.t("Paylaş") == "Paylaş", "Türkçede anahtar aynen döner")
+	Ceviri.dil_degistir()
+	dogrula(Ceviri.dil_kodu() == "en" and tr("Oyna") == "Play" and Ceviri.t("Rekor: %d m") == "Best: %d m", "İngilizceye geçince metinler değişmeli")
+	dogrula(String(Kayit.yukle()["ayarlar"]["dil"]) == "en" and int(Kayit.yukle()["rekor"]) == 412, "dil tercihi kaydedilmeli, rekor bozulmamalı")
+	# Görev metni kayıtlı Türkçe metinden değil şablondan çevrilir
+	var g := {"id": "k_mesafe", "hedef": 120, "metin": "Tek koşuda 120 m koş"}
+	dogrula(Gorevler.metin_ad(g) == "Run 120 m in one run", "görev metni şablondan çevrilmeli (%s)" % Gorevler.metin_ad(g))
+	Ceviri.dil_degistir()
+	dogrula(Ceviri.dil_kodu() == "tr" and Gorevler.metin_ad(g) == "Tek koşuda 120 m koş", "Türkçeye dönünce görev metni aynı")
+	_kayit_temizle()
+
+
+func _test_yeni_menu_akisi() -> void:
+	print("[yeni menü: OYNA, dil, paneller, geçiş]")
+	_kayit_temizle()
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await _kareler(4)
+	var oyna: Button = menu.get_node("%BaslaDugme")
+	dogrula(oyna.theme_type_variation == &"Birincil" and oyna.custom_minimum_size.y >= 40.0 and tr(oyna.text) == "Oyna", "büyük birincil OYNA düğmesi")
+	dogrula(oyna.has_focus() or menu.get_viewport().gui_get_focus_owner() == oyna, "açılışta odak OYNA'da")
+	var nasil: Label = menu.get_node("%Nasil")
+	dogrula(nasil.visible and not nasil.text.contains("\n") and nasil.text.contains("zıpla"), "tek satır nasıl oynanır")
+	var ekran: Rect2 = menu.get_viewport().get_visible_rect()
+	for ad in ["BaslaDugme", "RitimDugme", "GunlukDugme", "KarakterDugme", "BasarimDugme", "AyarlarDugme", "DilDugme"]:
+		dogrula(ekran.encloses((menu.get_node("%" + ad) as Control).get_global_rect()), "menü düğmesi ekrana sığmalı: " + ad)
+	# Dil düğmesi: TR -> EN, metinler değişir, kayıt yazılır
+	var dd: Button = menu.get_node("%DilDugme")
+	dogrula(dd.text == "TR", "dil düğmesi etkin dili gösterir")
+	dd.pressed.emit()
+	await _kareler(2)
+	dogrula(dd.text == "EN" and tr(oyna.text) == "Play" and (menu.get_node("%RitimDugme") as Button).text == "Rhythm", "dil düğmesi menüyü İngilizceye çevirmeli (%s / %s)" % [tr(oyna.text), (menu.get_node("%RitimDugme") as Button).text])
+	dogrula((menu.get_node("%RekorEtiketi") as Label).text.begins_with("Best"), "rekor etiketi çevrilmeli (%s)" % (menu.get_node("%RekorEtiketi") as Label).text)
+	dogrula(String(Kayit.yukle()["ayarlar"]["dil"]) == "en", "menüden seçilen dil kaydedilmeli")
+	# Ayarlar panelindeki dil düğmesi de aynı işi yapar
+	(menu.get_node("%AyarlarDugme") as Button).pressed.emit()
+	await _kareler(3)
+	var adb: Button = menu.get_node("%AyarDilDugme")
+	dogrula(adb.text == "English", "ayarlar dil düğmesi etkin dilin adını yazmalı (%s)" % adb.text)
+	adb.pressed.emit()
+	await _kareler(2)
+	dogrula(adb.text == "Türkçe" and dd.text == "TR" and tr(oyna.text) == "Oyna", "ayarlardan Türkçeye dönülebilmeli")
+	# Esc panelden ana menüye döner; alt paneller açıkken dil/alt satır gizli
+	dogrula(not menu.get_node("%Alt").visible and not dd.visible, "ayarlar açıkken alt satır ve dil düğmesi gizli")
+	var ev := InputEventAction.new()
+	ev.action = &"duraklat"
+	ev.pressed = true
+	menu._unhandled_input(ev)
+	await _kareler(2)
+	dogrula(menu.get_node("%AnaPanel").visible and menu.get_node("%Alt").visible and dd.visible, "Esc ayarlardan ana menüye döndürmeli")
+	# Görev listesi küçük etiket ve başlık çevirisi
+	dogrula((menu.get_node("%GorevListesi") as Label).text.begins_with("GÖREVLER"), "görev listesi başlığı büyük harf (%s)" % (menu.get_node("%GorevListesi") as Label).text.get_slice("\n", 0))
+	menu.queue_free()
+	await process_frame
+	# Geçiş bandı: kapat -> örter, ac -> açılır (testte süre sıfır)
+	var gecis: CanvasLayer = root.get_node("Gecis")
+	dogrula(gecis != null and gecis.layer == 100, "Gecis autoload'u var")
+	await gecis.kapat()
+	dogrula(gecis._bant.visible and gecis._bant.color == Tema.PEMBE, "geçiş bandı ekranı pembeyle örtmeli")
+	await gecis.ac()
+	dogrula(not gecis._bant.visible and not gecis.mesgul_mu(), "geçiş bandı açılınca kapanmalı")
+	_kayit_temizle()
+	Ceviri.zorla = "tr"
+	Ceviri.dil_uygula()
+
+
+func _test_duraklat_ve_oyun_sonu() -> void:
+	print("[duraklat kartı ve oyun sonu kartı]")
+	_kayit_temizle()
+	var d := Kayit.yukle()
+	d["rekor"] = 100
+	Kayit.kaydet(d)
+	var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+	oyun.kayit_yap = true
+	oyun.olum_tekrari_acik = false
+	oyun.tohum = 5
+	root.add_child(oyun)
+	await _kareler(20)
+	var perde: Control = oyun.get_node("%DuraklatPerde")
+	dogrula(not oyun.duraklat_paneli.visible and not perde.visible, "koşarken duraklat kartı gizli")
+	(oyun.get_node("%DuraklatDugme") as Button).pressed.emit()
+	await _kareler(2)
+	dogrula(paused and oyun.duraklat_paneli.visible and perde.visible, "duraklat düğmesi kartı ve perdeyi açmalı")
+	dogrula((oyun.get_node("%DevamDugme") as Button).has_focus(), "duraklat kartında odak Devam'da")
+	for ad in ["DevamDugme", "BastanDugme", "DurAyarDugme", "MenuDugme"]:
+		dogrula((oyun.get_node("%" + ad) as Button).visible, "duraklat kartında düğme: " + ad)
+	dogrula(not oyun.get_node("%DurAyarlar").visible, "ayar bölümü kapalı başlar")
+	(oyun.get_node("%DurAyarDugme") as Button).pressed.emit()
+	dogrula(oyun.get_node("%DurAyarlar").visible, "Ayarlar düğmesi ses ve dil bölümünü açmalı")
+	(oyun.get_node("%DurMuzik") as HSlider).value = 35.0
+	await _kareler(1)
+	dogrula(is_equal_approx(float(Kayit.yukle()["ayarlar"]["muzik"]), 0.35), "duraklattaki müzik kaydırıcısı kaydetmeli")
+	(oyun.get_node("%DurDilDugme") as Button).pressed.emit()
+	await _kareler(1)
+	dogrula(Ceviri.dil_kodu() == "en" and tr((oyun.get_node("%DevamDugme") as Button).text) == "Resume" and (oyun.get_node("%DurDilDugme") as Button).text == "Language: English",
+		"duraklattaki dil düğmesi oyunu İngilizceye çevirmeli (%s)" % tr((oyun.get_node("%DevamDugme") as Button).text))
+	(oyun.get_node("%DurDilDugme") as Button).pressed.emit()
+	await _kareler(1)
+	dogrula(Ceviri.dil_kodu() == "tr" and tr((oyun.get_node("%DevamDugme") as Button).text) == "Devam", "dil geri Türkçe")
+	var kesit: float = oyun.sure
+	await _kareler(10)
+	dogrula(is_equal_approx(oyun.sure, kesit), "duraklatılınca oyun zamanı akmamalı")
+	(oyun.get_node("%DevamDugme") as Button).pressed.emit()
+	await _kareler(3)
+	dogrula(not paused and not oyun.duraklat_paneli.visible and not perde.visible and oyun.sure > kesit, "Devam koşuyu sürdürmeli")
+	# Esc ile de duraklat / devam
+	var ev := InputEventAction.new()
+	ev.action = &"duraklat"
+	ev.pressed = true
+	oyun._unhandled_input(ev)
+	dogrula(paused and oyun.duraklat_paneli.visible, "Esc/P duraklatır")
+	oyun._unhandled_input(ev)
+	dogrula(not paused and not oyun.duraklat_paneli.visible, "Esc/P tekrar basınca devam eder")
+	# Baştan: koşu sıfırlanır
+	await _kareler(30)
+	oyun.duraklat()
+	(oyun.get_node("%BastanDugme") as Button).pressed.emit()
+	await _kareler(2)
+	dogrula(not paused and oyun.sure < 0.2 and oyun.mesafe() <= 1 and not oyun.duraklat_paneli.visible, "Baştan duraklatmayı kapatıp koşuyu sıfırlamalı")
+	# Oyun sonu: yeni rekor kartı, tek dokunuşla tekrar
+	oyun.baslangic_x -= 150.0 * Ayarlar.PIKSEL_METRE
+	oyun.oyuncu.ol()
+	await _kareler(3)
+	var sp: Control = oyun.get_node("%SonPaneli")
+	dogrula(oyun.bitti and sp.visible, "ölünce oyun sonu kartı açılmalı")
+	dogrula(oyun.get_node("%SonSkor").text.begins_with("Mesafe: 15"), "büyük skor (%s)" % oyun.get_node("%SonSkor").text)
+	dogrula(oyun.get_node("%SonRekor").text == "YENİ REKOR!", "rekor aşılınca YENİ REKOR damgası (%s)" % oyun.get_node("%SonRekor").text)
+	dogrula((oyun.get_node("%TekrarDugme") as Button).has_focus() and (oyun.get_node("%TekrarDugme") as Button).theme_type_variation == &"Birincil", "ilk odak birincil TEKRAR düğmesinde")
+	dogrula(int(Kayit.yukle()["rekor"]) >= 150, "rekor kaydedilmeli")
+	dogrula(oyun.get_viewport().get_visible_rect().encloses(sp.get_global_rect()), "oyun sonu kartı ekrana sığmalı")
+	oyun._yeniden_baslat_izni = 0.0
+	# Tek dokunuş: sol tık / Boşluk kartı kapatıp yeniden başlatır
+	var dokun := InputEventAction.new()
+	dokun.action = &"zipla"
+	dokun.pressed = true
+	oyun._unhandled_input(dokun)
+	await _kareler(2)
+	dogrula(not oyun.bitti and not sp.visible and oyun.oyuncu.canli, "tek dokunuş oyunu yeniden başlatmalı")
+	# İngilizce oyun sonu kartı
+	Ceviri.zorla = "en"
+	Ceviri.dil_uygula()
+	oyun.baslangic_x -= 400.0 * Ayarlar.PIKSEL_METRE
+	oyun.oyuncu.ol()
+	await _kareler(3)
+	dogrula(oyun.get_node("%SonSkor").text.begins_with("Distance: 4") and oyun.get_node("%SonRekor").text == "NEW RECORD!", "İngilizce oyun sonu kartı (%s / %s)" % [oyun.get_node("%SonSkor").text, oyun.get_node("%SonRekor").text])
+	dogrula(tr(oyun.get_node("%SonBaslik").text) == "RUN OVER" and tr((oyun.get_node("%TekrarDugme") as Button).text) == "Retry", "İngilizce kart başlığı ve düğmesi")
+	Ceviri.zorla = "tr"
+	Ceviri.dil_uygula()
+	oyun.queue_free()
+	await process_frame
+	_kayit_temizle()
+
+
+func _test_ilk_oyun_ogretme() -> void:
+	print("[ilk oyunda öğretme]")
+	_kayit_temizle()
+	var oyun: Node2D = (load(OYUN) as PackedScene).instantiate()
+	oyun.kayit_yap = false
+	oyun.olum_tekrari_acik = false
+	oyun.tohum = 2
+	root.add_child(oyun)
+	await _kareler(10)
+	dogrula(oyun.ipucu.visible and oyun.ipucu.text == "Zıpla: Boşluk ya da dokun", "ilk oyunda 1. adım: zıpla (%s)" % oyun.ipucu.text)
+	oyun.oyuncu.zipla_bas()
+	await _kareler(4)
+	dogrula(oyun.ipucu.text.contains("Basılı tut"), "zıpladıktan sonra 2. adım: basılı tut + havada bir kez daha (%s)" % oyun.ipucu.text)
+	oyun.oyuncu.zipla_birak()
+	await _kareler(60 * 4)
+	dogrula(oyun.ipucu.text == "" or not oyun.ipucu.visible, "2. adım birkaç saniye sonra kapanır (%s)" % oyun.ipucu.text)
+	oyun.queue_free()
+	await process_frame
+	# Tavan yaklaşınca 3. adım
+	var sira: Array[String] = ["res://scenes/parcalar/01_duz.tscn", "res://scenes/parcalar/16_alcak_gecit.tscn"]
+	var o2: Node2D = (load(OYUN) as PackedScene).instantiate()
+	o2.kayit_yap = false
+	o2.olum_tekrari_acik = false
+	o2.parca_sirasi = sira
+	o2.sabit_hiz = 220.0
+	root.add_child(o2)
+	await _kareler(5)
+	o2.oyuncu.olumsuz = true
+	o2.oyuncu.zipla_bas()
+	await _kareler(30)
+	var gordu := false
+	for i in 60 * 20:
+		await physics_frame
+		if o2.ipucu.text.contains("KISA"):
+			gordu = true
+			break
+	dogrula(gordu, "alçak tavan yaklaşınca 3. adım: kısa dokun")
+	o2.queue_free()
+	await process_frame
+	# İkinci oyundan itibaren yalnız 4 sn'lik tek satır
+	var kd := Kayit.yukle()
+	kd["kosu_sayisi"] = 3
+	Kayit.kaydet(kd)
+	var o3: Node2D = (load(OYUN) as PackedScene).instantiate()
+	o3.kayit_yap = false
+	o3.tohum = 2
+	root.add_child(o3)
+	await _kareler(10)
+	dogrula(o3.ipucu.visible and not o3._ogretme_ilk, "sonraki oyunlarda kısa ipucu var, öğretme dizisi yok")
+	await _kareler(60 * 5)
+	dogrula(not o3.ipucu.visible, "sonraki oyunlarda ipucu 4 sn sonra gizlenir")
+	o3.queue_free()
+	await process_frame
+	_kayit_temizle()
+
+
+## Oyun hissi (tools/his_olc.gd ile aynı ölçüm, headless): kojot ve tampon pencereleri.
+func _test_his_pencereleri() -> void:
+	print("[oyun hissi: kojot ve tampon]")
+	var kare_ms := 1000.0 / 60.0
+	dogrula(is_equal_approx(Ayarlar.KOJOT_SURESI, 0.08) and is_equal_approx(Ayarlar.ZIPLAMA_TAMPONU, 0.12), "kojot 80 ms, tampon 120 ms (ritim penceresi bu değerlerle ölçüldü)")
+	var enbuyuk := -1
+	for k in range(0, 12):
+		var dunya := Node2D.new()
+		root.add_child(dunya)
+		var z := Zemin.new()
+		z.position = Vector2(0, Ayarlar.ZEMIN_Y)
+		z.genislik = 300.0
+		z.yukseklik = 120.0
+		dunya.add_child(z)
+		var o: Oyuncu = (load("res://scenes/oyuncu.tscn") as PackedScene).instantiate()
+		o.iz_acik = false
+		dunya.add_child(o)
+		o.sifirla(Vector2(240.0, Ayarlar.ZEMIN_Y))
+		o.hiz = 300.0
+		o.olumsuz = true
+		var havada := -1
+		for kare in 200:
+			await physics_frame
+			if not o.is_on_floor() and havada < 0:
+				havada = 0
+			elif havada >= 0:
+				havada += 1
+			if havada == k:
+				o.zipla_bas()
+				await physics_frame
+				if o.velocity.y < (Ayarlar.ZIPLAMA_HIZI + Ayarlar.IKINCI_ZIPLAMA_HIZI) / 2.0:
+					enbuyuk = k
+				break
+		dunya.queue_free()
+		await physics_frame
+	var pencere_ms := (enbuyuk + 1) * kare_ms
+	dogrula(pencere_ms >= 67.0 and pencere_ms <= 100.0, "kenardan sonra tam güç zıplama penceresi ≈ 83 ms (ölçülen %.0f ms, %d kare)" % [pencere_ms, enbuyuk + 1])
+	# Kojot dışında (kenardan çok sonra) basış zayıf ikinci zıplamaya döner: yine de zıplar
+	dogrula(enbuyuk < 11, "kojot penceresi sonsuz değil")
+
 
 class YakinDinleyici extends Node:
 	var sayi := 0

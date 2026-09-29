@@ -15,7 +15,7 @@ const AZAMI_DUSUS := 900.0
 const ZIPLAMA_HIZI := -520.0        ## İlk zıplama (tam basılı tutunca ~96 px yükseklik)
 const IKINCI_ZIPLAMA_HIZI := -440.0 ## Havadaki ikinci zıplama
 const KISA_ZIPLAMA_CARPANI := 0.6   ## Erken bırakınca yukarı hız bu oranla kesilir (dokunuş ≈ 35 px sıçrama)
-const KOJOT_SURESI := 0.08          ## Kenardan düştükten sonra hâlâ zıplanabilen süre
+const KOJOT_SURESI := 0.08          ## Kenardan düştükten sonra hâlâ tam güçte zıplanabilen süre (ölçüm: tools/his_olc.gd; 0,10 denendi, ritim deseni kapısını bozdu — docs/TASARIM.md)
 const ZIPLAMA_TAMPONU := 0.12       ## Yere değmeden hemen önce basılan zıplama kabul süresi
 
 # --- Hız ---

@@ -25,13 +25,15 @@ var ritim := false                    ## Ritim koşusu (menüden Ritim.secili il
 var ritim_sarki := -1                 ## Ritim şarkısı (-1: menüden Ritim.sarki)
 var ritim_gunluk := false             ## Günün ritmi (tarihten tohum + şarkı; menüden Ritim.gunluk_secili)
 
+## Düz renkli dünya temaları (videodaki gece / şarap; hepsi tek renk gökyüzü + iki basamaklı siluet).
+## "ust" = "alt" (degrade yok); "uzak"/"yakin" beyaz siluet dokusunu boyar.
 const TEMALAR := [
-	{"ad": "Akşam", "ust": Color("68386c"), "alt": Color("f77622"), "uzak": Color(1, 0.85, 0.8), "yakin": Color(1, 0.9, 0.9), "yildiz": 0.3, "yagis": false},
-	{"ad": "Gece", "ust": Color("181425"), "alt": Color("262b44"), "uzak": Color(1, 1, 1), "yakin": Color(1, 1, 1), "yildiz": 1.0, "yagis": false},
-	{"ad": "Yağış", "ust": Color("262b44"), "alt": Color("5a6988"), "uzak": Color(0.75, 0.8, 0.9), "yakin": Color(0.8, 0.85, 0.95), "yildiz": 0.0, "yagis": true},
-	{"ad": "Neon", "ust": Color("181425"), "alt": Color("b55088"), "uzak": Color(0.9, 0.7, 1.0), "yakin": Color(1.0, 0.75, 1.0), "yildiz": 0.6, "yagis": false},
+	{"ad": "Gece", "ust": Color("201b2d"), "alt": Color("201b2d"), "uzak": Color("272238"), "yakin": Color("2d283f"), "yildiz": 0.5, "yagis": false},
+	{"ad": "Şarap", "ust": Color("52001a"), "alt": Color("52001a"), "uzak": Color("640021"), "yakin": Color("75102f"), "yildiz": 0.0, "yagis": false},
+	{"ad": "Yağış", "ust": Color("1a2035"), "alt": Color("1a2035"), "uzak": Color("232b47"), "yakin": Color("2c3653"), "yildiz": 0.0, "yagis": true},
+	{"ad": "Menekşe", "ust": Color("2a1f52"), "alt": Color("2a1f52"), "uzak": Color("352a68"), "yakin": Color("41347c"), "yildiz": 0.35, "yagis": false},
 	# v1.5: yalnız şarkı kilidiyle (Ritim.SARKILAR[i].tema) gelir, normal koşu döngüsüne girmez (TEMA_DONGU)
-	{"ad": "Fırtına", "ust": Color("14162b"), "alt": Color("3a4466"), "uzak": Color(0.6, 0.65, 0.82), "yakin": Color(0.68, 0.74, 0.9), "yildiz": 0.0, "yagis": true, "simsek": true},
+	{"ad": "Fırtına", "ust": Color("0f0b1c"), "alt": Color("0f0b1c"), "uzak": Color("181330"), "yakin": Color("1f1940"), "yildiz": 0.0, "yagis": true, "simsek": true},
 ]
 const TEMA_DONGU := 4                 ## normal koşuda mesafeyle dönen tema sayısı (ilk 4)
 const SIMSEK_OLASILIK := 0.4          ## fırtına temasında her 2 ölçüde bir şimşek olasılığı
@@ -123,6 +125,8 @@ var _ritim_ipucu_sayisi := 0            ## ritim: çalınan ipucu sesi sayısı 
 
 func _ready() -> void:
 	Simgeler.kur()
+	Ceviri.kur()
+	Ceviri.dil_uygula(str(Kayit.yukle()["ayarlar"].get("dil", "")))
 	add_to_group("oyun")
 	var du := DikeyUyari.new()
 	add_child(du)
@@ -151,6 +155,11 @@ func _ready() -> void:
 	oyuncu.indi.connect(_indi)
 	%DuraklatDugme.pressed.connect(duraklat)
 	%DevamDugme.pressed.connect(devam)
+	%BastanDugme.pressed.connect(func() -> void: yeniden_baslat())
+	%DurAyarDugme.pressed.connect(func() -> void: %DurAyarlar.visible = not %DurAyarlar.visible; Ses.cal("tik"))
+	%DurDilDugme.pressed.connect(_dil_degistir)
+	%DurMuzik.value_changed.connect(func(v: float) -> void: Kayit.ayar_yaz("muzik", v / 100.0); Ses.ses_duzeyi_uygula())
+	%DurEfekt.value_changed.connect(func(v: float) -> void: Kayit.ayar_yaz("efekt", v / 100.0); Ses.ses_duzeyi_uygula())
 	%MenuDugme.pressed.connect(menuye_don)
 	%TekrarDugme.pressed.connect(yeniden_baslat)
 	%SonMenuDugme.pressed.connect(menuye_don)
@@ -242,9 +251,7 @@ func yeniden_baslat() -> void:
 	son_paneli.hide()
 	tekrar_etiketi.hide()
 	gorev_bildirimi.hide()
-	ipucu.visible = not bot_modu
-	if ritim:
-		ipucu.text = "Müziği dinle: sarı oklu lambaya vuruşta basınca zıpla\nKısa dokunuş: alçak tavanın altından geç"
+	_ogretme_kur(d)
 
 	# Başlangıçta iki düz parça: ısınma alanı.
 	_parca_ekle(ParcaListesi.DUZ)
@@ -264,8 +271,8 @@ func yeniden_baslat() -> void:
 		Ses.muzik(str(Ritim.SARKILAR[ritim_sarki]["muzik"]), true)  # vuruş ızgarası müziğin başıyla hizalı
 	elif not bot_modu:
 		Ses.muzik("muzik_oyun")
-	gecis.color.a = 1.0
-	create_tween().tween_property(gecis, "color:a", 0.0, 0.35)
+	gecis.color = Color(Tema.MUREKKEP, 1.0)
+	create_tween().tween_property(gecis, "color:a", 0.0, 0.22)
 
 
 func _hiz_hesapla() -> float:
@@ -295,8 +302,7 @@ func _physics_process(delta: float) -> void:
 	var m := mesafe()
 	istatistik["mesafe"] = m
 	mesafe_etiketi.text = "%d m" % m
-	if ipucu.visible and sure > (7.0 if ritim else 4.0):
-		ipucu.hide()
+	_ogretme_adim()
 	_altin_seri = maxf(_altin_seri - delta, 0.0)
 	_gecisleri_say()
 	_gorevleri_denetle()
@@ -363,7 +369,7 @@ func altin_toplandi(konum: Vector2 = Vector2.INF) -> void:
 	_altin_seri = 0.45
 	Ses.cal("altin", _altin_perde)
 	if konum != Vector2.INF:
-		_parcacik(konum, Color("fee761"), 6, 60.0, 0.3)
+		_parcacik(konum, Tema.CAM, 6, 60.0, 0.3)
 
 
 func yakin_kacis(tehlike: Node2D) -> void:
@@ -374,9 +380,9 @@ func yakin_kacis(tehlike: Node2D) -> void:
 	istatistik["yakin"] = int(istatistik["yakin"]) + 1
 	altin_etiketi.text = str(altin)
 	Ses.cal("yakin")
-	_yazi(oyuncu.global_position + Vector2(0, -34), "Kıl payı! +%d" % Ayarlar.YAKIN_KACIS_ODULU, Color("2ce8f5"))
+	_yazi(oyuncu.global_position + Vector2(0, -34), tr("Kıl payı! +%d") % Ayarlar.YAKIN_KACIS_ODULU, Tema.CAM)
 	if tehlike:
-		_parcacik(oyuncu.global_position, Color("2ce8f5"), 5, 50.0, 0.25)
+		_parcacik(oyuncu.global_position, Tema.CAM, 5, 50.0, 0.25)
 
 
 func _ziplandi(ikinci: bool) -> void:
@@ -385,29 +391,29 @@ func _ziplandi(ikinci: bool) -> void:
 	if ikinci:
 		istatistik["ikinci"] = int(istatistik["ikinci"]) + 1
 		Ses.cal("ikinci")
-		_parcacik(oyuncu.global_position, Kostumler.toz_rengi(oyuncu.kostum, Color("c0cbdc")), 6, 70.0, 0.25)
+		_parcacik(oyuncu.global_position, Kostumler.toz_rengi(oyuncu.kostum, Tema.KAGIT), 6, 70.0, 0.25)
 	else:
 		Ses.cal("zipla")
-		_parcacik(oyuncu.global_position, Kostumler.toz_rengi(oyuncu.kostum, Color("8b9bb4")), 5, 40.0, 0.25)
+		_parcacik(oyuncu.global_position, Kostumler.toz_rengi(oyuncu.kostum, Tema.SOLUK), 5, 40.0, 0.25)
 
 
 func _indi() -> void:
 	Ses.cal("indi")
-	_parcacik(oyuncu.global_position, Kostumler.toz_rengi(oyuncu.kostum, Color("8b9bb4")), 6, 45.0, 0.3)
+	_parcacik(oyuncu.global_position, Kostumler.toz_rengi(oyuncu.kostum, Tema.SOLUK), 6, 45.0, 0.3)
 
 
 func iskele_catirdadi(iskele: Node2D) -> void:
 	if bitti:
 		return
 	Ses.cal("catirti")
-	_parcacik(Vector2(oyuncu.global_position.x, iskele.global_position.y), Color("b86f50"), 4, 30.0, 0.3)
+	_parcacik(Vector2(oyuncu.global_position.x, iskele.global_position.y), Tema.KAGIT, 4, 30.0, 0.3)
 
 
 func iskele_coktu(iskele: Node2D) -> void:
 	Ses.cal("indi", 0.55)
 	var w: float = iskele.get("genislik")
 	for i in 3:
-		_parcacik(iskele.global_position + Vector2(w * (0.2 + 0.3 * i), 4), Color("733e39"), 4, 40.0, 0.4)
+		_parcacik(iskele.global_position + Vector2(w * (0.2 + 0.3 * i), 4), Color(Tema.KAGIT, 0.6), 4, 40.0, 0.4)
 
 
 ## Ritim: zıplama bir olay vuruşuna ne kadar yakın?
@@ -424,11 +430,11 @@ func _ritim_degerlendir() -> void:
 	if absf(ms) <= Ritim.TAM_VURUS_MS:
 		_ritim_seri += 1
 		istatistik["ritim"] = int(istatistik["ritim"]) + 1
-		_yazi(yer, "Tam vuruş" + (" ×%d" % _ritim_seri if _ritim_seri > 1 else ""), Color("fee761"))
+		_yazi(yer, tr("Tam vuruş") + (" ×%d" % _ritim_seri if _ritim_seri > 1 else ""), Tema.PEMBE)
 		Ses.cal("tik", 1.0 + minf(_ritim_seri, 8) * 0.06)
 	else:
 		_ritim_seri = 0
-		_yazi(yer, "%s %d ms" % ["Erken" if ms < 0.0 else "Geç", int(round(absf(ms)))], Color("c0cbdc"))
+		_yazi(yer, "%s %d ms" % [tr("Erken") if ms < 0.0 else tr("Geç"), int(round(absf(ms)))], Tema.KAGIT)
 
 
 ## Ritim: müzik oyun zamanından kaydıysa (sekme gizlendi, uzun takılma) müziği oyuna göre sar.
@@ -497,8 +503,8 @@ func _ruzgar_etiketi_guncelle() -> void:
 	if absf(r) < 1.0:
 		e.hide()
 		return
-	e.text = "← karşı rüzgâr" if r < 0.0 else "arka rüzgâr →"
-	e.add_theme_color_override("font_color", Color("f6757a") if r < 0.0 else Color("2ce8f5"))
+	e.text = tr("← karşı rüzgâr") if r < 0.0 else tr("arka rüzgâr →")
+	e.add_theme_color_override("font_color", Tema.PEMBE if r < 0.0 else Tema.CAM)
 	e.show()
 
 
@@ -509,7 +515,7 @@ func _gorevleri_denetle() -> void:
 		if Gorevler.tamam_mi(gorevler[i], istatistik):
 			_gorev_bildirildi[i] = true
 			Ses.cal("gorev")
-			gorev_bildirimi.text = "Görev tamam: %s  +%d altın" % [gorevler[i]["metin"], int(gorevler[i]["odul"])]
+			gorev_bildirimi.text = tr("Görev tamam: %s  +%d altın") % [Gorevler.metin_ad(gorevler[i]), int(gorevler[i]["odul"])]
 			gorev_bildirimi.show()
 			gorev_bildirimi.modulate.a = 1.0
 			var tw := create_tween()
@@ -671,7 +677,7 @@ func _tema_guncelle(aninda: bool) -> void:
 	_tema_tween.tween_property(katman_uzak, "modulate", t["uzak"], sure_)
 	_tema_tween.tween_property(katman_yakin, "modulate", t["yakin"], sure_)
 	_tema_tween.tween_property(katman_yildiz, "modulate:a", t["yildiz"], sure_)
-	_yazi(oyuncu.global_position + Vector2(120, -80), t["ad"], Color("c0cbdc"))
+	_yazi(oyuncu.global_position + Vector2(120, -80), tr(str(t["ad"])), Tema.KAGIT)
 
 
 func _gok_ayarla(ust: Color, alt: Color) -> void:
@@ -704,10 +710,9 @@ func _parcacik(konum: Vector2, renk: Color, adet: int, hiz: float, omur: float) 
 func _yazi(konum: Vector2, metin: String, renk: Color) -> void:
 	var l := Label.new()
 	l.text = metin
-	l.add_theme_font_size_override("font_size", 12)
+	l.theme_type_variation = &"EtiketKalin"
+	l.add_theme_font_size_override("font_size", 9)
 	l.add_theme_color_override("font_color", renk)
-	l.add_theme_color_override("font_outline_color", Color("181425"))
-	l.add_theme_constant_override("outline_size", 4)
 	l.position = konum - Vector2(40, 0)
 	efektler.add_child(l)
 	var tw := l.create_tween().set_parallel()
@@ -735,14 +740,24 @@ func _oyuncu_oldu() -> void:
 	_yeniden_baslat_izni = 0.5
 	Ses.cal("olum")
 	sars(Ayarlar.SARSINTI_OLUM)
+	_flas()
 	if _titresim and not bot_modu:
 		Input.vibrate_handheld(Ayarlar.TITRESIM_OLUM_MS)
-	_parcacik(oyuncu.global_position + Vector2(0, -10), Color("0099db"), 18, 110.0, 0.6)
+	_parcacik(oyuncu.global_position + Vector2(0, -10), Tema.PEMBE, 18, 110.0, 0.6)
 	_kosu_sonucunu_isle()
 	if olum_tekrari_acik and oyuncu.gecmis.size() > 10:
 		_tekrar_baslat()
 	else:
 		_son_paneli_goster()
+
+
+## Ölümde kısa pembe flaş (140 ms): geri bildirim; koşu yeniden başlarken perde mürekkebe döner.
+func _flas() -> void:
+	if bot_modu or not sarsinti_acik:
+		return
+	gecis.color = Color(Tema.PEMBE, 0.30)
+	var tw := create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(gecis, "color:a", 0.0, 0.14)
 
 
 func _kosu_sonucunu_isle() -> void:
@@ -820,10 +835,10 @@ func _tekrar_baslat() -> void:
 	if r.size != Vector2.ZERO:
 		_tekrar_vurgu = Line2D.new()
 		_tekrar_vurgu.width = 2.0
-		_tekrar_vurgu.default_color = Color("ff0044")
+		_tekrar_vurgu.default_color = Tema.SARI
 		_tekrar_vurgu.points = PackedVector2Array([r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y), r.position])
 		efektler.add_child(_tekrar_vurgu)
-	tekrar_etiketi.text = "Çukura düştün  •  geçmek için dokun" if str(neden) == "cukur" else "Ölüm tekrarı  •  geçmek için dokun"
+	tekrar_etiketi.text = tr("Çukura düştün  •  geçmek için dokun") if str(neden) == "cukur" else tr("Ölüm tekrarı  •  geçmek için dokun")
 	tekrar_etiketi.show()
 
 
@@ -866,33 +881,33 @@ func _tekrar_temizle() -> void:
 func _son_paneli_goster() -> void:
 	_yeniden_baslat_izni = maxf(_yeniden_baslat_izni, 0.35)
 	var s := son_sonuc
-	son_skor.text = "Mesafe: %d m" % int(s.get("mesafe", mesafe()))
+	son_skor.text = tr("Mesafe: %d m") % int(s.get("mesafe", mesafe()))
 	if gunluk or ritim_gunluk:
-		son_rekor.text = ("GÜNÜN REKORU!" if s.get("yeni_rekor", false) else "Bugünün rekoru: %d m" % int(s.get("rekor", _rekor))) \
-				+ "   (deneme %d)" % int(s.get("deneme", 0))
+		son_rekor.text = (tr("GÜNÜN REKORU!") if s.get("yeni_rekor", false) else tr("Bugünün rekoru: %d m") % int(s.get("rekor", _rekor))) \
+				+ tr("   (deneme %d)") % int(s.get("deneme", 0))
 	else:
-		son_rekor.text = ("YENİ REKOR!" if s.get("yeni_rekor", false) else "Rekor: %d m" % int(s.get("rekor", _rekor)))
+		son_rekor.text = (tr("YENİ REKOR!") if s.get("yeni_rekor", false) else tr("Rekor: %d m") % int(s.get("rekor", _rekor)))
 	%SonHarita.ayarla(int(s.get("mesafe", mesafe())), int(s.get("rekor", _rekor)), s.get("olumler", []))
 	if s.get("yeni_rekor", false):
 		_rekor = int(s.get("rekor", _rekor))
 		rekor_etiketi.text = _rekor_metni(_rekor)
 		Ses.cal("rekor")
-		_parcacik(kamera.global_position + Vector2(0, -60), Color("fee761"), 24, 150.0, 0.9)
+		_parcacik(kamera.global_position + Vector2(0, -60), Tema.PEMBE, 24, 150.0, 0.9)
 	var g: Dictionary = s.get("gorev", {})
 	var satirlar := []
 	var ek_odul := int(g.get("odul", 0)) + Ayarlar.BASARIM_ODULU * (s.get("basarimlar", []) as Array).size()
-	satirlar.append("Altın: %d" % altin + ("   Ödül: +%d" % ek_odul if ek_odul > 0 else "")
-			+ ("   Tam vuruş: %d" % int(istatistik["ritim"]) if ritim else "")
-			+ ("   Ort. sapma: %+d ms" % int(round(float(s.get("ritim_sapma", 0.0)))) if ritim and int(s.get("ritim_sapma_sayi", 0)) > 0 else ""))
+	satirlar.append(tr("Altın: %d") % altin + (tr("   Ödül: +%d") % ek_odul if ek_odul > 0 else "")
+			+ (tr("   Tam vuruş: %d") % int(istatistik["ritim"]) if ritim else "")
+			+ (tr("   Ort. sapma: %+d ms") % int(round(float(s.get("ritim_sapma", 0.0)))) if ritim and int(s.get("ritim_sapma_sayi", 0)) > 0 else ""))
 	var yeni_basarimlar: Array = s.get("basarimlar", [])
 	if not yeni_basarimlar.is_empty():
-		satirlar.append("★ " + ", ".join(yeni_basarimlar.map(func(b: Dictionary) -> String: return str(b["ad"]))))
+		satirlar.append("★ " + ", ".join(yeni_basarimlar.map(func(b: Dictionary) -> String: return tr(str(b["ad"])))))
 	for tamam in g.get("tamamlanan", []):
-		satirlar.append("✓ " + str(tamam["metin"]))
+		satirlar.append("✓ " + Gorevler.metin_ad(tamam))
 	for gv in s.get("gorevler", gorevler):
 		satirlar.append("• " + Gorevler.metin(gv))
 	if g.get("seviye_atladi", false):
-		satirlar.append("Görev seviyesi %d!" % int(s.get("seviye", 1)))
+		satirlar.append(tr("Görev seviyesi %d!") % int(s.get("seviye", 1)))
 	son_altin.text = satirlar[0]
 	son_gorevler.text = "\n".join(satirlar.slice(1))
 	# v1.7: ritimde vuruş sapması histogramı (değerlendirilen zıplama yoksa gizli)
@@ -903,13 +918,13 @@ func _son_paneli_goster() -> void:
 		grafik.ayarla(sapmalar)
 	# Günlük koşuda üç düğme: Tekrar | Paylaş | Menü. Ritimde gecikme önerisi varsa: Tekrar | Gecikme | Menü
 	%PaylasDugme.visible = gunluk or ritim_gunluk
-	%PaylasDugme.text = "Paylaş"
+	%PaylasDugme.text = tr("Paylaş")
 	var gd: Button = %GecikmeDugme
 	gd.visible = ritim and _gecikme_onerisi != null
 	gd.disabled = false
 	if gd.visible:
-		gd.text = "Gecikme %+d ms" % int(_gecikme_onerisi)
-		gd.tooltip_text = "Zıplamaların vuruştan ortalama %+d ms uzakta. Ses gecikmesi ayarını buna göre değiştir." % int(round(float(s.get("ritim_sapma", 0.0))))
+		gd.text = tr("Gecikme %+d ms") % int(_gecikme_onerisi)
+		gd.tooltip_text = tr("Zıplamaların vuruştan ortalama %+d ms uzakta. Ses gecikmesi ayarını buna göre değiştir.") % int(round(float(s.get("ritim_sapma", 0.0))))
 	var dugme_sayisi := 2 + int(%PaylasDugme.visible) + int(gd.visible)
 	var genislik := 150.0 if dugme_sayisi == 2 else (110.0 if dugme_sayisi == 3 else 96.0)
 	for b in [%PaylasDugme, gd]:
@@ -936,7 +951,7 @@ func gecikme_uygula() -> void:
 	Kayit.ayar_yaz("ritim_gecikme", int(_gecikme_onerisi))
 	Ses.cal("tik")
 	var gd: Button = %GecikmeDugme
-	gd.text = "Ayarlandı ✓"
+	gd.text = tr("Ayarlandı ✓")
 	gd.disabled = true
 	_gecikme_onerisi = null
 
@@ -957,7 +972,7 @@ func paylasim_metni() -> String:
 	if ritim_gunluk:
 		return Gunluk.paylasim_metni(Gunluk.bugun(), int(s.get("mesafe", 0)), int(s.get("deneme", 0)),
 				int(s.get("rekor", 0)), bool(s.get("yeni_rekor", false)), 0,
-				"Günün ritmi (%s)" % Ritim.SARKILAR[ritim_sarki]["ad"])
+				"Günün ritmi (%s)" % Ritim.SARKILAR[ritim_sarki]["ad"])   # paylaşım metni Türkçe kalır (tarih biçimi, testler)
 	return Gunluk.paylasim_metni(Gunluk.bugun(), int(s.get("mesafe", 0)), int(s.get("deneme", 0)),
 			int(s.get("rekor", 0)), bool(s.get("yeni_rekor", false)), int(s.get("seri", 0)))
 
@@ -974,10 +989,10 @@ func _paylas() -> void:
 		DisplayServer.clipboard_set(metin)
 	Ses.cal("tik")
 	var dg: Button = %PaylasDugme
-	dg.text = "Paylaşıldı ✓" if paylasildi else "Kopyalandı ✓"
+	dg.text = tr("Paylaşıldı ✓") if paylasildi else tr("Kopyalandı ✓")
 	var tw := create_tween()
 	tw.tween_interval(1.6)
-	tw.tween_callback(func() -> void: dg.text = "Paylaş")
+	tw.tween_callback(func() -> void: dg.text = tr("Paylaş"))
 
 
 # ------------------------------------------------------------------ v0.3: kip, işaretler, hayalet, başarımlar
@@ -993,12 +1008,12 @@ func _mod_rekoru(d: Dictionary) -> int:
 
 func _rekor_metni(r: int) -> String:
 	if gunluk:
-		return "Günlük rekor: %d m" % r
+		return tr("Günlük rekor: %d m") % r
 	if ritim_gunluk:
-		return "Günün ritmi rekoru: %d m" % r
+		return tr("Günün ritmi rekoru: %d m") % r
 	if ritim:
-		return "%s rekoru: %d m" % [Ritim.SARKILAR[ritim_sarki]["ad"], r]
-	return ("Rahat rekor: %d m" if rahat else "Rekor: %d m") % r
+		return tr("%s rekoru: %d m") % [tr(str(Ritim.SARKILAR[ritim_sarki]["ad"])), r]
+	return (tr("Rahat rekor: %d m") if rahat else tr("Rekor: %d m")) % r
 
 
 func _olum_listesi(d: Dictionary) -> Array:
@@ -1020,9 +1035,9 @@ func _isaretleri_kur(d: Dictionary) -> void:
 	var olumler := _olum_listesi(d)
 	var son := int(olumler[-1]) if not olumler.is_empty() else 0
 	if _rekor >= Ayarlar.ISARET_EN_AZ_M:
-		_isaret_ekle(_rekor, "REKOR", Color("fee761"), 44.0)
+		_isaret_ekle(_rekor, tr("REKOR"), Tema.PEMBE, 44.0)
 	if son >= Ayarlar.ISARET_EN_AZ_M and absi(son - _rekor) > 3:
-		_isaret_ekle(son, "SON", Color("e43b44"), 64.0)
+		_isaret_ekle(son, tr("SON"), Tema.SARI, 64.0)
 
 
 func _isaret_ekle(m: int, metin: String, renk: Color, ust_y: float) -> Isaret:
@@ -1118,7 +1133,7 @@ func _basarimlari_denetle() -> void:
 	for b in Basarimlar.anlik(d, istatistik, gunluk, _basarim_bildirilen):
 		_basarim_bildirilen.append(b["id"])
 		Ses.cal("gorev", 1.2)
-		gorev_bildirimi.text = "★ Başarım: %s  +%d altın" % [b["ad"], Ayarlar.BASARIM_ODULU]
+		gorev_bildirimi.text = tr("★ Başarım: %s  +%d altın") % [tr(str(b["ad"])), Ayarlar.BASARIM_ODULU]
 		gorev_bildirimi.show()
 		gorev_bildirimi.modulate.a = 1.0
 		var tw := create_tween()
@@ -1139,6 +1154,12 @@ func duraklat() -> void:
 	get_tree().paused = true
 	if ritim:
 		Ses.muzik_duraklat(true)
+	var a: Dictionary = Kayit.yukle()["ayarlar"]
+	%DurMuzik.set_value_no_signal(float(a["muzik"]) * 100.0)
+	%DurEfekt.set_value_no_signal(float(a["efekt"]) * 100.0)
+	%DurAyarlar.hide()
+	_dil_etiketi_yenile()
+	%DuraklatPerde.show()
 	duraklat_paneli.show()
 	%DevamDugme.grab_focus()
 
@@ -1146,11 +1167,76 @@ func duraklat() -> void:
 func devam() -> void:
 	get_tree().paused = false
 	Ses.muzik_duraklat(false)
+	%DuraklatPerde.hide()
 	duraklat_paneli.hide()
+
+
+func _dil_degistir() -> void:
+	Ceviri.dil_degistir()
+	Ses.cal("tik")
+	_dil_etiketi_yenile()
+	if not bitti:
+		rekor_etiketi.text = _rekor_metni(_rekor)
+
+
+func _dil_etiketi_yenile() -> void:
+	%DurDilDugme.text = tr("Dil: %s") % Ceviri.dil_adi()
 
 
 func menuye_don() -> void:
 	get_tree().paused = false
-	var tw := create_tween()
-	tw.tween_property(gecis, "color:a", 1.0, 0.25)
-	tw.tween_callback(func() -> void: get_tree().change_scene_to_file("res://scenes/menu.tscn"))
+	Gecis.git("res://scenes/menu.tscn")
+
+
+# ------------------------------------------------------------------ ilk oyunda öğretme
+## Koşu sayısı 0 ise (ilk oyun) ipucu adım adım gelir: 1 zıpla, 2 basılı tut + havada bir kez daha,
+## 3 alçak tavan yaklaşınca kısa dokun. Sonraki oyunlarda yalnız 4 sn'lik tek satır.
+var _ogretme := 0
+var _ogretme_ilk := false
+var _ogretme_t := 0.0
+var _ogretme_tavan := false
+
+
+func _ogretme_kur(d: Dictionary) -> void:
+	_ogretme_ilk = int(d.get("kosu_sayisi", 0)) == 0 and not bot_modu and not ritim and not gunluk
+	_ogretme = 0
+	_ogretme_t = 0.0
+	_ogretme_tavan = false
+	ipucu.visible = not bot_modu
+	ipucu.modulate.a = 1.0
+	if ritim:
+		ipucu.text = tr("Müziği dinle: pembe oklu çizgide vuruşla zıpla · alçak tavanda kısa dokun")
+	else:
+		ipucu.text = tr("Zıpla: Boşluk ya da dokun")
+
+
+func _ogretme_adim() -> void:
+	if not ipucu.visible:
+		return
+	if ritim:
+		if sure > 7.0:
+			ipucu.hide()
+		return
+	if not _ogretme_ilk:
+		if sure > 4.0:
+			ipucu.hide()
+		return
+	# İlk oyun: adım adım. 0: "zıpla" (ilk zıplamaya kadar) -> 1: yükseklik + havada ikinci zıplama (3,2 sn)
+	# -> 2: sessiz -> 3: alçak tavan yaklaşınca kısa dokun (3 sn) -> ipucu kapanır
+	if _ogretme == 0 and oyuncu.velocity.y < 0.0:
+		_ogretme = 1
+		_ogretme_t = sure
+		ipucu.text = tr("Basılı tut: daha yüksek · havada bir kez daha zıpla")
+	elif _ogretme == 1 and sure - _ogretme_t > 3.2:
+		_ogretme = 2
+		ipucu.text = ""
+	if not _ogretme_tavan and _ogretme >= 1:
+		for t in dunya_tavan_araliklari():
+			var dx: float = t[0] - oyuncu.global_position.x
+			if dx > 0.0 and dx < 260.0:
+				_ogretme_tavan = true
+				_ogretme = 3
+				_ogretme_t = sure
+				ipucu.text = tr("Sarı tabelanın altında KISA dokun")
+	elif _ogretme == 3 and sure - _ogretme_t > 3.0:
+		ipucu.hide()

@@ -23,7 +23,7 @@ func _draw() -> void:
 	var w := size.x
 	var h := size.y
 	var taban := h - 5.0
-	draw_rect(Rect2(0, taban, w, 2), Color("5a6988"))
+	draw_rect(Rect2(0, taban, w, 2), Color(Tema.KAGIT, 0.25))
 	# Bina silüetleri; geçilenlerin pencereleri yanık.
 	var adim := 10.0
 	var i := 0
@@ -31,9 +31,9 @@ func _draw() -> void:
 	while x < w:
 		var boy := 6.0 + float((i * 7919) % 9)
 		var bina := Rect2(x + 1, taban - boy, adim - 2, boy)
-		draw_rect(bina, Color("262b44"))
+		draw_rect(bina, Tema.SILUET)
 		var gecildi := (x + adim * 0.5) / w * en <= mesafe
-		var pencere := Color("fee761") if gecildi else Color("3a4466")
+		var pencere := Tema.PEMBE if gecildi else Color(Tema.KAGIT, 0.18)
 		draw_rect(Rect2(x + 3, taban - boy + 2, 2, 2), pencere)
 		if boy > 9.0:
 			draw_rect(Rect2(x + 6, taban - boy + 5, 2, 2), pencere)
@@ -41,10 +41,10 @@ func _draw() -> void:
 		i += 1
 	for o in olumler:
 		var ox := float(o) / en * w
-		draw_line(Vector2(ox, taban - 16), Vector2(ox, taban + 2), Color("e43b44", 0.8), 1.0)
+		draw_line(Vector2(ox, taban - 16), Vector2(ox, taban + 2), Color(Tema.SARI, 0.9), 1.0)
 	if rekor > 0:
 		var rx := float(rekor) / en * w
-		draw_line(Vector2(rx, 0), Vector2(rx, taban + 2), Color("fee761"), 1.0)
-		draw_string(get_theme_default_font(), Vector2(minf(rx + 2, w - 40), 8), "rekor", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color("fee761"))
+		draw_line(Vector2(rx, 0), Vector2(rx, taban + 2), Tema.KAGIT, 1.0)
+		draw_string(get_theme_font("font", "Etiket"), Vector2(minf(rx + 2, w - 40), 8), Ceviri.t("rekor"), HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Tema.KAGIT)
 	var mx := float(mesafe) / en * w
-	draw_rect(Rect2(mx - 2, taban - 3, 4, 4), Color("2ce8f5"))
+	draw_rect(Rect2(mx - 2, taban - 3, 4, 4), Tema.PEMBE)

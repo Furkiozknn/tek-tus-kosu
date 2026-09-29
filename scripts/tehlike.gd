@@ -7,10 +7,9 @@ extends Area2D
 
 enum Tur { DIKEN, BLOK, TAVAN, PISTON }
 
-const DOKU_DIKEN := preload("res://assets/sprites/diken.png")
-const DOKU_BLOK := preload("res://assets/sprites/blok.png")
-const DOKU_PISTON := preload("res://assets/sprites/piston.png")
-const KOYU := Color("181425")
+const RENK := Tema.SARI            ## tehlike rengi (videodaki sari ucgenler)
+const KOYU := Tema.MUREKKEP
+const GOVDE := Color("3a3450")     ## piston govdesi
 
 ## Yüksek kontrast modu (Ayarlar ekranı): tehlikelere beyaz dış çizgi.
 static var kontrast := false
@@ -130,43 +129,43 @@ func isabet_rect() -> Rect2:
 	return Rect2(global_position + _sekil.position - r / 2.0, r)
 
 
+func _ucgen(x: float, w: float, h: float, taban: float, renk: Color) -> void:
+	var a := Vector2(x, taban)
+	var b := Vector2(x + w * 0.5, taban - h)
+	var c := Vector2(x + w, taban)
+	draw_colored_polygon(PackedVector2Array([a, b, c]), renk)
+	draw_polyline(PackedVector2Array([a, b, c, a]), renk, 1.0, true)   # yumusak kenar
+
+
 func _draw() -> void:
 	match tur:
 		Tur.DIKEN:
 			var adet := maxi(1, int(round(genislik / 12.0)))
 			var w := genislik / adet
 			for i in adet:
-				draw_texture_rect(DOKU_DIKEN, Rect2(i * w, -yukseklik, w, yukseklik), false)
+				_ucgen(i * w, w, yukseklik, 0.0, RENK)
 		Tur.BLOK:
-			var r := Rect2(0, -yukseklik, genislik, yukseklik)
-			draw_texture_rect(DOKU_BLOK, r.grow(-2), true)
-			draw_rect(r, Color("a22633"), false, 2.0)
-			draw_rect(Rect2(genislik / 2.0 - 4, -yukseklik + 5, 8, 8), Color("e43b44"))
-			draw_rect(Rect2(genislik / 2.0 - 1, -yukseklik + 7, 2, 4), Color("fee761"))
+			draw_rect(Rect2(0, -yukseklik, genislik, yukseklik), RENK)
+			# Uyari isareti: koyu cubuk + nokta
+			var cx := genislik * 0.5
+			draw_rect(Rect2(cx - 1.5, -yukseklik + 7, 3, minf(yukseklik * 0.42, 22.0)), KOYU)
+			draw_rect(Rect2(cx - 1.5, -yukseklik + 7 + minf(yukseklik * 0.42, 22.0) + 4, 3, 3), KOYU)
 		Tur.TAVAN:
 			var r := Rect2(0, -yukseklik, genislik, yukseklik)
 			for x in [6.0, genislik - 7.0]:
-				draw_line(Vector2(x, -yukseklik), Vector2(x, -yukseklik - 400.0), Color("8b9bb4"), 1.0)
-			draw_rect(r, Color("a22633"))
-			draw_rect(r.grow(-1), Color("e43b44"))
+				draw_line(Vector2(x, -yukseklik), Vector2(x, -yukseklik - 400.0), Color(Tema.KAGIT, 0.4), 1.0)
+			draw_rect(r, RENK)
 			var adet := int((genislik - 8) / 10.0)
 			for i in adet:
-				draw_rect(Rect2(6 + i * 10, -yukseklik + yukseklik / 2.0 - 3, 5, 6), Color.WHITE)
-			draw_rect(r, KOYU, false, 1.0)
+				draw_rect(Rect2(6 + i * 10, -yukseklik + yukseklik / 2.0 - 3, 5, 6), KOYU)
 		Tur.PISTON:
 			var h := _anlik_yukseklik
-			var r := Rect2(0, -h, genislik, h)
-			draw_rect(Rect2(2, -h + 6, genislik - 4, maxf(h - 6, 0)), Color("5a6988"))
-			draw_rect(Rect2(4, -h + 7, genislik - 8, maxf(h - 8, 0)), Color("8b9bb4"))
+			draw_rect(Rect2(2, -h + 7, genislik - 4, maxf(h - 7, 0)), GOVDE)
 			var adet := maxi(1, int(round(genislik / 6.0)))
 			var w := genislik / adet
 			for i in adet:
-				var x := i * w
-				draw_colored_polygon(PackedVector2Array([
-					Vector2(x, -h + 7), Vector2(x + w / 2.0, -h), Vector2(x + w, -h + 7)
-				]), Color("e43b44"))
-			draw_rect(Rect2(-2, -3, genislik + 4, 3), Color("3a4466"))
-			draw_rect(r, KOYU, false, 1.0)
+				_ucgen(i * w, w, 8.0, -h + 8.0, RENK)
+			draw_rect(Rect2(-2, -3, genislik + 4, 3), Tema.SOLUK)
 	if kontrast:
 		var ust := _anlik_yukseklik if tur == Tur.PISTON else yukseklik
 		draw_rect(Rect2(-1, -ust - 1, genislik + 2, ust + 2), Color.WHITE, false, 2.0)
