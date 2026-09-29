@@ -332,8 +332,8 @@ func _paralaks(ad: String, doku: String, olcek: float, y: float, tekrar: float, 
 	return p
 
 
-## ay_konum: oyunda ay, sağ üstteki rekor yazısının altına iner.
-func _arka_plan(kok: Node, oto: bool, ay_konum := Vector2(520, 34)) -> void:
+## Düz renkli dünya: gökyüzü (oyun.gd renklendirir), az yıldız, iki basamaklı siluet katmanı.
+func _arka_plan(kok: Node, oto: bool) -> void:
 	var gk := CanvasLayer.new()
 	gk.name = "Gokyuzu"
 	gk.layer = -20
@@ -347,10 +347,6 @@ func _arka_plan(kok: Node, oto: bool, ay_konum := Vector2(520, 34)) -> void:
 	gk.add_child(gok)
 	var k := 1.0 if oto else 0.0
 	kok.add_child(_paralaks("Yildizlar", "res://assets/sprites/yildizlar.png", 0.03, 0, 320, -3.0 * k))
-	var ay := _paralaks("Ay", "res://assets/sprites/ay.png", 0.0, ay_konum.y, 0)
-	ay.get_node("Resim").position.x = ay_konum.x
-	ay.repeat_times = 1
-	kok.add_child(ay)
 	kok.add_child(_paralaks("SehirUzak", "res://assets/sprites/sehir_uzak.png", 0.2, 150, 640, -12.0 * k))
 	kok.add_child(_paralaks("SehirYakin", "res://assets/sprites/sehir_yakin.png", 0.45, 170, 640, -30.0 * k))
 
@@ -362,8 +358,8 @@ func _oyun() -> Node:
 	kok.process_mode = Node.PROCESS_MODE_ALWAYS
 	kok.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
-	_arka_plan(kok, false, Vector2(548, 66))
-	for ad in ["Yildizlar", "Ay", "SehirUzak", "SehirYakin"]:
+	_arka_plan(kok, false)
+	for ad in ["Yildizlar", "SehirUzak", "SehirYakin"]:
 		kok.get_node(ad).process_mode = Node.PROCESS_MODE_PAUSABLE
 
 	var dunya := Node2D.new()
@@ -390,7 +386,7 @@ func _oyun() -> Node:
 	var damla := CPUParticles2D.new()
 	damla.name = "Damlalar"
 	damla.emitting = false
-	damla.amount = 90
+	damla.amount = 70
 	damla.lifetime = 0.7
 	damla.position = Vector2(360, -10)
 	damla.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
@@ -400,20 +396,18 @@ func _oyun() -> Node:
 	damla.initial_velocity_min = 420.0
 	damla.initial_velocity_max = 520.0
 	damla.gravity = Vector2.ZERO
-	# İnce, eğik çizgi şeklinde damla (yön boyunca hizalı)
-	var dg := Gradient.new()
-	dg.colors = PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 1.0)])
+	# İnce, eğik düz çizgi (damla yönü boyunca hizalı; renk geçişi yok)
 	var dt := GradientTexture2D.new()
+	var dg := Gradient.new()
+	dg.colors = PackedColorArray([Color.WHITE, Color.WHITE])
 	dt.gradient = dg
 	dt.width = 1
-	dt.height = 7
-	dt.fill_from = Vector2(0, 0)
-	dt.fill_to = Vector2(0, 1)
+	dt.height = 8
 	damla.texture = dt
 	damla.particle_flag_align_y = true
 	damla.scale_amount_min = 1.0
-	damla.scale_amount_max = 1.4
-	damla.color = Color(0.78, 0.87, 1.0, 0.7)
+	damla.scale_amount_max = 1.3
+	damla.color = Color(Tema.KAGIT, 0.5)
 	yg.add_child(damla)
 
 	var ui := CanvasLayer.new()
@@ -422,17 +416,20 @@ func _oyun() -> Node:
 	ui.process_mode = Node.PROCESS_MODE_ALWAYS
 	kok.add_child(ui)
 
+	# --- HUD: sol üst mesafe + altın, sağ üst en iyi + duraklat ---
 	var ust := HBoxContainer.new()
 	ust.name = "Ust"
 	ust.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	ust.offset_left = 12
+	ust.offset_left = 14
 	ust.offset_right = -12
 	ust.offset_top = 8
-	ust.offset_bottom = 48
+	ust.offset_bottom = 46
 	ust.add_theme_constant_override("separation", 10)
 	ust.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(ust)
-	ust.add_child(_etiket("Mesafe", "0 m", 22))
+	var mesafe := _etiket("Mesafe", "0 m", 26, Tema.KAGIT, true)
+	mesafe.custom_minimum_size = Vector2(0, 34)
+	ust.add_child(mesafe)
 	var ikon := TextureRect.new()
 	ikon.name = "AltinIkon"
 	var at := AtlasTexture.new()
@@ -440,12 +437,12 @@ func _oyun() -> Node:
 	at.region = Rect2(0, 0, 12, 12)
 	ikon.texture = at
 	ikon.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
-	ikon.custom_minimum_size = Vector2(14, 30)
+	ikon.custom_minimum_size = Vector2(14, 34)
 	ikon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ust.add_child(ikon)
-	ust.add_child(_etiket("AltinSayisi", "0", 22, Color("fee761")))
-	var rze := _etiket("RuzgarEtiketi", "", 13, Color("2ce8f5"))
-	rze.custom_minimum_size = Vector2(0, 30)
+	ust.add_child(_etiket("AltinSayisi", "0", 16, Tema.CAM, true))
+	var rze := _etiket("RuzgarEtiketi", "", 8, Tema.CAM, true)
+	rze.custom_minimum_size = Vector2(0, 34)
 	rze.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	rze.visible = false
 	ust.add_child(rze)
@@ -454,29 +451,35 @@ func _oyun() -> Node:
 	bosluk.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bosluk.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ust.add_child(bosluk)
-	ust.add_child(_etiket("Rekor", "Rekor: 0 m", 14, Color("c0cbdc")))
-	ust.add_child(_dugme("DuraklatDugme", "II", Vector2(44, 40)))
+	var rk := _etiket("Rekor", "Rekor: 0 m", 8, Tema.KAGIT)
+	rk.custom_minimum_size = Vector2(0, 34)
+	rk.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	rk.modulate.a = 0.7
+	ust.add_child(rk)
+	var dd := _dugme("DuraklatDugme", "II", Vector2(34, 34), "Kucuk")
+	dd.add_theme_font_size_override("font_size", 12)
+	ust.add_child(dd)
 
-	var ipucu := _etiket("Ipucu", "Zıplamak için dokun / Boşluk\nBasılı tut: daha yüksek • Havada bir kez daha zıpla\nKırmızı tabelanın altında KISA zıpla", 13)
+	# Tek satır ipucu (ilk koşuda oyun.gd adım adım değiştirir)
+	var ipucu := _etiket("Ipucu", "Zıpla: Boşluk ya da dokun", 9, Tema.KAGIT)
 	ipucu.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ipucu.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	ipucu.offset_left = -240
-	ipucu.offset_right = 240
-	ipucu.offset_top = 64
-	ipucu.offset_bottom = 124
+	ipucu.offset_left = -280
+	ipucu.offset_right = 280
+	ipucu.offset_top = 56
+	ipucu.offset_bottom = 76
 	ui.add_child(ipucu)
 
-	var gb := _etiket("GorevBildirimi", "", 14, Color("63c74d"))
+	var gb := _etiket("GorevBildirimi", "", 9, Tema.PEMBE, true)
 	gb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	gb.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	gb.offset_left = -300
 	gb.offset_right = 300
-	gb.offset_top = 46
-	gb.offset_bottom = 66
+	gb.offset_top = 40
+	gb.offset_bottom = 58
 	ui.add_child(gb)
 
-	var te := _etiket("TekrarEtiketi", "Ölüm tekrarı  •  geçmek için dokun", 14, Color("ffffff"))
-	te.add_theme_constant_override("outline_size", 6)
+	var te := _etiket("TekrarEtiketi", "Ölüm tekrarı  •  geçmek için dokun", 9, Tema.KAGIT)
 	te.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	te.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	te.offset_left = -300
@@ -485,21 +488,52 @@ func _oyun() -> Node:
 	te.offset_bottom = -16
 	ui.add_child(te)
 
-	var dp := _panel("DuraklatPaneli")
+	# --- Duraklat kartı: Devam / Baştan / Ayarlar / Menü (+ açılır ses ve dil) ---
+	var perde_d := ColorRect.new()
+	perde_d.name = "DuraklatPerde"
+	perde_d.color = Color(Tema.MUREKKEP, 0.6)
+	perde_d.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	perde_d.mouse_filter = Control.MOUSE_FILTER_STOP
+	perde_d.unique_name_in_owner = true
+	perde_d.visible = false
+	ui.add_child(perde_d)
+	var dp := _kart("DuraklatPaneli")
+	dp.custom_minimum_size = Vector2(250, 0)
 	ui.add_child(dp)
 	var dk: VBoxContainer = dp.get_child(0)
-	dk.add_child(_etiket("DuraklatBaslik", "Duraklatıldı", 28))
-	dk.add_child(_dugme("DevamDugme", "Devam", Vector2(200, 44)))
-	dk.add_child(_dugme("MenuDugme", "Menüye Dön", Vector2(200, 44)))
+	dk.add_child(_etiket("DuraklatEtiket", "DURAKLATILDI", 8, Tema.MUREKKEP, false, true))
+	dk.add_child(_dugme("DevamDugme", "Devam", Vector2(0, 38), "Birincil"))
+	var d2 := HBoxContainer.new()
+	d2.name = "DurSatir"
+	d2.add_theme_constant_override("separation", 6)
+	dk.add_child(d2)
+	for cift in [["BastanDugme", "Baştan"], ["DurAyarDugme", "Ayarlar"], ["MenuDugme", "Menü"]]:
+		var b := _dugme(cift[0], cift[1], Vector2(0, 30), "KartDugme")
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		d2.add_child(b)
+	var ayar := VBoxContainer.new()
+	ayar.name = "DurAyarlar"
+	ayar.unique_name_in_owner = true
+	ayar.add_theme_constant_override("separation", 4)
+	ayar.visible = false
+	dk.add_child(ayar)
+	for cift in [["DurMuzik", "Müzik"], ["DurEfekt", "Efektler"]]:
+		var satir := HBoxContainer.new()
+		var l := _etiket(cift[0] + "Etiket", cift[1], 11, Tema.MUREKKEP, false, true)
+		l.custom_minimum_size = Vector2(64, 0)
+		satir.add_child(l)
+		satir.add_child(_kaydirici(cift[0], 150))
+		ayar.add_child(satir)
+	ayar.add_child(_dugme("DurDilDugme", "Dil: Türkçe", Vector2(0, 28), "KartDugme"))
 
-	var sp := _panel("SonPaneli")
+	# --- Oyun sonu kartı: skor, en iyi, tek dokunuşla tekrar ---
+	var sp := _kart("SonPaneli")
 	sp.custom_minimum_size = Vector2(380, 0)
 	ui.add_child(sp)
 	var sk: VBoxContainer = sp.get_child(0)
-	sk.add_theme_constant_override("separation", 4)
 	sk.add_theme_constant_override("separation", 3)
-	sk.add_child(_etiket("SonBaslik", "Koşu bitti", 20))
-	sk.add_child(_etiket("SonSkor", "Mesafe: 0 m", 18))
+	sk.add_child(_etiket("SonBaslik", "KOŞU BİTTİ", 8, Tema.MUREKKEP, false, true))
+	sk.add_child(_etiket("SonSkor", "Mesafe: 0 m", 30, Tema.MUREKKEP, true, true))
 	var harita := Control.new()
 	harita.name = "SonHarita"
 	harita.unique_name_in_owner = true
@@ -507,8 +541,8 @@ func _oyun() -> Node:
 	harita.custom_minimum_size = Vector2(340, 26)
 	harita.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	sk.add_child(harita)
-	sk.add_child(_etiket("SonRekor", "Rekor: 0 m", 15, Color("fee761")))
-	sk.add_child(_etiket("SonAltin", "Altın: 0", 14))
+	sk.add_child(_etiket("SonRekor", "Rekor: 0 m", 9, Tema.PEMBE, true, true))
+	sk.add_child(_etiket("SonAltin", "Altın: 0", 8, Tema.MUREKKEP, false, true))
 	# v1.7: ritim koşusunda vuruş sapması histogramı (oyun.gd yalnız ritimde gösterir)
 	var sapma := Control.new()
 	sapma.name = "SonSapma"
@@ -518,83 +552,93 @@ func _oyun() -> Node:
 	sapma.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	sapma.visible = false
 	sk.add_child(sapma)
-	var sg := _etiket("SonGorevler", "", 11, Color("c0cbdc"))
+	var sg := _etiket("SonGorevler", "", 8, Tema.MUREKKEP, false, true)
 	sg.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	sk.add_child(sg)
 	var dugmeler := HBoxContainer.new()
 	dugmeler.name = "Dugmeler"
 	dugmeler.alignment = BoxContainer.ALIGNMENT_CENTER
-	dugmeler.add_theme_constant_override("separation", 10)
+	dugmeler.add_theme_constant_override("separation", 8)
 	sk.add_child(dugmeler)
-	dugmeler.add_child(_dugme("TekrarDugme", "Tekrar", Vector2(150, 36)))
-	var pd := _dugme("PaylasDugme", "Paylaş", Vector2(110, 36))
+	dugmeler.add_child(_dugme("TekrarDugme", "Tekrar", Vector2(150, 36), "Birincil"))
+	var pd := _dugme("PaylasDugme", "Paylaş", Vector2(110, 36), "KartDugme")
 	pd.visible = false
 	dugmeler.add_child(pd)
-	var gcd := _dugme("GecikmeDugme", "Gecikme", Vector2(110, 36))
-	gcd.add_theme_font_size_override("font_size", 13)
+	var gcd := _dugme("GecikmeDugme", "Gecikme", Vector2(110, 36), "KartDugme")
 	gcd.visible = false
 	dugmeler.add_child(gcd)
-	dugmeler.add_child(_dugme("SonMenuDugme", "Menü", Vector2(150, 36)))
-	sk.add_child(_etiket("SonIpucu", "Tekrar için dokun ya da Boşluk", 11, Color("8b9bb4")))
-	_ortala(dk)
+	dugmeler.add_child(_dugme("SonMenuDugme", "Menü", Vector2(150, 36), "KartDugme"))
+	sk.add_child(_etiket("SonIpucu", "Tekrar için dokun ya da Boşluk", 8, Tema.MUREKKEP, false, true))
 	for ad in ["SonBaslik", "SonSkor", "SonRekor", "SonAltin", "SonIpucu"]:
 		sk.get_node(ad).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sk.get_node("SonIpucu").modulate.a = 0.6
 
-	var gc := CanvasLayer.new()
-	gc.name = "Gecis"
-	gc.layer = 100
-	kok.add_child(gc)
-	var perde := ColorRect.new()
-	perde.name = "Perde"
-	perde.color = Color(0.094, 0.078, 0.145, 0.0)
-	perde.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	perde.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	gc.add_child(perde)
+	# Ekran geçişleri sahnede değil: autoload "Gecis" (scripts/gecis.gd, shader) ekranı örter.
 	return kok
 
 
-func _etiket(ad: String, metin: String, boyut: int, renk := Color.WHITE) -> Label:
+## Etiket. Yazı tipi temadaki varyasyondan gelir: kalin -> Bold, boyut <= 9 -> mono etiket
+## (BÜYÜK HARF ve harf aralığı oyun kodunda). kart: kâğıt kart üstünde (mürekkep yazı).
+func _etiket(ad: String, metin: String, boyut: int, renk: Variant = null, kalin := false, kart := false) -> Label:
 	var l := Label.new()
 	l.name = ad
 	l.text = metin
 	l.unique_name_in_owner = true
+	var mono := boyut <= 9 and not kalin
+	if kalin:
+		l.theme_type_variation = &"KartBaslik" if kart else &"Baslik"
+	elif mono:
+		l.theme_type_variation = &"KartEtiket" if kart else &"Etiket"
+	else:
+		l.theme_type_variation = &"KartYazi" if kart else &"Govde"
 	l.add_theme_font_size_override("font_size", boyut)
-	l.add_theme_color_override("font_color", renk)
-	l.add_theme_color_override("font_outline_color", Color("222034"))
-	l.add_theme_constant_override("outline_size", 4)
+	if renk != null:
+		var r: Color = renk
+		if kart and mono and r == Tema.MUREKKEP:
+			r = Color(Tema.MUREKKEP, 0.65)
+		l.add_theme_color_override("font_color", r)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l
 
 
-func _dugme(ad: String, metin: String, boyut: Vector2) -> Button:
+## tur: "" ikincil (şeffaf + kâğıt çizgi), "Birincil" (mor dolgu), "KartDugme" (kâğıt üstünde), "Kucuk"
+func _dugme(ad: String, metin: String, boyut: Vector2, tur := "") -> Button:
 	var b := Button.new()
 	b.name = ad
 	b.text = metin
 	b.unique_name_in_owner = true
 	b.custom_minimum_size = boyut
-	b.add_theme_font_size_override("font_size", 18)
+	if tur != "":
+		b.theme_type_variation = StringName(tur)
 	return b
 
 
-func _panel(ad: String) -> PanelContainer:
+func _kaydirici(ad: String, genislik: float) -> HSlider:
+	var k := HSlider.new()
+	k.name = ad
+	k.unique_name_in_owner = true
+	k.min_value = 0
+	k.max_value = 100
+	k.step = 5
+	k.custom_minimum_size = Vector2(genislik, 24)
+	k.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return k
+
+
+## Kâğıt kart (video kartları): tema "KagitKart" PanelContainer + dikey kutu.
+func _kart(ad: String) -> PanelContainer:
 	var p := PanelContainer.new()
 	p.name = ad
 	p.unique_name_in_owner = true
+	p.theme_type_variation = &"KagitKart"
 	p.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	p.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	p.grow_vertical = Control.GROW_DIRECTION_BOTH
 	p.custom_minimum_size = Vector2(260, 0)
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = Color("3f3f74", 0.96)
-	sb.border_color = Color("cbdbfc")
-	sb.set_border_width_all(2)
-	sb.set_corner_radius_all(6)
-	sb.set_content_margin_all(16)
-	p.add_theme_stylebox_override("panel", sb)
 	var v := VBoxContainer.new()
 	v.name = "Kutu"
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
-	v.add_theme_constant_override("separation", 8)
+	v.add_theme_constant_override("separation", 6)
 	p.add_child(v)
 	return p
 
@@ -603,6 +647,17 @@ func _ortala(kutu: Node) -> void:
 	for c in kutu.get_children():
 		if c is Label:
 			c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+
+func _anahtar(ad: String, metin: String) -> CheckButton:
+	var cb := CheckButton.new()
+	cb.name = ad
+	cb.unique_name_in_owner = true
+	cb.text = metin
+	for r in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color", "font_hover_pressed_color"]:
+		cb.add_theme_color_override(r, Tema.MUREKKEP)
+	cb.add_theme_font_size_override("font_size", 11)
+	return cb
 
 
 # ---------------------------------------------------------------- menü
@@ -619,172 +674,194 @@ func _menu() -> Node:
 	sahne.name = "Sahne"
 	kok.add_child(sahne)
 	_arka_plan(sahne, true)
-	var cati := Sprite2D.new()
-	cati.name = "Cati"
-	cati.texture = load("res://assets/sprites/zemin.png")
-	cati.region_enabled = true
-	cati.region_rect = Rect2(0, 0, 16, 16)
-	cati.centered = false
-	cati.scale = Vector2(40, 1)
+	var cati := ColorRect.new()
+	cati.name = "CatiGovde"
+	cati.color = Tema.MUREKKEP
 	cati.position = Vector2(0, 296)
+	cati.size = Vector2(640, 64)
+	cati.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	sahne.add_child(cati)
-	var govde := ColorRect.new()
-	govde.name = "CatiGovde"
-	govde.color = Color("3e2731")
-	govde.position = Vector2(0, 312)
-	govde.size = Vector2(640, 48)
-	govde.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	sahne.add_child(govde)
+	var cizgi := ColorRect.new()
+	cizgi.name = "Cati"
+	cizgi.color = Tema.KAGIT
+	cizgi.position = Vector2(0, 296)
+	cizgi.size = Vector2(640, 2)
+	cizgi.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sahne.add_child(cizgi)
 	var onizleme := AnimatedSprite2D.new()
 	onizleme.name = "Onizleme"
 	onizleme.unique_name_in_owner = true
 	onizleme.centered = false
 	onizleme.offset = Vector2(-10, -25)
-	onizleme.position = Vector2(560, 297)
 	onizleme.scale = Vector2(2, 2)
 	onizleme.position = Vector2(560, 298)
 	sahne.add_child(onizleme)
 
-	var baslik := _etiket("Baslik", "TEK TUŞ KOŞU", 38, Color("2ce8f5"))
-	baslik.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	baslik.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	baslik.offset_left = -300
-	baslik.offset_right = 300
-	baslik.offset_top = 14
-	baslik.offset_bottom = 64
-	baslik.add_theme_constant_override("outline_size", 8)
-	kok.add_child(baslik)
-
-	# --- Ana panel: solda düğmeler, sağda görevler ---
-	var ana := HBoxContainer.new()
+	# --- Ana panel: ortada başlık, büyük OYNA, tek satır nasıl oynanır, ikincil düğmeler ---
+	var ana := VBoxContainer.new()
 	ana.name = "AnaPanel"
 	ana.unique_name_in_owner = true
 	ana.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	ana.offset_left = 28
-	ana.offset_right = -28
-	ana.offset_top = 72
+	ana.offset_top = 20
 	ana.offset_bottom = -70
-	ana.add_theme_constant_override("separation", 24)
+	ana.alignment = BoxContainer.ALIGNMENT_CENTER
+	ana.add_theme_constant_override("separation", 6)
 	ana.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	kok.add_child(ana)
-	var sol := VBoxContainer.new()
-	sol.name = "Sol"
-	sol.add_theme_constant_override("separation", 6)
-	sol.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ana.add_child(sol)
-	sol.add_child(_dugme("BaslaDugme", "Başla", Vector2(190, 40)))
-	var gd := _dugme("GunlukDugme", "Günlük koşu", Vector2(190, 30))
-	gd.add_theme_font_size_override("font_size", 15)
-	sol.add_child(gd)
-	for cift in [["KarakterDugme", "Karakter", "BasarimDugme", "Başarımlar"], ["RitimDugme", "Ritim", "AyarlarDugme", "Ayarlar"]]:
+	var slogan := _etiket("Slogan", "TEK TUŞ · TAM RİTİM", 8, Tema.MOR)
+	slogan.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ana.add_child(slogan)
+	var baslik := _etiket("Baslik", "Tek Tuş Koşu", 42, Tema.KAGIT, true)
+	baslik.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	ana.add_child(baslik)
+	var bosluk1 := Control.new()
+	bosluk1.custom_minimum_size = Vector2(0, 6)
+	bosluk1.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ana.add_child(bosluk1)
+	var oyna := _dugme("BaslaDugme", "Oyna", Vector2(200, 46), "Birincil")
+	oyna.add_theme_font_size_override("font_size", 22)
+	oyna.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	ana.add_child(oyna)
+	var nasil := _etiket("Nasil", "Boşluk ya da dokun: zıpla · basılı tut: daha yüksek · havada bir kez daha", 10, Tema.KAGIT)
+	nasil.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	nasil.modulate.a = 0.75
+	ana.add_child(nasil)
+	var bosluk2 := Control.new()
+	bosluk2.custom_minimum_size = Vector2(0, 4)
+	bosluk2.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ana.add_child(bosluk2)
+	for cift in [["RitimDugme", "Ritim", "GunlukDugme", "Günlük koşu"], ["KarakterDugme", "Karakter", "BasarimDugme", "Başarımlar", "AyarlarDugme", "Ayarlar"]]:
 		var satir := HBoxContainer.new()
 		satir.name = cift[0] + "Satir"
+		satir.alignment = BoxContainer.ALIGNMENT_CENTER
 		satir.add_theme_constant_override("separation", 6)
 		satir.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		for i in [0, 2]:
-			var b := _dugme(cift[i], cift[i + 1], Vector2(92, 30))
-			b.add_theme_font_size_override("font_size", 14)
-			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		for i in range(0, cift.size(), 2):
+			var b := _dugme(cift[i], cift[i + 1], Vector2(112, 28))
+			b.add_theme_font_size_override("font_size", 11)
 			satir.add_child(b)
-		sol.add_child(satir)
-	sol.add_child(_etiket("RekorEtiketi", "Rekor: 0 m", 16, Color("fee761")))
-	sol.add_child(_etiket("AltinEtiketi", "Altın: 0", 14))
-	var gorev := _panel("GorevPaneli")
-	gorev.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		ana.add_child(satir)
+
+	# Alt sol: rekor + altın, alt sağ: görevler (küçük, mono)
+	var alt := HBoxContainer.new()
+	alt.name = "Alt"
+	alt.unique_name_in_owner = true
+	alt.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	alt.offset_left = 16
+	alt.offset_right = -16
+	alt.offset_top = -66
+	alt.offset_bottom = -10
+	alt.add_theme_constant_override("separation", 20)
+	alt.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	kok.add_child(alt)
+	var sol := VBoxContainer.new()
+	sol.name = "Sol"
+	sol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sol.alignment = BoxContainer.ALIGNMENT_END
+	sol.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	alt.add_child(sol)
+	sol.add_child(_etiket("RekorEtiketi", "Rekor: 0 m", 9, Tema.PEMBE, true))
+	sol.add_child(_etiket("AltinEtiketi", "Altın: 0", 8, Tema.KAGIT))
+	var gorev := VBoxContainer.new()
+	gorev.name = "GorevPaneli"
+	gorev.unique_name_in_owner = true
 	gorev.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	gorev.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	gorev.custom_minimum_size = Vector2(0, 0)
+	gorev.alignment = BoxContainer.ALIGNMENT_END
 	gorev.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ana.add_child(gorev)
-	var gl := _etiket("GorevListesi", "GÖREVLER", 12, Color("ead4aa"))
+	alt.add_child(gorev)
+	var gl := _etiket("GorevListesi", "GÖREVLER", 8, Tema.KAGIT)
+	gl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	gl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	gorev.get_child(0).add_child(gl)
+	gl.modulate.a = 0.8
+	gl.add_theme_constant_override("line_spacing", -3)
+	gorev.add_child(gl)
 
-	# Çıkış: yalnız masaüstünde, sol üst köşede küçük düğme
-	var cikis := _dugme("CikisDugme", "Çıkış", Vector2(64, 26))
-	cikis.add_theme_font_size_override("font_size", 12)
-	cikis.position = Vector2(8, 8)
+	# Çıkış (yalnız masaüstü) ve dil düğmesi: köşe
+	var cikis := _dugme("CikisDugme", "Çıkış", Vector2(60, 26), "Kucuk")
+	cikis.add_theme_font_size_override("font_size", 10)
+	cikis.position = Vector2(10, 10)
 	kok.add_child(cikis)
+	var dil := _dugme("DilDugme", "TR", Vector2(40, 26), "Kucuk")
+	dil.add_theme_font_size_override("font_size", 10)
+	dil.position = Vector2(590, 10)
+	kok.add_child(dil)
 
-	var ip := _etiket("Ipucu", "Başlamak için boş bir yere dokun ya da Boşluk", 12, Color("c0cbdc"))
+	var ip := _etiket("Ipucu", "Başlamak için boş bir yere dokun ya da Boşluk", 8, Tema.KAGIT)
 	ip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	ip.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	ip.offset_left = -300
 	ip.offset_right = 300
-	ip.offset_top = -26
-	ip.offset_bottom = -6
+	ip.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	ip.offset_left = -150
+	ip.offset_right = 150
+	ip.offset_top = 14
+	ip.offset_bottom = 28
+	ip.modulate.a = 0.6
 	kok.add_child(ip)
 
 	# --- Karakter paneli ---
-	var kp := _panel("KarakterPaneli")
+	var kp := _kart("KarakterPaneli")
 	kp.custom_minimum_size = Vector2(380, 0)
 	kok.add_child(kp)
 	var kv: VBoxContainer = kp.get_child(0)
 	kv.add_theme_constant_override("separation", 4)
-	kv.add_child(_etiket("KarakterBaslik", "Karakter", 22))
-	kv.add_child(_etiket("KarakterAltin", "Altın: 0", 14, Color("fee761")))
+	kv.add_child(_etiket("KarakterBaslik", "Karakter", 20, Tema.MUREKKEP, true, true))
+	kv.add_child(_etiket("KarakterAltin", "Altın: 0", 9, Tema.PEMBE, true, true))
 	var liste := VBoxContainer.new()
 	liste.name = "KostumListesi"
 	liste.unique_name_in_owner = true
 	liste.add_theme_constant_override("separation", 2)
 	kv.add_child(liste)
-	kv.add_child(_dugme("KarakterGeri", "Geri", Vector2(160, 36)))
+	kv.add_child(_dugme("KarakterGeri", "Geri", Vector2(160, 32), "KartDugme"))
 	_ortala(kv)
 
-	# --- Ayarlar paneli ---
-	var ap := _panel("AyarlarPaneli")
+	# --- Ayarlar paneli: ses + dil + oynanış anahtarları ---
+	var ap := _kart("AyarlarPaneli")
 	ap.custom_minimum_size = Vector2(360, 0)
 	kok.add_child(ap)
 	var av: VBoxContainer = ap.get_child(0)
 	av.add_theme_constant_override("separation", 4)
-	av.add_child(_etiket("AyarlarBaslik", "Ayarlar", 22))
+	av.add_child(_etiket("AyarlarBaslik", "Ayarlar", 20, Tema.MUREKKEP, true, true))
 	for cift in [["MuzikKaydirici", "Müzik"], ["EfektKaydirici", "Efektler"]]:
 		var satir := HBoxContainer.new()
 		satir.name = cift[0] + "Satir"
-		var l := _etiket(cift[0] + "Etiket", cift[1], 14)
+		var l := _etiket(cift[0] + "Etiket", cift[1], 11, Tema.MUREKKEP, false, true)
 		l.custom_minimum_size = Vector2(90, 0)
 		satir.add_child(l)
-		var k := HSlider.new()
-		k.name = cift[0]
-		k.unique_name_in_owner = true
-		k.min_value = 0
-		k.max_value = 100
-		k.step = 5
-		k.custom_minimum_size = Vector2(220, 28)
-		satir.add_child(k)
+		satir.add_child(_kaydirici(cift[0], 220))
 		av.add_child(satir)
-	for cift in [["TamEkranKutu", "Tam ekran"], ["SarsintiKutu", "Ekran sarsıntısı"], ["TitresimKutu", "Titreşim (telefon)"], ["KontrastKutu", "Yüksek kontrast (tehlike çerçevesi)"], ["RahatKutu", "Rahat mod (%80 hız, ayrı rekor)"]]:
-		var cb := CheckButton.new()
-		cb.name = cift[0]
-		cb.unique_name_in_owner = true
-		cb.text = cift[1]
-		cb.add_theme_font_size_override("font_size", 14)
-		av.add_child(cb)
-	av.add_child(_dugme("AyarlarGeri", "Geri", Vector2(160, 36)))
+	var dil_satir := HBoxContainer.new()
+	dil_satir.name = "DilSatir"
+	var dl := _etiket("DilEtiket", "Dil", 11, Tema.MUREKKEP, false, true)
+	dl.custom_minimum_size = Vector2(90, 0)
+	dil_satir.add_child(dl)
+	dil_satir.add_child(_dugme("AyarDilDugme", "Türkçe", Vector2(120, 26), "KartDugme"))
+	av.add_child(dil_satir)
+	for cift in [["TamEkranKutu", "Tam ekran"], ["SarsintiKutu", "Ekran sarsıntısı"], ["TitresimKutu", "Titreşim (telefon)"], ["KontrastKutu", "Yüksek kontrast (tehlike çerçevesi)"], ["RahatKutu", "Rahat mod (%80 hız, ayrı rekor)"], ["SadeGecisKutu", "Sade geçişler (hareket azaltma)"]]:
+		av.add_child(_anahtar(cift[0], cift[1]))
+	av.add_child(_dugme("AyarlarGeri", "Geri", Vector2(160, 32), "KartDugme"))
 	av.get_node("AyarlarBaslik").horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	# --- Ritim paneli: şarkı seçimi + ses gecikmesi ---
-	var rp := _panel("RitimPaneli")
+	var rp := _kart("RitimPaneli")
 	rp.custom_minimum_size = Vector2(380, 0)
 	kok.add_child(rp)
-	# Üç şarkı + günün ritmi + gecikme satırı 360 px'lik temel çözünürlüğe sığmalı (v1.3: kenar 12, aralık 5, düğme 30)
-	(rp.get_theme_stylebox("panel") as StyleBoxFlat).set_content_margin_all(12)
 	var rv: VBoxContainer = rp.get_child(0)
 	rv.add_theme_constant_override("separation", 5)
-	rv.add_child(_etiket("RitimBaslik", "Ritim koşusu", 22))
-	rv.add_child(_etiket("RitimAciklama", "Engeller müziğin vuruşuna hizalı. Sarı oklu lambada zıpla.", 12, Color("c0cbdc")))
+	rv.add_child(_etiket("RitimBaslik", "Ritim koşusu", 20, Tema.MUREKKEP, true, true))
+	rv.add_child(_etiket("RitimAciklama", "Engeller müziğin vuruşuna hizalı. Pembe oklu çizgide zıpla.", 10, Tema.MUREKKEP, false, true))
 	for i in 3:
-		var sd := _dugme("SarkiDugme%d" % i, "Şarkı %d" % (i + 1), Vector2(300, 30))
-		sd.add_theme_font_size_override("font_size", 15)
+		var sd := _dugme("SarkiDugme%d" % i, "Şarkı %d" % (i + 1), Vector2(300, 30), "KartDugme")
+		sd.add_theme_font_size_override("font_size", 12)
 		rv.add_child(sd)
-	var grd := _dugme("GunlukRitimDugme", "Günün ritmi", Vector2(300, 30))
-	grd.add_theme_font_size_override("font_size", 14)
+	var grd := _dugme("GunlukRitimDugme", "Günün ritmi", Vector2(300, 30), "KartDugme")
+	grd.add_theme_font_size_override("font_size", 12)
 	rv.add_child(grd)
 	var gs := HBoxContainer.new()
 	gs.name = "GecikmeSatir"
 	gs.add_theme_constant_override("separation", 8)
-	var gl2 := _etiket("GecikmeEtiket", "Ses gecikmesi", 14)
-	gl2.custom_minimum_size = Vector2(110, 0)
+	var gl2 := _etiket("GecikmeEtiket", "Ses gecikmesi", 11, Tema.MUREKKEP, false, true)
+	gl2.custom_minimum_size = Vector2(100, 0)
 	gs.add_child(gl2)
 	var gk := HSlider.new()
 	gk.name = "GecikmeKaydirici"
@@ -792,33 +869,29 @@ func _menu() -> Node:
 	gk.min_value = -150
 	gk.max_value = 300
 	gk.step = 10
-	gk.custom_minimum_size = Vector2(150, 28)
+	gk.custom_minimum_size = Vector2(150, 24)
 	gk.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	gs.add_child(gk)
-	var gd2 := _etiket("GecikmeDeger", "+0 ms", 14, Color("fee761"))
-	gd2.custom_minimum_size = Vector2(64, 0)
+	var gd2 := _etiket("GecikmeDeger", "+0 ms", 9, Tema.PEMBE, true, true)
+	gd2.custom_minimum_size = Vector2(56, 0)
 	gd2.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	gs.add_child(gd2)
 	rv.add_child(gs)
-	var gi := _etiket("GecikmeIpucu", "Vuruşları geç duyuyorsan (bluetooth kulaklık) artır.", 11, Color("8b9bb4"))
-	rv.add_child(gi)
-	var ik := CheckButton.new()
-	ik.name = "IpucuSesiKutu"
-	ik.unique_name_in_owner = true
-	ik.text = "Zıplama vuruşundan önce tık sesi"
-	ik.add_theme_font_size_override("font_size", 13)
+	rv.add_child(_etiket("GecikmeIpucu", "Vuruşları geç duyuyorsan (bluetooth kulaklık) artır.", 10, Tema.MUREKKEP, false, true))
+	var ik := _anahtar("IpucuSesiKutu", "Zıplama vuruşundan önce tık sesi")
+	ik.add_theme_font_size_override("font_size", 10)
 	rv.add_child(ik)
-	rv.add_child(_dugme("RitimGeri", "Geri", Vector2(160, 32)))
+	rv.add_child(_dugme("RitimGeri", "Geri", Vector2(160, 30), "KartDugme"))
 	for ad in ["RitimBaslik", "RitimAciklama", "GecikmeIpucu"]:
 		rv.get_node(ad).horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 
 	# --- Başarımlar paneli ---
-	var bp := _panel("BasarimPaneli")
-	bp.custom_minimum_size = Vector2(400, 0)
+	var bp := _kart("BasarimPaneli")
+	bp.custom_minimum_size = Vector2(430, 0)
 	kok.add_child(bp)
 	var bv: VBoxContainer = bp.get_child(0)
 	bv.add_theme_constant_override("separation", 3)
-	var bb := _etiket("BasarimBaslik", "Başarımlar", 20)
+	var bb := _etiket("BasarimBaslik", "Başarımlar", 20, Tema.MUREKKEP, true, true)
 	bb.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	bv.add_child(bb)
 	# v1.7: 16 başarım tek sütunda 360 px'e sığmıyor; iki sütunlu ızgara (menu.gd doldurur).
@@ -829,13 +902,13 @@ func _menu() -> Node:
 	bl.add_theme_constant_override("v_separation", 1)
 	bl.add_theme_constant_override("h_separation", 14)
 	bv.add_child(bl)
-	bv.add_child(_dugme("BasarimGeri", "Geri", Vector2(160, 32)))
+	bv.add_child(_dugme("BasarimGeri", "Geri", Vector2(160, 30), "KartDugme"))
 	_ortala(bv)
 
 	var perde := ColorRect.new()
 	perde.name = "Perde"
 	perde.unique_name_in_owner = true
-	perde.color = Color(0.094, 0.078, 0.145, 0.0)
+	perde.color = Color(Tema.MUREKKEP, 0.0)
 	perde.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	perde.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	kok.add_child(perde)

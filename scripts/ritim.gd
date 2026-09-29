@@ -103,10 +103,10 @@ static func gecmis_metni(d: Dictionary, en_cok := 4) -> String:
 		var t := str(k.get("tarih", ""))
 		var kisa := (t.substr(8, 2) + "." + t.substr(5, 2)) if t.length() >= 10 else t
 		var sk := clampi(int(k.get("sarki", 0)), 0, SARKILAR.size() - 1)
-		var ad := str(SARKILAR[sk]["ad"]).split(" ")[0]
+		var ad := Ceviri.t(str(SARKILAR[sk]["ad"])).split(" ")[0]
 		parcalar.append("%s %s %d m" % [kisa, ad, int(k.get("rekor", 0))])
 		i -= 1
-	return "Son günler: " + " · ".join(parcalar)
+	return Ceviri.t("Son günler: ") + " · ".join(parcalar)
 
 
 static func adim(sarki_no: int) -> float:

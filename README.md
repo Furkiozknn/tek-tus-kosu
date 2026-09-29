@@ -2,21 +2,26 @@
 
 # Tek Tuş Koşu
 
+<h3 align="center"><a href="https://furkiozknn.github.io/tek-tus-kosu/">Tarayıcıda oyna → furkiozknn.github.io/tek-tus-kosu</a></h3>
+
 <p align="center"><img src="docs/reel/reel.gif" alt="tek-tus-kosu - 15 saniyelik tanıtım videosu" width="720"></p>
 <p align="center"><sub><a href="docs/reel/reel.mp4">Sesli MP4 sürümü</a></sub></p>
 
-*One-button endless rooftop runner (Godot 4, Turkish UI). Its rhythm mode lays every obstacle on the music's beat grid, then shows you how you were off: a five-bucket timing histogram after the run, and an audio-delay correction the game derives from your own jumps. 961 headless tests, including a beat-perfect bot that has to clear every bar pattern at every song's beat spacing.*
+*One-button endless rooftop runner (Godot 4, Turkish and English UI, flat-colour look matching the trailer). Its rhythm mode lays every obstacle on the music's beat grid, then shows you how you were off: a five-bucket timing histogram after the run, and an audio-delay correction the game derives from your own jumps. 1148 headless tests, including a beat-perfect bot that has to clear every bar pattern at every song's beat spacing.*
 
 [![CI](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml/badge.svg)](https://github.com/Furkiozknn/tek-tus-kosu/actions/workflows/ci.yml)
+
+![Oynanış](yayin/tanitim.gif)
 
 ![Oynanış](yayin/ekran-2.png)
 
 Mobil öncelikli, tek tuşla oynanan sonsuz çatı koşusu. Karakter kendiliğinden koşar;
 oyuncu yalnızca zıplar. Hız zamanla artar, amaç en uzağa gitmek.
 
-**Durum:** v1.7.3 — MIT lisansı, her push'ta ve her PR'da **961 testin** koştuğu CI.
-Oyun kodu v1.7.1 ile aynı: v1.7.2 ve v1.7.3 belge/lisans/CI turlarıydı, yayımlanmış
-derlemeler değişmedi.
+**Durum:** arayüz yenilemesi (son yayın v1.7.3) — MIT lisansı, her push'ta ve her PR'da **1148 testin**
+koştuğu CI. Çekirdek mekanik, ritim modu, desenler ve bot eşikleri v1.7.3 ile aynı; yenilenen şey
+görünüm (tanıtım videosundaki düz renkli dünya), arayüz, **Türkçe/İngilizce dil**, ilk oyun öğretmesi ve
+geri bildirim. Denetim ve tasarım kararları: [`docs/DENETIM.md`](docs/DENETIM.md), [`docs/TASARIM.md`](docs/TASARIM.md).
 
 **Oyunda ne var:** üç şarkılı **ritim koşusu** — engeller müziğin vuruş ızgarasına
 hizalı; koşu sonrası **beş kovalı sapma histogramı** (çok erken / erken / tam / geç /
@@ -42,7 +47,7 @@ notları [Releases](https://github.com/Furkiozknn/tek-tus-kosu/releases) sayfas�
 
 - **Ritim koşusu (v0.6):** menüde **Ritim**. Hız sabit 300 px/sn, oyun müziği 150 BPM → her vuruş
   120 px. Engeller ölçü ölçü koddan üretilir; her engelin ideal zıplama anı bir vuruşa denk gelir.
-  Çatı kenarındaki lambalar müzikle nabız atar, zıplanacak vuruşlar sarı ve oklu. Vuruşun ±70 ms
+  Çatı kenarındaki vuruş işaretleri müzikle nabız atar, zıplanacak vuruşlar ince pembe dikey çizgili ve oklu. Vuruşun ±70 ms
   içinde zıplamak "Tam vuruş ×N" serisi; dışında "Erken/Geç N ms". Engeller dikenler, çukurlar ve
   alçak tavan (kısa sıçrama); ilk 2 ölçü boş, 10. ölçüden sonra iki olaylı ölçüler (13 desen). Ayrı rekor
   ve ölüm listesi; sonuç panelinde tam vuruş sayısı; "Vuruşu yakala" başarımı (tek koşuda 20 tam vuruş).
@@ -170,7 +175,7 @@ scripts/parca.gd         parça tabanı + tehlike/tavan aralıkları
 scripts/parca_listesi.gd 43 parçanın yol + zorluk listesi (sahne üreticisi yazar; testler ve bot_stres okur)
 scripts/tehlike.gd       diken / blok / tavan / piston + kıl payı algılayıcı
 scripts/hareketli.gd     hareketli platform (AnimatableBody2D)
-scripts/zemin.gd         dokulu çatı/tuğla çizimi
+scripts/zemin.gd         düz zemin çizimi (koyu blok + ince kâğıt çizgi)
 scripts/altin.gd         toplanabilir altın
 scripts/gorevler.gd      görev şablonları, ilerleme, ödül
 scripts/kostumler.gd     kostüm listesi, SpriteFrames üretimi, satın alma
@@ -287,7 +292,7 @@ Ayrıntılar: `CLAUDE.md` → Doğrulama.
 çıkıyor; oysa bir test fonksiyonundaki çalışma zamanı hatası (null erişimi, `int == bool`)
 yalnızca o fonksiyonu keser — motor `SCRIPT ERROR` yazar, kalan doğrulamalar hiç sayılmaz ve
 takım yine "0 hata" ile biter. CI günlüğü `tests/kapi.sh`'a veriyor: `=== SONUÇ ===` satırı
-olmalı, geçen sayı tabanın (`ci.yml` → `TEST_TABANI`, şu an 961) altına düşmemeli, günlükte
+olmalı, geçen sayı tabanın (`ci.yml` → `TEST_TABANI`, şu an 1148) altına düşmemeli, günlükte
 `SCRIPT ERROR` / `Parse Error` olmamalı. Kapının kendisi `tests/kapi_sinama.sh` ile dokuz örnek
 günlükte sınanıyor (Godot'suz, `bash tests/kapi_sinama.sh`). Test ekleyince tabanı da yükselt.
 
@@ -295,7 +300,7 @@ günlükte sınanıyor (Godot'suz, `bash tests/kapi_sinama.sh`). Test ekleyince 
 (v1.7 etiketinde 849'du; panel taşma düzeltmesi 4 doğrulama ekledi). Bot stresi 24 tohum × 3 dk 0 ölüm,
 43 parçanın hepsi görüldü; ritim stresi üç şarkıda 8'er tohum × 3 dk 0 ölüm; vuruş penceresi
 −175…+150 ms (v0.6'da ölçüldü, o günden beri değişmedi). Windows + Web dışa aktarma temiz
-(exe 105 MB, web pck 840 KB); `yayin/` altında 10 ekran görüntüsü + kapak.
+(exe 105 MB, web pck 1,1 MB (yenileme sonrası)); `yayin/` altında 10 ekran görüntüsü + kapak.
 
 Temiz klon denemesi (v1.7.1): `git lfs pull` → `.godot` önbelleği olmadan içe aktarma 0 hata →
 853 test → iki dışa aktarma → web yapısı Chromium'da açıldı (menü, 16 başarımlı iki sütunlu panel,

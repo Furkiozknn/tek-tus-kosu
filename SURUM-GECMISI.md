@@ -7,7 +7,28 @@ Liste silinmedi, buraya taşındı.
 Güncel sürümün notları GitHub'da da duruyor:
 <https://github.com/Furkiozknn/tek-tus-kosu/releases>
 
-## Yayımlanmamış (`main`, v1.7.3'ten sonra)
+## Yayımlanmamış (`yenileme/arayuz` dalı, v1.7.3'ten sonra)
+
+**Arayüz yenilemesi** — çekirdek mekanik, ritim modu, desenler ve bot eşikleri değişmedi.
+
+- Görünüm: tanıtım videosundaki düz renkli dünya (pembe koşucu, sarı tehlike, cam göbeği altın,
+  kâğıt kartlar, basamaklı siluet); Instrument Sans + JetBrains Mono; proje teması `assets/tema.tres`.
+  Pixel-art PNG'ler `_eski/sprites/` altına taşındı.
+- Ekranlar: büyük OYNA + tek satır nasıl oynanır; sade HUD; duraklat kartı (Devam / Baştan / Ayarlar /
+  Menü, ses ve dil); oyun sonu kartı (büyük skor, YENİ REKOR damgası, tek dokunuşla Tekrar); pembe renk
+  bandı geçişi, sıralı giriş.
+- Dil: Türkçe / İngilizce (varsayılan tarayıcı dili; menü, Ayarlar ve duraklattan değişir; kayıt
+  anahtarı `ayarlar.dil`, eski kayıtlar bozulmaz).
+- İlk oyunda adım adım öğretme; ölümde pembe flaş.
+- Araçlar: `tools/his_olc.gd` (girdi gecikmesi, kojot, tampon), `tools/fps.gd`, `tools/kayit.*` (ham klip),
+  `Bot.gecikme_aralik` (insan tepki bandı; varsayılan 0 = testlerle aynı).
+- Günlük video imkânları: sekiz geçiş ailesi (iris, glitch, bloklar, itme, perde, flaş, kararma, zoom;
+  `assets/gecis.gdshader`, GL Compatibility), üç paletin renk akışı (neon / arcade / uzay), menü açılışı,
+  oyun sonu, duraklat perdesi, dil glitch'i, 100 m'de mesafe rozeti akışı, rekor anı damgası + flaş.
+  Ayarlarda "Sade geçişler" (ve tarayıcıda prefers-reduced-motion) geçişleri anında yapar. Ritim modunda
+  koşu sırasında ekrana ışık bindirilmez. Kapalı ayar anahtarları kâğıt kartta görünür yapıldı.
+  Kaynak eşlemesi: `docs/TASARIM.md` §7. Testler 1048 → 1148.
+- Testler 961 → 1048; web `index.pck` 863 548 → 1 109 080 B; kare süresi 442 → 504 FPS (bot, Intel UHD).
 
 Oynanış değişmedi; yeni bir sürüm etiketi yok.
 

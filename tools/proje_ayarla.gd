@@ -16,7 +16,11 @@ func _initialize() -> void:
 	ps.set_setting("rendering/renderer/rendering_method.mobile", "gl_compatibility")
 	ps.set_setting("rendering/textures/canvas_textures/default_texture_filter", 0)
 	ps.set_setting("rendering/2d/snap/snap_2d_transforms_to_pixel", true)
-	ps.set_setting("rendering/environment/defaults/default_clear_color", Color("222034"))
+	ps.set_setting("rendering/environment/defaults/default_clear_color", Color("120d1f"))
+	# Yenileme: proje temasi (assets/tema.tres), yedek dil Turkce, gecis bandi autoload'u
+	ps.set_setting("gui/theme/custom", "res://assets/tema.tres")
+	ps.set_setting("internationalization/locale/fallback", "tr")
+	ps.set_setting("autoload/Gecis", "*res://scripts/gecis.gd")
 	ps.set_setting("physics/common/physics_ticks_per_second", 60)
 	ps.set_setting("input_devices/pointing/emulate_mouse_from_touch", true)
 	# Web'de ses "Sample" oynatma türüyle (itch.io'da çıtırtı olmasın); Android'de çevik girdi.

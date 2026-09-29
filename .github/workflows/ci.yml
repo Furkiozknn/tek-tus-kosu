@@ -26,7 +26,7 @@ env:
   # Test kapisinin tabani: gecen dogrulama sayisi bunun altina duserse CI
   # kirmizi. Test EKLEYINCE yukselt (README, project-meta.json ile birlikte);
   # dusurmek, bir bolumun sessizce kayboldugunu kabul etmek demek.
-  TEST_TABANI: 961
+  TEST_TABANI: 1148
 
 jobs:
   testler:

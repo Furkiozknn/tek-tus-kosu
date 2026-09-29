@@ -1,18 +1,21 @@
 extends Control
-## Ana menü: Başla / Karakter / Ayarlar / Çıkış, görevler, rekor ve toplam altın.
+## Ana menü: büyük OYNA + tek satır nasıl oynanır; ikincil düğmeler (Ritim, Günlük, Karakter,
+## Başarımlar, Ayarlar), rekor ve toplam altın, küçük görev listesi. Türkçe/İngilizce.
 
 var d: Dictionary
 var _aktif_panel: Control
 var _basliyor := false
 
 
-const RITIM_ACIKLAMA := "Engeller müziğin vuruşuna hizalı. Sarı oklu lambada zıpla."
+const RITIM_ACIKLAMA := "Engeller müziğin vuruşuna hizalı. Pembe oklu çizgide zıpla."
 
 
 func _ready() -> void:
 	Simgeler.kur()
+	Ceviri.kur()
 	add_child(DikeyUyari.new())
 	d = Kayit.yukle()
+	Ceviri.dil_uygula(str(d["ayarlar"].get("dil", "")))
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	Gorevler.hazirla(d, rng)
@@ -20,6 +23,7 @@ func _ready() -> void:
 	_tam_ekran_uygula(bool(d["ayarlar"]["tam_ekran"]))
 	Ses.ses_duzeyi_uygula()
 	Ses.muzik("muzik_menu")
+	_dunya_renkle()
 
 	%BaslaDugme.pressed.connect(basla)
 	%GunlukDugme.pressed.connect(basla.bind(true))
@@ -43,6 +47,8 @@ func _ready() -> void:
 	%KarakterGeri.pressed.connect(func() -> void: _panel_ac(%AnaPanel))
 	%BasarimGeri.pressed.connect(func() -> void: _panel_ac(%AnaPanel))
 	%AyarlarGeri.pressed.connect(func() -> void: _panel_ac(%AnaPanel))
+	%DilDugme.pressed.connect(_dil_degistir)
+	%AyarDilDugme.pressed.connect(_dil_degistir)
 	# Web ve mobilde "Çıkış" ve tam ekran anlamsız.
 	var masaustu := not (OS.has_feature("web") or OS.has_feature("mobile"))
 	%CikisDugme.visible = masaustu
@@ -56,6 +62,7 @@ func _ready() -> void:
 	%TitresimKutu.button_pressed = bool(a.get("titresim", true))
 	%KontrastKutu.button_pressed = bool(a["kontrast"])
 	%RahatKutu.button_pressed = bool(a["rahat"])
+	%SadeGecisKutu.button_pressed = bool(a.get("sade_gecis", false))
 	%MuzikKaydirici.value_changed.connect(func(v: float) -> void: _ayar("muzik", v / 100.0))
 	%EfektKaydirici.value_changed.connect(func(v: float) -> void: _ayar("efekt", v / 100.0); Ses.cal("tik"))
 	%TamEkranKutu.toggled.connect(func(v: bool) -> void: _ayar("tam_ekran", v); _tam_ekran_uygula(v))
@@ -63,15 +70,40 @@ func _ready() -> void:
 	%TitresimKutu.toggled.connect(func(v: bool) -> void: _ayar("titresim", v); if v: Input.vibrate_handheld(40))
 	%KontrastKutu.toggled.connect(func(v: bool) -> void: _ayar("kontrast", v))
 	%RahatKutu.toggled.connect(func(v: bool) -> void: _ayar("rahat", v); _yenile())
+	%SadeGecisKutu.toggled.connect(func(v: bool) -> void: _ayar("sade_gecis", v); GecisKatmani.sade_ayar = v)
 
 	%Onizleme.sprite_frames = Kostumler.kareler(str(d["kostum"]))
 	%Onizleme.play("kos")
+	UI.dugmeleri_bagla(self)
 	_kostum_listesi()
 	_basarim_listesi()
 	_yenile()
-	_panel_ac(%AnaPanel)
-	%Perde.color.a = 1.0
-	create_tween().tween_property(%Perde, "color:a", 0.0, 0.3)
+	_panel_ac(%AnaPanel, false)
+	# Sıralı giriş: slogan, başlık, OYNA, nasıl oynanır, ikincil düğmeler 40 ms arayla
+	var ogeler: Array = [%Slogan, %Baslik, %BaslaDugme, %Nasil]
+	ogeler.append_array(%AnaPanel.get_children().filter(func(c: Node) -> bool: return c is HBoxContainer))
+	UI.sirayla_gir(ogeler)
+	%Perde.color.a = 0.0
+	# Menü açılışı: iris ortadan açılır (yalnız ilk açılışta; geri dönüşlerde Gecis.git zaten açıyor)
+	if not Gecis.acilis_yapildi and not Gecis.mesgul_mu():
+		Gecis.acilis(&"iris", 0, 0.5)
+	Gecis.acilis_yapildi = true
+
+
+## Menü arka planı: gece teması (oyundaki ilk tema ile aynı renkler).
+func _dunya_renkle() -> void:
+	var gt := GradientTexture2D.new()
+	var g := Gradient.new()
+	g.colors = PackedColorArray([Tema.GOK, Tema.GOK])
+	gt.gradient = g
+	gt.fill_from = Vector2(0, 0)
+	gt.fill_to = Vector2(0, 1)
+	gt.width = 4
+	gt.height = 8
+	$Sahne/Gokyuzu/Gok.texture = gt
+	$Sahne/SehirUzak.modulate = Color("272238")
+	$Sahne/SehirYakin.modulate = Color("2d283f")
+	$Sahne/Yildizlar.modulate.a = 0.5
 
 
 func _ayar(ad: String, deger) -> void:
@@ -81,17 +113,30 @@ func _ayar(ad: String, deger) -> void:
 		Ses.ses_duzeyi_uygula()
 
 
+func _dil_degistir() -> void:
+	# Dil değişimi: glitch örtüsünün altında yeni metin
+	Gecis.ara(&"glitch", 0, func() -> void:
+		Ceviri.dil_degistir()
+		Ses.cal("tik")
+		d = Kayit.yukle()
+		_kostum_listesi()
+		_basarim_listesi()
+		_yenile())
+
+
 func _tam_ekran_uygula(acik: bool) -> void:
 	if OS.has_feature("web") or OS.has_feature("mobile") or DisplayServer.get_name() == "headless":
 		return
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if acik else DisplayServer.WINDOW_MODE_WINDOWED)
 
 
-func _panel_ac(panel: Control) -> void:
+func _panel_ac(panel: Control, ses := true) -> void:
 	for p in [%AnaPanel, %KarakterPaneli, %AyarlarPaneli, %BasarimPaneli, %RitimPaneli]:
 		p.visible = p == panel
 	_aktif_panel = panel
 	%Ipucu.visible = panel == %AnaPanel
+	%Alt.visible = panel == %AnaPanel
+	%DilDugme.visible = panel == %AnaPanel
 	if panel == %AnaPanel:
 		%BaslaDugme.grab_focus()
 	elif panel == %KarakterPaneli:
@@ -102,7 +147,10 @@ func _panel_ac(panel: Control) -> void:
 		%SarkiDugme0.grab_focus()
 	else:
 		%AyarlarGeri.grab_focus()
-	Ses.cal("tik")
+	if panel != %AnaPanel:
+		UI.sirayla_gir((panel.get_child(0) as Control).get_children())
+	if ses:
+		Ses.cal("tik")
 
 
 ## v1.6: şarkı önizlemesi yalnız ritim paneli açıkken.
@@ -114,9 +162,12 @@ func _onizle(i: int) -> void:
 
 func _yenile() -> void:
 	var rahat := bool(d["ayarlar"]["rahat"])
-	%RekorEtiketi.text = ("Rahat rekor: %d m" % int(d["rekor_rahat"])) if rahat else ("Rekor: %d m" % int(d["rekor"]))
-	%AltinEtiketi.text = "Altın: %d" % int(d["toplam_altin"])
-	%KarakterAltin.text = "Altın: %d" % int(d["toplam_altin"])
+	%RekorEtiketi.text = (tr("Rahat rekor: %d m") % int(d["rekor_rahat"])) if rahat else (tr("Rekor: %d m") % int(d["rekor"]))
+	%AltinEtiketi.text = tr("Altın: %d") % int(d["toplam_altin"])
+	%KarakterAltin.text = tr("Altın: %d") % int(d["toplam_altin"])
+	%DilDugme.text = Ceviri.dil_kodu().to_upper()
+	%DilDugme.tooltip_text = tr("Dil")
+	%AyarDilDugme.text = Ceviri.dil_adi()
 	var gun := Gunluk.durum(d)
 	var rr := 0
 	for i in Ritim.SARKILAR.size():
@@ -124,28 +175,28 @@ func _yenile() -> void:
 		var r := int(d.get(sk["rekor"], 0))
 		rr = maxi(rr, r)
 		var b: Button = get_node("%%SarkiDugme%d" % i)
-		b.text = "%s · %d BPM" % [sk["ad"], int(round(float(sk["bpm"])))] + ("" if r <= 0 else " · %d m" % r)
-		b.tooltip_text = str(sk.get("aciklama", ""))
+		b.text = "%s · %d BPM" % [tr(str(sk["ad"])), int(round(float(sk["bpm"])))] + ("" if r <= 0 else " · %d m" % r)
+		b.tooltip_text = tr(str(sk.get("aciklama", "")))
 	var gr := Ritim.gunluk_durum(d)
 	var gs: Dictionary = Ritim.SARKILAR[Ritim.gunun_sarkisi(Gunluk.bugun())]
-	%GunlukRitimDugme.text = "Günün ritmi · %s" % gs["ad"] + ("" if int(gr["deneme"]) == 0 else " · %d m" % int(gr["rekor"]))
-	%GunlukRitimDugme.tooltip_text = "Bugün herkes aynı şarkıda aynı çatılarda koşar. Deneme: %d" % int(gr["deneme"])
+	%GunlukRitimDugme.text = tr("Günün ritmi · %s") % tr(str(gs["ad"])) + ("" if int(gr["deneme"]) == 0 else " · %d m" % int(gr["rekor"]))
+	%GunlukRitimDugme.tooltip_text = tr("Bugün herkes aynı şarkıda aynı çatılarda koşar. Deneme: %d") % int(gr["deneme"])
 	# v1.6: günün ritmi geçmişi varsa açıklama satırı yerine son günlerin rekorları (yer kaplamaz)
 	var gecmis := Ritim.gecmis_metni(d)
-	%RitimAciklama.text = gecmis if gecmis != "" else RITIM_ACIKLAMA
-	%RitimDugme.text = "Ritim" if rr <= 0 else "Ritim · %d m" % rr
-	%RitimDugme.tooltip_text = "Engeller müziğin vuruşlarına hizalı; vuruşta zıpla."
+	%RitimAciklama.text = gecmis if gecmis != "" else tr(RITIM_ACIKLAMA)
+	%RitimDugme.text = tr("Ritim") if rr <= 0 else tr("Ritim") + " · %d m" % rr
+	%RitimDugme.tooltip_text = tr("Engeller müziğin vuruşlarına hizalı; vuruşta zıpla.")
 	var gc := int(d["ayarlar"].get("ritim_gecikme", 0))
 	%GecikmeDeger.text = "%+d ms" % gc
 	var seri := Gunluk.seri(d)
-	%GunlukDugme.text = "Günlük koşu" if int(gun["deneme"]) == 0 else "Günlük · %d m" % int(gun["rekor"])
+	%GunlukDugme.text = tr("Günlük koşu") if int(gun["deneme"]) == 0 else tr("Günlük") + " · %d m" % int(gun["rekor"])
 	if seri >= 2:
-		%GunlukDugme.text += " · %d gün" % seri
-	%GunlukDugme.tooltip_text = "Bugün herkes aynı çatılarda koşar. Deneme: %d" % int(gun["deneme"])
-	%BasarimDugme.text = "Başarım %d/%d" % [(d["basarimlar"] as Array).size(), Basarimlar.LISTE.size()]
-	var satirlar := ["GÖREVLER  (seviye %d)" % int(d["gorev_seviyesi"])]
+		%GunlukDugme.text += " · " + tr("%d gün") % seri
+	%GunlukDugme.tooltip_text = tr("Bugün herkes aynı çatılarda koşar. Deneme: %d") % int(gun["deneme"])
+	%BasarimDugme.text = tr("Başarım %d/%d") % [(d["basarimlar"] as Array).size(), Basarimlar.LISTE.size()]
+	var satirlar := [Tema.buyuk(tr("Görevler")) + "  ·  " + tr("seviye %d") % int(d["gorev_seviyesi"])]
 	for g in d["gorevler"]:
-		satirlar.append("• " + Gorevler.metin(g) + "  +%d" % int(g["odul"]))
+		satirlar.append("• " + Gorevler.metin_ad(g) + "  +%d" % int(g["odul"]))
 	%GorevListesi.text = "\n".join(satirlar)
 
 
@@ -165,28 +216,36 @@ func _kostum_listesi() -> void:
 		resim.custom_minimum_size = Vector2(24, 31)
 		resim.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		resim.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		satir.add_child(resim)
+		# Koyu fayans: açık renkli kostüm (Taç) kâğıt kart üstünde kaybolmasın
+		var fayans := PanelContainer.new()
+		fayans.add_theme_stylebox_override("panel", Tema.kutu(Tema.GOK, 5, 4, 3))
+		fayans.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		fayans.add_child(resim)
+		satir.add_child(fayans)
 		var ad := Label.new()
-		ad.text = k["isim"]
+		ad.text = tr(str(k["isim"]))
+		ad.theme_type_variation = &"KartBaslik"
+		ad.add_theme_font_size_override("font_size", 14)
 		ad.custom_minimum_size = Vector2(110, 0)
 		ad.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		ad.add_theme_font_size_override("font_size", 16)
 		satir.add_child(ad)
 		var dugme := Button.new()
-		dugme.custom_minimum_size = Vector2(150, 30)
-		dugme.add_theme_font_size_override("font_size", 14)
+		dugme.theme_type_variation = &"KartDugme"
+		dugme.custom_minimum_size = Vector2(150, 28)
+		dugme.add_theme_font_size_override("font_size", 12)
 		var acik := (d["acik_kostumler"] as Array).has(k["ad"])
 		if str(d["kostum"]) == k["ad"]:
-			dugme.text = "Seçili"
+			dugme.text = tr("Seçili")
 			dugme.disabled = true
 		elif acik:
-			dugme.text = "Seç"
+			dugme.text = tr("Seç")
 		else:
-			dugme.text = "Satın al: %d altın" % int(k["fiyat"])
+			dugme.text = tr("Satın al: %d altın") % int(k["fiyat"])
 			dugme.disabled = int(d["toplam_altin"]) < int(k["fiyat"])
 		dugme.pressed.connect(_kostum_sec.bind(str(k["ad"])))
 		satir.add_child(dugme)
 		liste.add_child(satir)
+	UI.dugmeleri_bagla(liste)
 
 
 func _basarim_listesi() -> void:
@@ -197,9 +256,10 @@ func _basarim_listesi() -> void:
 	for b in Basarimlar.LISTE:
 		var l := Label.new()
 		var tamam := acik.has(b["id"])
-		l.text = ("★ " if tamam else "☆ ") + "%s — %s" % [b["ad"], b["metin"]]
-		l.add_theme_font_size_override("font_size", 11)   # v1.7: iki sütun, 16 başarım
-		l.add_theme_color_override("font_color", Color("fee761") if tamam else Color("8b9bb4"))
+		l.text = ("★ " if tamam else "☆ ") + "%s — %s" % [tr(str(b["ad"])), tr(str(b["metin"]))]
+		l.theme_type_variation = &"KartYazi"
+		l.add_theme_font_size_override("font_size", 10)   # v1.7: iki sütun, 16 başarım
+		l.add_theme_color_override("font_color", Tema.PEMBE if tamam else Color(Tema.MUREKKEP, 0.5))
 		l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		liste.add_child(l)
 
@@ -239,7 +299,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _dugme_ustunde(konum: Vector2) -> bool:
-	for b in [%BaslaDugme, %GunlukDugme, %KarakterDugme, %BasarimDugme, %RitimDugme, %AyarlarDugme, %CikisDugme]:
+	for b in [%BaslaDugme, %GunlukDugme, %KarakterDugme, %BasarimDugme, %RitimDugme, %AyarlarDugme, %CikisDugme, %DilDugme]:
 		if b.visible and b.get_global_rect().has_point(konum):
 			return true
 	return false
@@ -267,6 +327,5 @@ func basla(gunluk := false, ritim := false, sarki := 0, ritim_gunluk := false) -
 	Ritim.gunluk_secili = ritim and ritim_gunluk
 	set_process_unhandled_input(false)
 	_telefonda_tam_ekran()
-	var tw := create_tween()
-	tw.tween_property(%Perde, "color:a", 1.0, 0.25)
-	tw.tween_callback(func() -> void: get_tree().change_scene_to_file("res://scenes/oyun.tscn"))
+	# Video geçiş ailesi (Gecis autoload, palet 0): ~260 ms örtme, sahne değişir, ~200 ms açma
+	Gecis.git("res://scenes/oyun.tscn", 0)

@@ -1,65 +1,31 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/oyun.gd" id="1_cd5sw"]
-[ext_resource type="Texture2D" path="res://assets/sprites/yildizlar.png" id="2_ajti7"]
-[ext_resource type="Texture2D" path="res://assets/sprites/ay.png" id="3_dx7yv"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sehir_uzak.png" id="4_ymggw"]
-[ext_resource type="Texture2D" path="res://assets/sprites/sehir_yakin.png" id="5_l17qn"]
-[ext_resource type="PackedScene" path="res://scenes/oyuncu.tscn" id="6_gy3e2"]
-[ext_resource type="Script" path="res://scripts/oyuncu.gd" id="7_n01t3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/altin.png" id="8_bevm8"]
-[ext_resource type="Script" path="res://scripts/mini_harita.gd" id="9_lfd6f"]
-[ext_resource type="Script" path="res://scripts/sapma_grafigi.gd" id="10_t7fvk"]
+[ext_resource type="Script" path="res://scripts/oyun.gd" id="1_0grmb"]
+[ext_resource type="Texture2D" path="res://assets/sprites/yildizlar.png" id="2_cd5sw"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sehir_uzak.png" id="3_ajti7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/sehir_yakin.png" id="4_dx7yv"]
+[ext_resource type="PackedScene" path="res://scenes/oyuncu.tscn" id="5_ymggw"]
+[ext_resource type="Script" path="res://scripts/oyuncu.gd" id="6_l17qn"]
+[ext_resource type="Texture2D" path="res://assets/sprites/altin.png" id="7_gy3e2"]
+[ext_resource type="Script" path="res://scripts/mini_harita.gd" id="8_n01t3"]
+[ext_resource type="Script" path="res://scripts/sapma_grafigi.gd" id="9_bevm8"]
 
-[sub_resource type="Gradient" id="Gradient_dqhw2"]
-colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 1)
+[sub_resource type="Gradient" id="Gradient_lfd6f"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
 
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_r3jcr"]
-gradient = SubResource("Gradient_dqhw2")
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_t7fvk"]
+gradient = SubResource("Gradient_lfd6f")
 width = 1
-height = 7
-fill_to = Vector2(0, 1)
+height = 8
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_7wslt"]
-atlas = ExtResource("8_bevm8")
+[sub_resource type="AtlasTexture" id="AtlasTexture_dqhw2"]
+atlas = ExtResource("7_gy3e2")
 region = Rect2(0, 0, 12, 12)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wee8i"]
-content_margin_left = 16.0
-content_margin_top = 16.0
-content_margin_right = 16.0
-content_margin_bottom = 16.0
-bg_color = Color(0.24705882, 0.24705882, 0.45490196, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.79607844, 0.85882354, 0.9882353, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi6hm"]
-content_margin_left = 16.0
-content_margin_top = 16.0
-content_margin_right = 16.0
-content_margin_bottom = 16.0
-bg_color = Color(0.24705882, 0.24705882, 0.45490196, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.79607844, 0.85882354, 0.9882353, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
 
 [node name="Oyun" type="Node2D" unique_id=1538904700]
 process_mode = 3
 texture_filter = 1
-script = ExtResource("1_cd5sw")
+script = ExtResource("1_0grmb")
 
 [node name="Gokyuzu" type="CanvasLayer" parent="." unique_id=8569036]
 layer = -20
@@ -79,17 +45,7 @@ repeat_size = Vector2(320, 0)
 repeat_times = 3
 
 [node name="Resim" type="Sprite2D" parent="Yildizlar" unique_id=455454996]
-texture = ExtResource("2_ajti7")
-centered = false
-
-[node name="Ay" type="Parallax2D" parent="." unique_id=1537636488]
-process_mode = 1
-texture_filter = 1
-scroll_scale = Vector2(0, 0)
-
-[node name="Resim" type="Sprite2D" parent="Ay" unique_id=1764421370]
-position = Vector2(548, 66)
-texture = ExtResource("3_dx7yv")
+texture = ExtResource("2_cd5sw")
 centered = false
 
 [node name="SehirUzak" type="Parallax2D" parent="." unique_id=1977089316]
@@ -101,7 +57,7 @@ repeat_times = 3
 
 [node name="Resim" type="Sprite2D" parent="SehirUzak" unique_id=1886310198]
 position = Vector2(0, 150)
-texture = ExtResource("4_ymggw")
+texture = ExtResource("3_ajti7")
 centered = false
 
 [node name="SehirYakin" type="Parallax2D" parent="." unique_id=823294149]
@@ -113,15 +69,15 @@ repeat_times = 3
 
 [node name="Resim" type="Sprite2D" parent="SehirYakin" unique_id=174562295]
 position = Vector2(0, 170)
-texture = ExtResource("5_l17qn")
+texture = ExtResource("4_dx7yv")
 centered = false
 
 [node name="Dunya" type="Node2D" parent="." unique_id=1291708175]
 process_mode = 1
 
-[node name="Oyuncu" type="CharacterBody2D" parent="." unique_id=1173728172 instance=ExtResource("6_gy3e2")]
+[node name="Oyuncu" type="CharacterBody2D" parent="." unique_id=1173728172 instance=ExtResource("5_ymggw")]
 process_mode = 1
-script = ExtResource("7_n01t3")
+script = ExtResource("6_l17qn")
 
 [node name="Efektler" type="Node2D" parent="." unique_id=1530952000]
 
@@ -132,8 +88,8 @@ script = ExtResource("7_n01t3")
 [node name="Damlalar" type="CPUParticles2D" parent="Yagis" unique_id=105129179]
 position = Vector2(360, -10)
 emitting = false
-amount = 90
-texture = SubResource("GradientTexture2D_r3jcr")
+amount = 70
+texture = SubResource("GradientTexture2D_t7fvk")
 lifetime = 0.7
 emission_shape = 3
 emission_rect_extents = Vector2(380, 4)
@@ -143,8 +99,8 @@ spread = 3.0
 gravity = Vector2(0, 0)
 initial_velocity_min = 420.0
 initial_velocity_max = 520.0
-scale_amount_max = 1.4
-color = Color(0.78, 0.87, 1, 0.7)
+scale_amount_max = 1.3
+color = Color(0.9607843, 0.92941177, 0.99607843, 0.5)
 
 [node name="Arayuz" type="CanvasLayer" parent="." unique_id=1130757002]
 process_mode = 3
@@ -153,47 +109,45 @@ layer = 10
 [node name="Ust" type="HBoxContainer" parent="Arayuz" unique_id=1339159640]
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 12.0
+offset_left = 14.0
 offset_top = 8.0
 offset_right = -12.0
-offset_bottom = 48.0
+offset_bottom = 46.0
 mouse_filter = 2
 theme_override_constants/separation = 10
 
 [node name="Mesafe" type="Label" parent="Arayuz/Ust" unique_id=552177912]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
+theme_type_variation = &"Baslik"
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(0.9607843, 0.92941177, 0.99607843, 1)
 text = "0 m"
 
 [node name="AltinIkon" type="TextureRect" parent="Arayuz/Ust" unique_id=481277136]
-custom_minimum_size = Vector2(14, 30)
+custom_minimum_size = Vector2(14, 34)
 layout_mode = 2
 mouse_filter = 2
-texture = SubResource("AtlasTexture_7wslt")
+texture = SubResource("AtlasTexture_dqhw2")
 stretch_mode = 3
 
 [node name="AltinSayisi" type="Label" parent="Arayuz/Ust" unique_id=956223377]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
-theme_override_colors/font_color = Color(0.99607843, 0.90588236, 0.38039216, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
+theme_type_variation = &"Baslik"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.13333334, 0.89411765, 1, 1)
 text = "0"
 
 [node name="RuzgarEtiketi" type="Label" parent="Arayuz/Ust" unique_id=1296735249]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(0, 30)
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_color = Color(0.17254902, 0.9098039, 0.9607843, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
+theme_type_variation = &"Baslik"
+theme_override_font_sizes/font_size = 8
+theme_override_colors/font_color = Color(0.13333334, 0.89411765, 1, 1)
 vertical_alignment = 1
 
 [node name="Bosluk" type="Control" parent="Arayuz/Ust" unique_id=133560279]
@@ -203,18 +157,21 @@ mouse_filter = 2
 
 [node name="Rekor" type="Label" parent="Arayuz/Ust" unique_id=1194008746]
 unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.7)
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-theme_override_colors/font_color = Color(0.7529412, 0.79607844, 0.8627451, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
+theme_type_variation = &"Etiket"
+theme_override_font_sizes/font_size = 8
+theme_override_colors/font_color = Color(0.9607843, 0.92941177, 0.99607843, 1)
 text = "Rekor: 0 m"
+vertical_alignment = 1
 
 [node name="DuraklatDugme" type="Button" parent="Arayuz/Ust" unique_id=520818897]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(44, 40)
+custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"Kucuk"
+theme_override_font_sizes/font_size = 12
 text = "II"
 
 [node name="Ipucu" type="Label" parent="Arayuz" unique_id=336599138]
@@ -222,17 +179,14 @@ unique_name_in_owner = true
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -240.0
-offset_top = 64.0
-offset_right = 240.0
-offset_bottom = 124.0
-theme_override_font_sizes/font_size = 13
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
-text = "Zıplamak için dokun / Boşluk
-Basılı tut: daha yüksek • Havada bir kez daha zıpla
-Kırmızı tabelanın altında KISA zıpla"
+offset_left = -280.0
+offset_top = 56.0
+offset_right = 280.0
+offset_bottom = 76.0
+theme_type_variation = &"Etiket"
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.9607843, 0.92941177, 0.99607843, 1)
+text = "Zıpla: Boşluk ya da dokun"
 horizontal_alignment = 1
 
 [node name="GorevBildirimi" type="Label" parent="Arayuz" unique_id=1121209428]
@@ -241,13 +195,12 @@ anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -300.0
-offset_top = 46.0
+offset_top = 40.0
 offset_right = 300.0
-offset_bottom = 66.0
-theme_override_font_sizes/font_size = 14
-theme_override_colors/font_color = Color(0.3882353, 0.78039217, 0.3019608, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
+offset_bottom = 58.0
+theme_type_variation = &"Baslik"
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.99215686, 0.17254902, 0.53333336, 1)
 horizontal_alignment = 1
 
 [node name="TekrarEtiketi" type="Label" parent="Arayuz" unique_id=104957620]
@@ -261,16 +214,23 @@ offset_left = -300.0
 offset_top = -40.0
 offset_right = 300.0
 offset_bottom = -16.0
-theme_override_font_sizes/font_size = 14
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 6
+theme_type_variation = &"Etiket"
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.9607843, 0.92941177, 0.99607843, 1)
 text = "Ölüm tekrarı  •  geçmek için dokun"
 horizontal_alignment = 1
 
+[node name="DuraklatPerde" type="ColorRect" parent="Arayuz" unique_id=1980701316]
+unique_name_in_owner = true
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.07058824, 0.050980393, 0.12156863, 0.6)
+
 [node name="DuraklatPaneli" type="PanelContainer" parent="Arayuz" unique_id=509238509]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(260, 0)
+custom_minimum_size = Vector2(250, 0)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -278,36 +238,106 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_wee8i")
+theme_type_variation = &"KagitKart"
 
 [node name="Kutu" type="VBoxContainer" parent="Arayuz/DuraklatPaneli" unique_id=1728382373]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 alignment = 1
 
-[node name="DuraklatBaslik" type="Label" parent="Arayuz/DuraklatPaneli/Kutu" unique_id=1318775394]
+[node name="DuraklatEtiket" type="Label" parent="Arayuz/DuraklatPaneli/Kutu" unique_id=1458353490]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
-text = "Duraklatıldı"
-horizontal_alignment = 1
+theme_type_variation = &"KartEtiket"
+theme_override_font_sizes/font_size = 8
+theme_override_colors/font_color = Color(0.07058824, 0.050980393, 0.12156863, 0.65)
+text = "DURAKLATILDI"
 
 [node name="DevamDugme" type="Button" parent="Arayuz/DuraklatPaneli/Kutu" unique_id=399666387]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 44)
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"Birincil"
 text = "Devam"
 
-[node name="MenuDugme" type="Button" parent="Arayuz/DuraklatPaneli/Kutu" unique_id=386735483]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(200, 44)
+[node name="DurSatir" type="HBoxContainer" parent="Arayuz/DuraklatPaneli/Kutu" unique_id=1257497346]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Menüye Dön"
+theme_override_constants/separation = 6
+
+[node name="BastanDugme" type="Button" parent="Arayuz/DuraklatPaneli/Kutu/DurSatir" unique_id=1560898684]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"KartDugme"
+text = "Baştan"
+
+[node name="DurAyarDugme" type="Button" parent="Arayuz/DuraklatPaneli/Kutu/DurSatir" unique_id=937155611]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"KartDugme"
+text = "Ayarlar"
+
+[node name="MenuDugme" type="Button" parent="Arayuz/DuraklatPaneli/Kutu/DurSatir" unique_id=1080852248]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"KartDugme"
+text = "Menü"
+
+[node name="DurAyarlar" type="VBoxContainer" parent="Arayuz/DuraklatPaneli/Kutu" unique_id=760458763]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="@HBoxContainer@2" type="HBoxContainer" parent="Arayuz/DuraklatPaneli/Kutu/DurAyarlar" unique_id=1866055648]
+layout_mode = 2
+
+[node name="DurMuzikEtiket" type="Label" parent="Arayuz/DuraklatPaneli/Kutu/DurAyarlar/@HBoxContainer@2" unique_id=1880961712]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+theme_type_variation = &"KartYazi"
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.07058824, 0.050980393, 0.12156863, 1)
+text = "Müzik"
+
+[node name="DurMuzik" type="HSlider" parent="Arayuz/DuraklatPaneli/Kutu/DurAyarlar/@HBoxContainer@2" unique_id=1890471338]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+step = 5.0
+
+[node name="@HBoxContainer@3" type="HBoxContainer" parent="Arayuz/DuraklatPaneli/Kutu/DurAyarlar" unique_id=1866055649]
+layout_mode = 2
+
+[node name="DurEfektEtiket" type="Label" parent="Arayuz/DuraklatPaneli/Kutu/DurAyarlar/@HBoxContainer@3" unique_id=334017808]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+theme_type_variation = &"KartYazi"
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.07058824, 0.050980393, 0.12156863, 1)
+text = "Efektler"
+
+[node name="DurEfekt" type="HSlider" parent="Arayuz/DuraklatPaneli/Kutu/DurAyarlar/@HBoxContainer@3" unique_id=1948223498]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+step = 5.0
+
+[node name="DurDilDugme" type="Button" parent="Arayuz/DuraklatPaneli/Kutu/DurAyarlar" unique_id=1403455408]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_type_variation = &"KartDugme"
+text = "Dil: Türkçe"
 
 [node name="SonPaneli" type="PanelContainer" parent="Arayuz" unique_id=761004133]
 unique_name_in_owner = true
@@ -319,7 +349,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_xi6hm")
+theme_type_variation = &"KagitKart"
 
 [node name="Kutu" type="VBoxContainer" parent="Arayuz/SonPaneli" unique_id=1550314525]
 layout_mode = 2
@@ -329,20 +359,18 @@ alignment = 1
 [node name="SonBaslik" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=1410117458]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
-text = "Koşu bitti"
+theme_type_variation = &"KartEtiket"
+theme_override_font_sizes/font_size = 8
+theme_override_colors/font_color = Color(0.07058824, 0.050980393, 0.12156863, 0.65)
+text = "KOŞU BİTTİ"
 horizontal_alignment = 1
 
 [node name="SonSkor" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=1993613979]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
+theme_type_variation = &"KartBaslik"
+theme_override_font_sizes/font_size = 30
+theme_override_colors/font_color = Color(0.07058824, 0.050980393, 0.12156863, 1)
 text = "Mesafe: 0 m"
 horizontal_alignment = 1
 
@@ -351,25 +379,23 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(340, 26)
 layout_mode = 2
 mouse_filter = 2
-script = ExtResource("9_lfd6f")
+script = ExtResource("8_n01t3")
 
 [node name="SonRekor" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=1363345951]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
-theme_override_colors/font_color = Color(0.99607843, 0.90588236, 0.38039216, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
+theme_type_variation = &"KartBaslik"
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.99215686, 0.17254902, 0.53333336, 1)
 text = "Rekor: 0 m"
 horizontal_alignment = 1
 
 [node name="SonAltin" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=1343446452]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
+theme_type_variation = &"KartEtiket"
+theme_override_font_sizes/font_size = 8
+theme_override_colors/font_color = Color(0.07058824, 0.050980393, 0.12156863, 0.65)
 text = "Altın: 0"
 horizontal_alignment = 1
 
@@ -379,26 +405,25 @@ visible = false
 custom_minimum_size = Vector2(340, 36)
 layout_mode = 2
 mouse_filter = 2
-script = ExtResource("10_t7fvk")
+script = ExtResource("9_bevm8")
 
 [node name="SonGorevler" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=1512153346]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.7529412, 0.79607844, 0.8627451, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
+theme_type_variation = &"KartEtiket"
+theme_override_font_sizes/font_size = 8
+theme_override_colors/font_color = Color(0.07058824, 0.050980393, 0.12156863, 0.65)
 
 [node name="Dugmeler" type="HBoxContainer" parent="Arayuz/SonPaneli/Kutu" unique_id=953774497]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 alignment = 1
 
 [node name="TekrarDugme" type="Button" parent="Arayuz/SonPaneli/Kutu/Dugmeler" unique_id=1264014699]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 36)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"Birincil"
 text = "Tekrar"
 
 [node name="PaylasDugme" type="Button" parent="Arayuz/SonPaneli/Kutu/Dugmeler" unique_id=250047820]
@@ -406,7 +431,7 @@ unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(110, 36)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"KartDugme"
 text = "Paylaş"
 
 [node name="GecikmeDugme" type="Button" parent="Arayuz/SonPaneli/Kutu/Dugmeler" unique_id=74188023]
@@ -414,32 +439,22 @@ unique_name_in_owner = true
 visible = false
 custom_minimum_size = Vector2(110, 36)
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_type_variation = &"KartDugme"
 text = "Gecikme"
 
 [node name="SonMenuDugme" type="Button" parent="Arayuz/SonPaneli/Kutu/Dugmeler" unique_id=1708625895]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 36)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_type_variation = &"KartDugme"
 text = "Menü"
 
 [node name="SonIpucu" type="Label" parent="Arayuz/SonPaneli/Kutu" unique_id=1353078466]
 unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.6)
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
-theme_override_colors/font_color = Color(0.54509807, 0.60784316, 0.7058824, 1)
-theme_override_colors/font_outline_color = Color(0.13333334, 0.1254902, 0.20392157, 1)
-theme_override_constants/outline_size = 4
+theme_type_variation = &"KartEtiket"
+theme_override_font_sizes/font_size = 8
+theme_override_colors/font_color = Color(0.07058824, 0.050980393, 0.12156863, 0.65)
 text = "Tekrar için dokun ya da Boşluk"
 horizontal_alignment = 1
-
-[node name="Gecis" type="CanvasLayer" parent="." unique_id=1294678457]
-layer = 100
-
-[node name="Perde" type="ColorRect" parent="Gecis" unique_id=335903771]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_filter = 2
-color = Color(0.094, 0.078, 0.145, 0)

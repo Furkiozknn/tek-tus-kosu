@@ -5,8 +5,8 @@ extends Control
 ## Yalnız çizim; sayım `kutula()` ile saf hesap (testlenir).
 
 const UZAK_MS := 150.0
-const KUTU_ADLARI := ["çok erken", "erken", "tam", "geç", "çok geç"]
-const RENKLER := [Color("8b9bb4"), Color("c0cbdc"), Color("fee761"), Color("c0cbdc"), Color("8b9bb4")]
+const KUTU_ADLARI := ["çok erken", "erken", "tam", "geç", "çok geç"]   ## çeviri anahtarı (Ceviri.t)
+const RENKLER := [Color("8d84a6"), Color("f5edfe"), Color("fd2c88"), Color("f5edfe"), Color("8d84a6")]
 const BOY := 36.0   ## sahnedeki en küçük yükseklik; panel sığmazsa oyun.gd grafiği gizler
 
 var sayilar: Array[int] = [0, 0, 0, 0, 0]
@@ -56,8 +56,8 @@ func _draw() -> void:
 	for s in sayilar:
 		en_cok = maxi(en_cok, s)
 	var kutu_w := w / 5.0
-	var font := get_theme_default_font()
-	draw_rect(Rect2(0, taban, w, 1), Color("5a6988"))
+	var font := get_theme_font("font", "Etiket")
+	draw_rect(Rect2(0, taban, w, 1), Color(Tema.KAGIT, 0.25))
 	for i in 5:
 		var x0 := kutu_w * i
 		var oran := float(sayilar[i]) / float(en_cok)
@@ -66,12 +66,12 @@ func _draw() -> void:
 		if sayilar[i] > 0:
 			draw_rect(cubuk, RENKLER[i])
 		else:
-			draw_rect(Rect2(x0 + 8.0, taban - 1.0, kutu_w - 16.0, 1.0), Color("5a6988"))
+			draw_rect(Rect2(x0 + 8.0, taban - 1.0, kutu_w - 16.0, 1.0), Color(Tema.KAGIT, 0.25))
 		if sayili:
 			var sayi := str(sayilar[i])
 			var sw := font.get_string_size(sayi, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x
-			draw_string(font, Vector2(x0 + (kutu_w - sw) * 0.5, taban - boy - 2.0), sayi, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, RENKLER[i] if sayilar[i] > 0 else Color("5a6988"))
+			draw_string(font, Vector2(x0 + (kutu_w - sw) * 0.5, taban - boy - 2.0), sayi, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, RENKLER[i] if sayilar[i] > 0 else Color(Tema.KAGIT, 0.25))
 		if isimli:
-			var ad: String = KUTU_ADLARI[i]
+			var ad: String = Ceviri.t(KUTU_ADLARI[i])
 			var aw := font.get_string_size(ad, HORIZONTAL_ALIGNMENT_LEFT, -1, 8).x
-			draw_string(font, Vector2(x0 + (kutu_w - aw) * 0.5, h - 1.0), ad, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color("8b9bb4"))
+			draw_string(font, Vector2(x0 + (kutu_w - aw) * 0.5, h - 1.0), ad, HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Tema.SOLUK)
