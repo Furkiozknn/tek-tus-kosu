@@ -351,6 +351,8 @@ indirmeden projeyi tarıyor ve bulguları SARIF olarak kod taramaya yüklüyor.
 üretilir; MIT onları da kapsar. Tek istisna `assets/fonts/simgeler.ttf`: DejaVu Sans Bold'un simge
 alt kümesi, **Bitstream Vera** lisansı altında dağıtılır — bildirim `assets/fonts/LISANS-simgeler.txt`.
 
+Claude Code ile yapıldı; commit geçmişindeki `Co-Authored-By` izleri kullanılan modelleri gösterir. Oyun döngüsü: [`scripts/oyun.gd`](scripts/oyun.gd).
+
 ---
 
 ## Bu ekosistemden başka projeler
