@@ -31,7 +31,7 @@
     "rhythm-game",
     "turkce"
   ],
-  "summary": "One-button endless rooftop runner in Godot 4: a rhythm mode that lays every obstacle on the music beat grid, plus a post-run timing histogram. Turkish UI.",
+  "summary": "One-button endless rooftop runner in Godot 4: a rhythm mode that lays every obstacle on the music beat grid, plus a post-run timing histogram. Turkish and English UI.",
   "key_features": [
     "One-button endless rooftop runner: the only input is when to press",
     "Rhythm mode lays every obstacle on the music's beat grid instead of a random spacer",
