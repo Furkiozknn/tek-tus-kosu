@@ -57,6 +57,11 @@ const EN := {
 	"Ses gecikmesi": "Audio delay",
 	"Vuruşları geç duyuyorsan (bluetooth kulaklık) artır.": "Raise this if you hear beats late (bluetooth headphones).",
 	"Zıplama vuruşundan önce tık sesi": "Click sound before a jump beat",
+	# --- rhythm practice ---
+	"Pratik: ölünce geri sar (kayıt yok)": "Practice: rewind on death (no records)",
+	"Ölünce koşu bitmez: son güvenli vuruşa geri sarılır. Rekor, görev ve başarım yazılmaz. Günün ritminde kapalı.": "A death does not end the run: it rewinds to the last safe beat. No records, missions or achievements are saved. Off in the daily rhythm.",
+	"PRATİK · kayıt yok · tekrar %d": "PRACTICE · nothing saved · retry %d",
+	"Pratik · tekrar %d": "Practice · retry %d",
 	"Seçili": "Selected",
 	"Seç": "Select",
 	"Satın al: %d altın": "Buy: %d gold",

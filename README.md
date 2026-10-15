@@ -57,6 +57,19 @@ notları [Releases](https://github.com/Furkiozknn/tek-tus-kosu/releases) sayfas�
   zıplamaların sapmasını beş kutuya sayar (|x| ≤ 70 ms tam; 70–150 erken/geç; > 150 çok erken/çok geç) ve çubuklarla
   çizer; yalnız ritimde ve zıplama varsa görünür. Başarımlar: "Metronom" (tek koşuda 100 tam vuruş, koşu içinde
   duyurulur), "Üç şarkı" (üç şarkı rekoru da ≥ 300 m), "Ritim müdavimi" (`gunluk_ritim_gecmis` ≥ 5 gün).
+- **Ritim pratiği:** Geometry Dash'in pratik kipi ve Rhythm Doctor'ın "ölmeden çalış"
+  yaklaşımı örnek alındı. Ritim panelindeki **Pratik: ölünce geri sar (kayıt yok)** kutusu
+  açıkken ölmek koşuyu bitirmez: oyuncu, ölümden en az 1 sn önce (`Ritim.PRATIK_GERI_SN`)
+  canlı olarak koştuğu son yere geri sarılır (`Ritim.pratik_konumu`, oyuncunun kendi
+  `gecmis` kaydından; o noktada zaten yaşamıştı, yani güvenli). Oradan sonraki zıplama
+  vuruşları yeniden değerlendirilir, müzik yeni konuma hemen sarılır, seri sıfırlanır.
+  - Üst etikette `PRATİK · kayıt yok · tekrar N` yazar.
+  - Rekor, ölüm işareti, görev, başarım ve koşu sayısı **yazılmaz**; koşu duraklatma
+    menüsünden biter.
+  - Geri sarılan yer hep kurulu zeminde kalsın diye kamera arkasında bir ritim parçası
+    fazla tutulur.
+  - Kutu oturumluk (`Ritim.pratik_secili`, kayda yazılmaz), böylece unutulan bir pratik
+    kutusu sonraki gerçek koşunun rekorunu sessizce yemez. Günün ritminde yok sayılır.
 - **Şarkı önizleme ve günlük geçmiş (v1.6):** `Ses.onizle()` ayrı oynatıcıyla şarkının ilk 2 saniyesini çalar
   (`Ritim.ONIZLEME_SN`), menü müziği duraklar ve önizleme bitince/panelden çıkınca sürer. Günün ritmi her koşuda
   `gunluk_ritim_gecmis`'e yazılır (tarih, şarkı, rekor; 7 gün); panelde "Son günler: 21.09 Çatı 410 m · …".
