@@ -11,6 +11,9 @@ const VARSAYILAN := {
 	"rekor_ritim": 0,
 	"rekor_ritim2": 0,
 	"rekor_ritim3": 0,
+	"seri_ritim": 0,       ## longest perfect-hit streak per song (Ritim.SARKILAR[*].seri)
+	"seri_ritim2": 0,
+	"seri_ritim3": 0,
 	"toplam_altin": 0,
 	"kostum": "klasik",
 	"acik_kostumler": ["klasik"],
