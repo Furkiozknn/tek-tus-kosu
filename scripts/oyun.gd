@@ -24,6 +24,10 @@ var gunluk := false                   ## Günlük koşu (menüden Gunluk.secili 
 var ritim := false                    ## Ritim koşusu (menüden Ritim.secili ile gelir)
 var ritim_sarki := -1                 ## Ritim şarkısı (-1: menüden Ritim.sarki)
 var ritim_gunluk := false             ## Günün ritmi (tarihten tohum + şarkı; menüden Ritim.gunluk_secili)
+var ritim_pratik := false             ## Ritim pratiği: ölüm koşuyu bitirmez, güvenli vuruşa geri sarar, kayıt yok (Ritim.pratik_secili)
+var _pratik_tekrar := 0               ## practice: rewinds so far in this run
+var _pratik_dogus := Vector2.ZERO     ## practice: last respawn spot (run start at first)
+var _ritim_tum_olaylar := {}          ## practice: every jump beat of the run (evaluated ones too)
 
 ## Düz renkli dünya temaları (videodaki gece / şarap; hepsi tek renk gökyüzü + iki basamaklı siluet).
 ## "ust" = "alt" (degrade yok); "uzak"/"yakin" beyaz siluet dokusunu boyar.
@@ -149,6 +153,7 @@ func _ready() -> void:
 	du.dikey_oldu.connect(_dikey_oldu)
 	ritim = ritim or Ritim.secili
 	ritim_gunluk = ritim and (ritim_gunluk or Ritim.gunluk_secili)
+	ritim_pratik = ritim and not ritim_gunluk and (ritim_pratik or Ritim.pratik_secili)
 	if ritim_gunluk:
 		ritim_sarki = Ritim.gunun_sarkisi(Gunluk.bugun())
 	elif ritim_sarki < 0:
@@ -201,6 +206,9 @@ func yeniden_baslat() -> void:
 	var d := Kayit.yukle()
 	var ayar: Dictionary = d["ayarlar"]
 	rahat = bool(ayar["rahat"]) and not bot_modu and not gunluk and not ritim
+	_pratik_tekrar = 0
+	_pratik_dogus = Vector2(100.0, Ayarlar.ZEMIN_Y)   # same spot as oyuncu.sifirla below
+	_ritim_tum_olaylar.clear()
 	sarsinti_acik = bool(ayar["sarsinti"])
 	_titresim = bool(ayar.get("titresim", true))
 	Tehlike.kontrast = bool(ayar["kontrast"])
@@ -347,8 +355,9 @@ func _physics_process(delta: float) -> void:
 	_ogretme_adim()
 	_altin_seri = maxf(_altin_seri - delta, 0.0)
 	_gecisleri_say()
-	_gorevleri_denetle()
-	_basarimlari_denetle()
+	if not ritim_pratik:   # practice records nothing: no mission or achievement pop-ups either
+		_gorevleri_denetle()
+		_basarimlari_denetle()
 	_hayalet_adim()
 	_tema_guncelle(false)
 	if ritim:
@@ -636,7 +645,9 @@ func _parcalari_guncelle() -> void:
 			_ritim_parcasi_ekle()
 		else:
 			_parca_ekle(_parca_sec())
-	while not parcalar.is_empty() and parcalar[0].position.x + parcalar[0].uzunluk < sol - Ayarlar.PARCA_ARKADA_SIL:
+	# Practice keeps one extra rhythm piece behind the camera, so a rewind always lands on built ground.
+	var arka_pay := Ayarlar.PARCA_ARKADA_SIL + (Ritim.PARCA_OLCU * Ritim.OLCU * _adim if ritim_pratik else 0.0)
+	while not parcalar.is_empty() and parcalar[0].position.x + parcalar[0].uzunluk < sol - arka_pay:
 		parcalar.pop_front().queue_free()
 
 
@@ -694,6 +705,7 @@ func _ritim_parcasi_ekle() -> void:
 	_ritim_son = r[1]
 	for k in r[2]:
 		_ritim_olaylar[k] = true
+		_ritim_tum_olaylar[k] = true
 	_parca_yerlestir(r[0])
 
 
@@ -731,7 +743,7 @@ func _mesafe_vurgusu(m: int) -> void:
 		if not Gecis.sade():
 			_rozet_kalan = ROZET_SURESI
 			_rozet_pal = _palet()
-	if not _rekor_asildi and _rekor > 0 and m > _rekor and not bot_modu:
+	if not _rekor_asildi and _rekor > 0 and m > _rekor and not bot_modu and not ritim_pratik:
 		_rekor_asildi = true
 		_damga_hud.goster(tr("YENİ REKOR!"), _palet(), Vector2(get_viewport().get_visible_rect().size.x * 0.5, 84.0), Gecis.sade(), Vector2(0.5, 0.0))
 		get_tree().create_timer(1.8).timeout.connect(_damga_hud.gizle)
@@ -840,6 +852,9 @@ func _sarsinti_guncelle(delta: float) -> void:
 
 # ------------------------------------------------------------------ ölüm + tekrar
 func _oyuncu_oldu() -> void:
+	if ritim_pratik:
+		_pratik_geri_sar.call_deferred()   # not inside the hazard's physics callback
+		return
 	bitti = true
 	_yeniden_baslat_izni = 0.5
 	Ses.cal("olum")
@@ -853,6 +868,41 @@ func _oyuncu_oldu() -> void:
 		_tekrar_baslat()
 	else:
 		_son_paneli_goster()
+
+
+## Practice rewind: back to a spot the player ran through alive about a second before the
+## death (Ritim.pratik_konumu), jump beats from there on are armed again (so "Perfect"
+## feedback works on the retry), the music is moved to the new spot at once, and the
+## streak resets. Nothing is saved: the run only ends from the pause menu.
+func _pratik_geri_sar() -> void:
+	if bitti or not ritim_pratik:
+		return
+	var yer := Ritim.pratik_konumu(oyuncu.gecmis, oyuncu.global_position.x,
+		Ritim.HIZ * Ritim.PRATIK_GERI_SN, _pratik_dogus)
+	_pratik_dogus = yer
+	var x := yer.x
+	oyuncu.sifirla(yer)
+	oyuncu.hiz = _hiz_hesapla()
+	_pratik_tekrar += 1
+	_ritim_seri = 0
+	_ritim_vurus_k = -999999
+	var ilk_vurus := (x - _izgara0) / _adim - 0.5
+	for k in _ritim_tum_olaylar:
+		if float(k) >= ilk_vurus:
+			_ritim_olaylar[k] = true
+	var uzunluk := Ses.muzik_uzunlugu()
+	if Ses.muzik_konumu() >= 0.0 and uzunluk > 0.0:
+		var oyun_t := (x - _ritim_bas_x) / Ritim.HIZ
+		var hedef := fposmod(oyun_t, uzunluk)
+		_ritim_ses_tur = int(floor(oyun_t / uzunluk))
+		_ritim_ses_onceki = hedef
+		_ritim_kayma_kare = 0
+		Ses.muzik_sar(hedef)
+	rekor_etiketi.text = _rekor_metni(_rekor)
+	_kamera_guncelle()
+	Ses.cal("hata")
+	_flas()
+	_yazi(oyuncu.global_position + Vector2(0, -40), tr("Pratik · tekrar %d") % _pratik_tekrar, Tema.CAM)
 
 
 ## Ölümde kısa pembe flaş (140 ms, "flas" ailesi): geri bildirim; koşu yeniden başlarken mürekkepten açılır.
@@ -1127,6 +1177,8 @@ func _rekor_metni(r: int) -> String:
 		return tr("Günlük rekor: %d m") % r
 	if ritim_gunluk:
 		return tr("Günün ritmi rekoru: %d m") % r
+	if ritim_pratik:
+		return tr("PRATİK · kayıt yok · tekrar %d") % _pratik_tekrar
 	if ritim:
 		return tr("%s rekoru: %d m") % [tr(str(Ritim.SARKILAR[ritim_sarki]["ad"])), r]
 	return (tr("Rahat rekor: %d m") if rahat else tr("Rekor: %d m")) % r
