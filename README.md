@@ -45,6 +45,14 @@ notları [Releases](https://github.com/Furkiozknn/tek-tus-kosu/releases) sayfas�
 
 ## Oyun içeriği
 
+- **Seri kilometre taşları ve seri rekoru:** osu! ve Bit.Trip Runner'daki kombo geri bildirimi
+  gibi, ritim koşusunda art arda tam vuruş serisi (`_ritim_seri`) ×10, ×25, ×50 ve ×100'e
+  ulaşınca rekor damgasının altında `SERİ ×25!` damgası çıkar. Damga 1,2 sn kalır, hareket
+  azaltmada (sade geçiş) kıpırdamaz. Her basamakta biraz daha tiz bir `gorev` sesi çalar.
+  En az 10'luk bir seri bozulunca (erken/geç zıplama ya da kaçan vuruş) "Seri bitti ×N"
+  yazısı çıkar. Koşunun en uzun serisi sonuç satırında görünür (`Seri ×N`, şarkının yeni
+  rekoruysa `★`). Şarkı başına seri rekoru kayıtta tutulur (`seri_ritim`, `seri_ritim2`,
+  `seri_ritim3`; `Ritim.SARKILAR[i].seri`). Eşikler `Ritim.SERI_ESIKLERI`.
 - **Ritim koşusu (v0.6):** menüde **Ritim**. Hız sabit 300 px/sn, oyun müziği 150 BPM → her vuruş
   120 px. Engeller ölçü ölçü koddan üretilir; her engelin ideal zıplama anı bir vuruşa denk gelir.
   Çatı kenarındaki vuruş işaretleri müzikle nabız atar, zıplanacak vuruşlar ince pembe dikey çizgili ve oklu. Vuruşun ±70 ms
