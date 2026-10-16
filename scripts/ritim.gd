@@ -16,12 +16,16 @@ const ADIM := HIZ * VURUS_SN     ## ilk şarkının vuruş aralığı (px)
 ## 128,6 px) diken ×1,5: iki dikenli ölçüler (ikili, arka_vurus) ×2,25 — daha sık çift zıplama, daha az tavan.
 const SARKILAR := [
 	{"ad": "Gece Koşusu", "muzik": "muzik_oyun", "bpm": 150.0, "rekor": "rekor_ritim", "olumler": "olumler_ritim",
-		"agirlik": {}, "aciklama": "150 BPM · dengeli"},
+		"seri": "seri_ritim", "agirlik": {}, "aciklama": "150 BPM · dengeli"},
 	{"ad": "Çatı Neşesi", "muzik": "muzik_ritim2", "bpm": 22050.0 * 15.0 / 2584.0, "rekor": "rekor_ritim2", "olumler": "olumler_ritim2",
-		"agirlik": {"kisa": 2.2, "cukur": 0.7}, "aciklama": "128 BPM · daha çok alçak tavan"},
+		"seri": "seri_ritim2", "agirlik": {"kisa": 2.2, "cukur": 0.7}, "aciklama": "128 BPM · daha çok alçak tavan"},
 	{"ad": "Fırtına Hattı", "muzik": "muzik_ritim3", "bpm": 22050.0 * 15.0 / 2363.0, "rekor": "rekor_ritim3", "olumler": "olumler_ritim3",
-		"agirlik": {"diken": 1.5, "kisa": 0.6, "cukur": 0.8}, "aciklama": "140 BPM · sık ikili diken", "tema": 4},
+		"seri": "seri_ritim3", "agirlik": {"diken": 1.5, "kisa": 0.6, "cukur": 0.8}, "aciklama": "140 BPM · sık ikili diken", "tema": 4},
 ]
+## Perfect-hit streak milestones (osu!/Bit.Trip Runner-style combo feedback): reaching one
+## flashes a HUD stamp and plays a rising chime; a streak of at least the first milestone
+## that breaks says so. The longest streak per song is a record ("seri" key above).
+const SERI_ESIKLERI := [10, 25, 50, 100]
 const GECIKME_ARALIK := Vector2i(-150, 300)   ## oyuncu ses gecikmesi ayarı (ms)
 const ONERI_ESIK_MS := 25.0                    ## ortalama sapma bundan büyükse ayar önerilir
 const ONERI_EN_AZ := 6                         ## öneri için en az değerlendirilen zıplama

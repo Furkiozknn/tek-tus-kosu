@@ -41,6 +41,7 @@ func _calistir() -> void:
 	await _test_ritim()
 	await _test_gunun_ritmi()
 	await _test_v17_histogram_ve_basarimlar()
+	await _test_ritim_serisi()
 	await _test_ritim_desen_gecilebilirligi()
 	await _test_tema_ve_ceviri()
 	await _test_dil_kaydi()
@@ -1683,6 +1684,115 @@ func _test_ritim_desen_gecilebilirligi() -> void:
 				% [ad, Ritim.SARKILAR[sarki]["ad"], int(sonuc[2]), int(sonuc[1])])
 			oyun.queue_free()
 			await process_frame
+	_kayit_temizle()
+
+
+
+# ------------------------------------------------------------------ ritim serisi (kombo kilometre taşları)
+## Perfect-hit streak milestones: stamp + chime at 10/25/50/100, "streak over" on a
+## break, longest streak per song saved as a record and shown on the results line.
+func _test_ritim_serisi() -> void:
+	print("[ritim serisi]")
+	_kayit_temizle()
+	dogrula(Ritim.SERI_ESIKLERI == [10, 25, 50, 100], "seri eşikleri 10/25/50/100")
+	var anahtarlar := {}
+	for sk in Ritim.SARKILAR:
+		anahtarlar[str(sk["seri"])] = true
+		dogrula(Kayit.VARSAYILAN.has(sk["seri"]) and int(Kayit.VARSAYILAN[sk["seri"]]) == 0, "şarkının seri rekoru anahtarı var (%s)" % sk["ad"])
+	dogrula(anahtarlar.size() == Ritim.SARKILAR.size(), "her şarkının seri anahtarı ayrı")
+
+	# Kusursuz oyuncu: seri = tam vuruş sayısı, eşikler kutlanır.
+	var oyun := await _ritim_oyunu(0, 5, true)
+	var s: Array = await _ritim_oyna(oyun, 0.0, 60 * 30)
+	var en_uzun: int = oyun._ritim_en_uzun
+	var beklenen_kutlama := 0
+	for e in Ritim.SERI_ESIKLERI:
+		if en_uzun >= int(e):
+			beklenen_kutlama += 1
+	dogrula(s[0] and en_uzun == int(s[2]) and en_uzun >= 10, "kusursuz koşuda seri = tam vuruş sayısı (%d / %s)" % [en_uzun, str(s)])
+	dogrula(oyun._seri_kutlama_sayisi == beklenen_kutlama, "her eşik bir kez kutlandı (%d / %d)" % [oyun._seri_kutlama_sayisi, beklenen_kutlama])
+
+	# Damga: görünür, metni doğru; yeni kutlama eski zamanlayıcıdan etkilenmez.
+	oyun._seri_kutla(10)
+	var damga: Damga = oyun._damga_seri
+	dogrula(damga.visible and damga.yazi.text == "SERİ ×10!", "seri damgası görünüyor ('%s')" % damga.yazi.text)
+	await create_timer(0.8).timeout
+	oyun._seri_kutla(25)
+	await create_timer(0.6).timeout
+	dogrula(damga.visible and damga.yazi.text == "SERİ ×25!", "eski zamanlayıcı yeni damgayı gizlemedi")
+	await create_timer(0.8).timeout
+	dogrula(not damga.visible, "damga 1,2 sn sonra kayboldu")
+
+	# Seri kırılınca: sıfırlanır, uzun seride "Seri bitti ×N" yazısı.
+	oyun._ritim_seri = 12
+	oyun._seri_kirildi()
+	var bitti_yazisi := false
+	for c in oyun.efektler.get_children():
+		if c is Label and (c as Label).text == "Seri bitti ×12":
+			bitti_yazisi = true
+	dogrula(oyun._ritim_seri == 0 and bitti_yazisi, "kırılan uzun seri sıfırlanır ve 'Seri bitti ×12' yazar")
+	oyun._ritim_seri = 3
+	var once: int = oyun.efektler.get_child_count()
+	oyun._seri_kirildi()
+	dogrula(oyun.efektler.get_child_count() == once, "kısa seri sessizce sıfırlanır")
+
+	# Koşu sonu: rekor kaydı ve sonuç satırı.
+	oyun.oyuncu.ol("cukur")
+	await _kareler(3)
+	var d := Kayit.yukle()
+	dogrula(int(oyun.son_sonuc.get("ritim_seri", -1)) == en_uzun and int(d["seri_ritim"]) == en_uzun, "en uzun seri sonuca ve kayda yazıldı (%d)" % int(d["seri_ritim"]))
+	dogrula(bool(oyun.son_sonuc.get("ritim_seri_rekor", false)) and oyun.son_altin.text.contains("Seri ×%d ★" % en_uzun),
+		"sonuç satırında yeni seri rekoru ('%s')" % oyun.son_altin.text)
+	dogrula(int(d["seri_ritim2"]) == 0 and int(d["seri_ritim3"]) == 0, "öteki şarkıların seri rekoru değişmedi")
+	# Widest results line (3-digit values everywhere) still fits the 640x360 screen.
+	oyun.altin = 999
+	oyun.istatistik["ritim"] = 999
+	oyun.son_sonuc["ritim_seri"] = 999
+	oyun.son_sonuc["ritim_sapma"] = -149.0
+	oyun.son_sonuc["ritim_sapma_sayi"] = 9
+	oyun._son_paneli_goster()
+	await process_frame
+	await process_frame
+	var ekran: Rect2 = oyun.get_viewport().get_visible_rect()
+	dogrula(ekran.encloses(oyun.son_paneli.get_global_rect()), "en geniş sonuç satırıyla panel ekrana sığıyor (%s)" % str(oyun.son_paneli.get_global_rect()))
+	oyun.queue_free()
+	await process_frame
+
+	# Daha kısa ikinci koşu: rekor korunur, yıldız yok.
+	var o2 := await _ritim_oyunu(0, 5, true)
+	await _ritim_oyna(o2, 0.0, 60 * 9)
+	var kisa: int = o2._ritim_en_uzun
+	o2.oyuncu.ol("cukur")
+	await _kareler(3)
+	dogrula(kisa < en_uzun and int(Kayit.yukle()["seri_ritim"]) == en_uzun and not bool(o2.son_sonuc.get("ritim_seri_rekor", true)),
+		"kısa seri rekoru ezmez (%d < %d)" % [kisa, en_uzun])
+	dogrula(kisa <= 1 or (o2.son_altin.text.contains("Seri ×%d" % kisa) and not o2.son_altin.text.contains("★")), "rekorsuz seride yıldız yok ('%s')" % o2.son_altin.text)
+	o2.queue_free()
+	await process_frame
+
+	# Normal (ritimsiz) koşu sonuç satırında seri yok.
+	var normal: Node2D = (load(OYUN) as PackedScene).instantiate()
+	normal.kayit_yap = false
+	normal.olum_tekrari_acik = false
+	normal.tohum = 2
+	root.add_child(normal)
+	await _kareler(5)
+	normal.oyuncu.ol("cukur")
+	await _kareler(3)
+	dogrula(not normal.son_altin.text.contains("Seri"), "normal koşuda seri satırı yok")
+	normal.queue_free()
+	await process_frame
+
+	# İngilizce metinler.
+	Ceviri.zorla = "en"
+	Ceviri.dil_uygula()
+	var en_damga := TranslationServer.translate("SERİ ×%d!") % 50
+	var en_bitti := TranslationServer.translate("Seri bitti ×%d") % 30
+	var en_satir := TranslationServer.translate("   Seri ×%d") % 12
+	Ceviri.zorla = "tr"
+	Ceviri.dil_uygula()
+	dogrula(en_damga == "STREAK ×50!" and en_bitti == "Streak over ×30" and en_satir == "   Streak ×12",
+		"seri metinleri İngilizce (%s / %s / %s)" % [en_damga, en_bitti, en_satir])
 	_kayit_temizle()
 
 

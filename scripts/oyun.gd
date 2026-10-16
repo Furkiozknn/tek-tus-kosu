@@ -111,6 +111,10 @@ var _ritim_olcu := 0
 var _ritim_son := -1
 var _ritim_olaylar := {}                ## ritim: henüz değerlendirilmemiş zıplama vuruşları
 var _ritim_seri := 0
+var _ritim_en_uzun := 0                 ## ritim: longest perfect-hit streak of this run
+var _seri_kutlama_sayisi := 0           ## ritim: milestone stamps shown this run (test/stat)
+var _seri_kutlama_kusak := 0            ## ritim: bumps on each stamp so an older hide timer does nothing
+var _damga_seri: Damga                  ## ritim: "SERİ ×25!" stamp under the record stamp
 var _ritim_bas_x := 0.0                 ## ritim: müziğin başladığı andaki oyuncu x'i
 var _ritim_ses_onceki := -1.0            ## ritim: son okunan müzik konumu (döngü sayımı için)
 var _ritim_ses_tur := 0
@@ -174,6 +178,9 @@ func _ready() -> void:
 	_damga_son = Damga.new()
 	son_paneli.get_parent().add_child(_damga_hud)
 	son_paneli.get_parent().add_child(_damga_son)
+	_damga_seri = Damga.new()
+	_damga_seri.name = "SeriDamga"
+	son_paneli.get_parent().add_child(_damga_seri)
 
 	oyuncu.oldu.connect(_oyuncu_oldu)
 	oyuncu.ziplandi.connect(_ziplandi)
@@ -269,6 +276,10 @@ func yeniden_baslat() -> void:
 	_ritim_son = -1
 	_ritim_olaylar.clear()
 	_ritim_seri = 0
+	_ritim_en_uzun = 0
+	_seri_kutlama_sayisi = 0
+	_seri_kutlama_kusak += 1
+	_damga_seri.gizle()
 	_ritim_bas_x = baslangic_x
 	_ritim_ses_onceki = -1.0
 	_ritim_ses_tur = 0
@@ -469,12 +480,38 @@ func _ritim_degerlendir() -> void:
 	var yer := oyuncu.global_position + Vector2(0, -40)
 	if absf(ms) <= Ritim.TAM_VURUS_MS:
 		_ritim_seri += 1
+		_ritim_en_uzun = maxi(_ritim_en_uzun, _ritim_seri)
 		istatistik["ritim"] = int(istatistik["ritim"]) + 1
 		_yazi(yer, tr("Tam vuruş") + (" ×%d" % _ritim_seri if _ritim_seri > 1 else ""), Tema.PEMBE)
 		Ses.cal("tik", 1.0 + minf(_ritim_seri, 8) * 0.06)
+		if Ritim.SERI_ESIKLERI.has(_ritim_seri):
+			_seri_kutla(_ritim_seri)
 	else:
-		_ritim_seri = 0
+		_seri_kirildi()
 		_yazi(yer, "%s %d ms" % [tr("Erken") if ms < 0.0 else tr("Geç"), int(round(absf(ms)))], Tema.KAGIT)
+
+
+## Streak milestone: stamp under the record stamp, rising chime (one step per
+## milestone). Reduced motion keeps the stamp still (Damga handles "sade").
+func _seri_kutla(n: int) -> void:
+	_seri_kutlama_sayisi += 1
+	_seri_kutlama_kusak += 1
+	var kusak := _seri_kutlama_kusak
+	var basamak := Ritim.SERI_ESIKLERI.find(n)
+	Ses.cal("gorev", 1.0 + 0.12 * maxi(basamak, 0))
+	_damga_seri.goster(tr("SERİ ×%d!") % n, _palet(), Vector2(get_viewport().get_visible_rect().size.x * 0.5, 106.0),
+		Gecis.sade(), Vector2(0.5, 0.0))
+	get_tree().create_timer(1.2).timeout.connect(func() -> void:
+		if kusak == _seri_kutlama_kusak and is_instance_valid(_damga_seri):
+			_damga_seri.gizle())
+
+
+## A streak ends (off-beat jump or a missed jump beat). Long streaks get a short
+## "streak over" note so the loss is felt, not silent.
+func _seri_kirildi() -> void:
+	if _ritim_seri >= int(Ritim.SERI_ESIKLERI[0]) and not bitti:
+		_yazi(oyuncu.global_position + Vector2(0, -56), tr("Seri bitti ×%d") % _ritim_seri, Tema.KAGIT)
+	_ritim_seri = 0
 
 
 ## Ritim: müzik oyun zamanından kaydıysa (sekme gizlendi, uzun takılma) müziği oyuna göre sar.
@@ -534,7 +571,7 @@ func _ritim_kacanlar() -> void:
 	for k in _ritim_olaylar.keys():
 		if k < sinir:
 			_ritim_olaylar.erase(k)
-			_ritim_seri = 0
+			_seri_kirildi()
 
 
 func _ruzgar_etiketi_guncelle() -> void:
@@ -886,6 +923,9 @@ func _kosu_sonucunu_isle() -> void:
 	var yeni_rekor: bool = m > onceki_rekor
 	var gorev_sonuc := {"tamamlanan": [], "odul": 0, "seviye_atladi": false}
 	var basarimlar: Array = []
+	var onceki_seri := int(d.get(_ritim_anahtar("seri"), 0)) if ritim else 0
+	if kayit_yap and ritim:
+		d[_ritim_anahtar("seri")] = maxi(onceki_seri, _ritim_en_uzun)
 	if kayit_yap:
 		d[anahtar] = maxi(int(d[anahtar]), m)
 		d["toplam_altin"] = int(d["toplam_altin"]) + altin
@@ -923,6 +963,8 @@ func _kosu_sonucunu_isle() -> void:
 		son_sonuc["ritim_sapma"] = toplam / _ritim_sapmalar.size() if not _ritim_sapmalar.is_empty() else 0.0
 		son_sonuc["ritim_sapma_sayi"] = _ritim_sapmalar.size()
 		son_sonuc["ritim_sapmalar"] = _ritim_sapmalar.duplicate()   # v1.7: sonuç panelindeki histogram
+		son_sonuc["ritim_seri"] = _ritim_en_uzun
+		son_sonuc["ritim_seri_rekor"] = _ritim_en_uzun > onceki_seri and _ritim_en_uzun > 1
 		_gecikme_onerisi = Ritim.gecikme_onerisi(int(d["ayarlar"].get("ritim_gecikme", 0)), _ritim_sapmalar)
 	kosu_bitti.emit(m, altin)
 
@@ -1013,7 +1055,9 @@ func _son_paneli_goster() -> void:
 	var ek_odul := int(g.get("odul", 0)) + Ayarlar.BASARIM_ODULU * (s.get("basarimlar", []) as Array).size()
 	satirlar.append(tr("Altın: %d") % altin + (tr("   Ödül: +%d") % ek_odul if ek_odul > 0 else "")
 			+ (tr("   Tam vuruş: %d") % int(istatistik["ritim"]) if ritim else "")
-			+ (tr("   Ort. sapma: %+d ms") % int(round(float(s.get("ritim_sapma", 0.0)))) if ritim and int(s.get("ritim_sapma_sayi", 0)) > 0 else ""))
+			+ (tr("   Ort. sapma: %+d ms") % int(round(float(s.get("ritim_sapma", 0.0)))) if ritim and int(s.get("ritim_sapma_sayi", 0)) > 0 else "")
+			+ (tr("   Seri ×%d") % int(s.get("ritim_seri", 0)) + (" ★" if bool(s.get("ritim_seri_rekor", false)) else "")
+				if ritim and int(s.get("ritim_seri", 0)) > 1 else ""))
 	var yeni_basarimlar: Array = s.get("basarimlar", [])
 	if not yeni_basarimlar.is_empty():
 		satirlar.append("★ " + ", ".join(yeni_basarimlar.map(func(b: Dictionary) -> String: return tr(str(b["ad"])))))
