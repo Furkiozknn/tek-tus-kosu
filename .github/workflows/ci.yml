@@ -39,7 +39,7 @@ jobs:
     # sonsuza kadar bekler; 6 saatlik varsayilan yerine erken kirmizi.
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           # PNG/WAV/TTF Git LFS'te (.gitattributes). LFS cekilmezse
           # checkout yalnizca ~130 baytlik isaretci dosyalari getirir ve
@@ -86,7 +86,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # Test kapisinin kendi sinamasi: Godot gerektirmez, bu yuzden motoru
       # indirmeyen bu iste. Kapi bozulursa (ornegin SCRIPT ERROR aramasi
