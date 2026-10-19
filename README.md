@@ -257,6 +257,12 @@ godot --headless --fixed-fps 60 --path . -s res://tools/panel_olc.gd   # sonuç 
 Dışa aktarmadan önce hedef klasörler var olmalı (`mkdir -p build/web build/windows`), yoksa Godot
 "The given export path doesn't exist" der.
 
+```
+mkdir -p build/web build/windows
+godot --headless --path . --export-release "Windows Desktop" build/windows/tek-tus-kosu.exe
+godot --headless --path . --export-release "Web" build/web/index.html
+```
+
 Parça eklemek için `tools/sahne_uret.gd` içindeki `PARCALAR` listesini düzenle. Test, her parçayı
 kendi en düşük hızında ve en yüksek hızda (460 px/sn) bot ile koşturur; geçilemeyen parça testi
 düşürür. Tasarım kuralları: parça uçlarında 60 px güvenli zemin, yüksek bloklar parça başından en
