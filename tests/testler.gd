@@ -869,12 +869,16 @@ func _test_seri_ve_paylasim() -> void:
 	# Paylaşım metni
 	var m := Gunluk.paylasim_metni("2026-09-16", 475, 3, 950, false, 4)
 	var satir := m.split("\n")
-	dogrula(satir.size() == 4 and satir[0] == "Tek Tuş Koşu · Günlük 16.09.2026", "paylaşım başlığı: %s" % satir[0])
+	# ITCH_ADRESI doluysa metnin son satiri o baglantidir.
+	var itch_satir := 1 if Ayarlar.ITCH_ADRESI != "" else 0
+	dogrula(satir.size() == 4 + itch_satir and satir[0] == "Tek Tuş Koşu · Günlük 16.09.2026", "paylaşım başlığı: %s" % satir[0])
 	dogrula(satir[1] == "475 m · 3. deneme", "paylaşım mesafe satırı: %s" % satir[1])
 	dogrula(satir[2] == "■■■■■□□□□□  rekor 950 m", "paylaşım şeridi: %s" % satir[2])
 	dogrula(satir[3] == "Seri: 4 gün", "paylaşım seri satırı")
+	if itch_satir == 1:
+		dogrula(satir[satir.size() - 1] == Ayarlar.ITCH_ADRESI, "paylaşım metni itch.io bağlantısıyla bitmeli: %s" % satir[satir.size() - 1])
 	var m2 := Gunluk.paylasim_metni("2026-09-16", 1200, 1, 0, true, 1)
-	dogrula(m2.split("\n").size() == 3 and m2.contains("günün rekoru!") and m2.contains("■■■■■■■■■■") and not m2.contains("□"), "rekor koşusunun metni: %s" % m2)
+	dogrula(m2.split("\n").size() == 3 + itch_satir and m2.contains("günün rekoru!") and m2.contains("■■■■■■■■■■") and not m2.contains("□"), "rekor koşusunun metni: %s" % m2)
 	# Oyun içinde günlük sonuç paneli: Paylaş düğmesi, sığma, kopyalama
 	_kayit_temizle()
 	Gunluk.tarih_ezme = "2026-07-01"
