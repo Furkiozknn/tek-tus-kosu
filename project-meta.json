@@ -48,9 +48,9 @@
     "videos": []
   },
   "tests": {
-    "count": 1148,
-    "source": "CI log: `=== SONUÇ: 1148 geçti, 0 hata ===`",
-    "measured": "2026-09-29"
+    "count": 1189,
+    "source": "CI log: `=== SONUÇ: 1189 geçti, 0 hata ===`",
+    "measured": "2026-10-19"
   },
   "ci": {
     "workflows": [
