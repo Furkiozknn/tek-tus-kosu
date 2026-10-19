@@ -3,6 +3,7 @@
 # Tek Tuş Koşu
 
 <h3 align="center"><a href="https://furkiozknn.github.io/tek-tus-kosu/">Tarayıcıda oyna → furkiozknn.github.io/tek-tus-kosu</a></h3>
+<p align="center"><a href="https://furkiozknn.itch.io/tek-tus-kosu">itch.io sayfası / on itch.io → furkiozknn.itch.io/tek-tus-kosu</a></p>
 
 <p align="center"><img src="docs/reel/reel.gif" alt="tek-tus-kosu - 15 saniyelik tanıtım videosu" width="720"></p>
 <p align="center"><sub><a href="docs/reel/reel.mp4">Sesli MP4 sürümü</a></sub></p>
@@ -288,7 +289,7 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
   koşu zaten her zıplamanın sapmasını ölçüyor, tutarlı bir kayma varsa sonuçta tek dokunuşla düzeltiliyor.
 - **Oyun zamanı yetkili, müzik ona uyar:** fizik ve dünya belirlenimci kalsın diye kayma olunca oyun
   değil müzik sarılır.
-- **Paylaşımda bağlantı yok (şimdilik):** `Ayarlar.ITCH_ADRESI` boş; yayından sonra doldurulunca paylaşım metninin
+- **Paylaşımda itch.io bağlantısı:** `Ayarlar.ITCH_ADRESI` (https://furkiozknn.itch.io/tek-tus-kosu) paylaşım metninin
   son satırına eklenir.
 - **Günün ritmi ayrı tohum ve ayrı kayıt:** günlük koşuyla aynı tohumu paylaşsaydı iki kip aynı günü
   "tüketirdi"; ayrı tutunca iki günlük meydan okuma birbirini bozmadan yan yana duruyor. Hayaleti de ayrı
