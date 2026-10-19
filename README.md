@@ -3,6 +3,7 @@
 # Tek Tuş Koşu
 
 <h3 align="center"><a href="https://furkiozknn.github.io/tek-tus-kosu/">Tarayıcıda oyna → furkiozknn.github.io/tek-tus-kosu</a></h3>
+<p align="center"><a href="https://furkiozknn.itch.io/tek-tus-kosu">itch.io sayfası / on itch.io → furkiozknn.itch.io/tek-tus-kosu</a></p>
 
 <p align="center"><img src="docs/reel/reel.gif" alt="tek-tus-kosu - 15 saniyelik tanıtım videosu" width="720"></p>
 <p align="center"><sub><a href="docs/reel/reel.mp4">Sesli MP4 sürümü</a></sub></p>
@@ -45,6 +46,14 @@ notları [Releases](https://github.com/Furkiozknn/tek-tus-kosu/releases) sayfas�
 
 ## Oyun içeriği
 
+- **Seri kilometre taşları ve seri rekoru:** osu! ve Bit.Trip Runner'daki kombo geri bildirimi
+  gibi, ritim koşusunda art arda tam vuruş serisi (`_ritim_seri`) ×10, ×25, ×50 ve ×100'e
+  ulaşınca rekor damgasının altında `SERİ ×25!` damgası çıkar. Damga 1,2 sn kalır, hareket
+  azaltmada (sade geçiş) kıpırdamaz. Her basamakta biraz daha tiz bir `gorev` sesi çalar.
+  En az 10'luk bir seri bozulunca (erken/geç zıplama ya da kaçan vuruş) "Seri bitti ×N"
+  yazısı çıkar. Koşunun en uzun serisi sonuç satırında görünür (`Seri ×N`, şarkının yeni
+  rekoruysa `★`). Şarkı başına seri rekoru kayıtta tutulur (`seri_ritim`, `seri_ritim2`,
+  `seri_ritim3`; `Ritim.SARKILAR[i].seri`). Eşikler `Ritim.SERI_ESIKLERI`.
 - **Ritim koşusu (v0.6):** menüde **Ritim**. Hız sabit 300 px/sn, oyun müziği 150 BPM → her vuruş
   120 px. Engeller ölçü ölçü koddan üretilir; her engelin ideal zıplama anı bir vuruşa denk gelir.
   Çatı kenarındaki vuruş işaretleri müzikle nabız atar, zıplanacak vuruşlar ince pembe dikey çizgili ve oklu. Vuruşun ±70 ms
@@ -57,6 +66,19 @@ notları [Releases](https://github.com/Furkiozknn/tek-tus-kosu/releases) sayfas�
   zıplamaların sapmasını beş kutuya sayar (|x| ≤ 70 ms tam; 70–150 erken/geç; > 150 çok erken/çok geç) ve çubuklarla
   çizer; yalnız ritimde ve zıplama varsa görünür. Başarımlar: "Metronom" (tek koşuda 100 tam vuruş, koşu içinde
   duyurulur), "Üç şarkı" (üç şarkı rekoru da ≥ 300 m), "Ritim müdavimi" (`gunluk_ritim_gecmis` ≥ 5 gün).
+- **Ritim pratiği:** Geometry Dash'in pratik kipi ve Rhythm Doctor'ın "ölmeden çalış"
+  yaklaşımı örnek alındı. Ritim panelindeki **Pratik: ölünce geri sar (kayıt yok)** kutusu
+  açıkken ölmek koşuyu bitirmez: oyuncu, ölümden en az 1 sn önce (`Ritim.PRATIK_GERI_SN`)
+  canlı olarak koştuğu son yere geri sarılır (`Ritim.pratik_konumu`, oyuncunun kendi
+  `gecmis` kaydından; o noktada zaten yaşamıştı, yani güvenli). Oradan sonraki zıplama
+  vuruşları yeniden değerlendirilir, müzik yeni konuma hemen sarılır, seri sıfırlanır.
+  - Üst etikette `PRATİK · kayıt yok · tekrar N` yazar.
+  - Rekor, ölüm işareti, görev, başarım ve koşu sayısı **yazılmaz**; koşu duraklatma
+    menüsünden biter.
+  - Geri sarılan yer hep kurulu zeminde kalsın diye kamera arkasında bir ritim parçası
+    fazla tutulur.
+  - Kutu oturumluk (`Ritim.pratik_secili`, kayda yazılmaz), böylece unutulan bir pratik
+    kutusu sonraki gerçek koşunun rekorunu sessizce yemez. Günün ritminde yok sayılır.
 - **Şarkı önizleme ve günlük geçmiş (v1.6):** `Ses.onizle()` ayrı oynatıcıyla şarkının ilk 2 saniyesini çalar
   (`Ritim.ONIZLEME_SN`), menü müziği duraklar ve önizleme bitince/panelden çıkınca sürer. Günün ritmi her koşuda
   `gunluk_ritim_gecmis`'e yazılır (tarih, şarkı, rekor; 7 gün); panelde "Son günler: 21.09 Çatı 410 m · …".
@@ -273,7 +295,7 @@ az 360 px içeride, alçak tavanın alt kenarı y=212 (kısa sıçrama sığar, 
   koşu zaten her zıplamanın sapmasını ölçüyor, tutarlı bir kayma varsa sonuçta tek dokunuşla düzeltiliyor.
 - **Oyun zamanı yetkili, müzik ona uyar:** fizik ve dünya belirlenimci kalsın diye kayma olunca oyun
   değil müzik sarılır.
-- **Paylaşımda bağlantı yok (şimdilik):** `Ayarlar.ITCH_ADRESI` boş; yayından sonra doldurulunca paylaşım metninin
+- **Paylaşımda itch.io bağlantısı:** `Ayarlar.ITCH_ADRESI` (https://furkiozknn.itch.io/tek-tus-kosu) paylaşım metninin
   son satırına eklenir.
 - **Günün ritmi ayrı tohum ve ayrı kayıt:** günlük koşuyla aynı tohumu paylaşsaydı iki kip aynı günü
   "tüketirdi"; ayrı tutunca iki günlük meydan okuma birbirini bozmadan yan yana duruyor. Hayaleti de ayrı

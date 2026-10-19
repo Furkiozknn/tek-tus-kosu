@@ -37,9 +37,11 @@ func _calistir() -> void:
 	await _test_kostum_izi()
 	await _test_ruzgar()
 	await _test_dikey_uyari()
+	await _test_ritim_pratik()
 	await _test_ritim()
 	await _test_gunun_ritmi()
 	await _test_v17_histogram_ve_basarimlar()
+	await _test_ritim_serisi()
 	await _test_ritim_desen_gecilebilirligi()
 	await _test_tema_ve_ceviri()
 	await _test_dil_kaydi()
@@ -867,12 +869,16 @@ func _test_seri_ve_paylasim() -> void:
 	# Paylaşım metni
 	var m := Gunluk.paylasim_metni("2026-09-16", 475, 3, 950, false, 4)
 	var satir := m.split("\n")
-	dogrula(satir.size() == 4 and satir[0] == "Tek Tuş Koşu · Günlük 16.09.2026", "paylaşım başlığı: %s" % satir[0])
+	# ITCH_ADRESI doluysa metnin son satiri o baglantidir.
+	var itch_satir := 1 if Ayarlar.ITCH_ADRESI != "" else 0
+	dogrula(satir.size() == 4 + itch_satir and satir[0] == "Tek Tuş Koşu · Günlük 16.09.2026", "paylaşım başlığı: %s" % satir[0])
 	dogrula(satir[1] == "475 m · 3. deneme", "paylaşım mesafe satırı: %s" % satir[1])
 	dogrula(satir[2] == "■■■■■□□□□□  rekor 950 m", "paylaşım şeridi: %s" % satir[2])
 	dogrula(satir[3] == "Seri: 4 gün", "paylaşım seri satırı")
+	if itch_satir == 1:
+		dogrula(satir[satir.size() - 1] == Ayarlar.ITCH_ADRESI, "paylaşım metni itch.io bağlantısıyla bitmeli: %s" % satir[satir.size() - 1])
 	var m2 := Gunluk.paylasim_metni("2026-09-16", 1200, 1, 0, true, 1)
-	dogrula(m2.split("\n").size() == 3 and m2.contains("günün rekoru!") and m2.contains("■■■■■■■■■■") and not m2.contains("□"), "rekor koşusunun metni: %s" % m2)
+	dogrula(m2.split("\n").size() == 3 + itch_satir and m2.contains("günün rekoru!") and m2.contains("■■■■■■■■■■") and not m2.contains("□"), "rekor koşusunun metni: %s" % m2)
 	# Oyun içinde günlük sonuç paneli: Paylaş düğmesi, sığma, kopyalama
 	_kayit_temizle()
 	Gunluk.tarih_ezme = "2026-07-01"
@@ -1685,6 +1691,115 @@ func _test_ritim_desen_gecilebilirligi() -> void:
 	_kayit_temizle()
 
 
+
+# ------------------------------------------------------------------ ritim serisi (kombo kilometre taşları)
+## Perfect-hit streak milestones: stamp + chime at 10/25/50/100, "streak over" on a
+## break, longest streak per song saved as a record and shown on the results line.
+func _test_ritim_serisi() -> void:
+	print("[ritim serisi]")
+	_kayit_temizle()
+	dogrula(Ritim.SERI_ESIKLERI == [10, 25, 50, 100], "seri eşikleri 10/25/50/100")
+	var anahtarlar := {}
+	for sk in Ritim.SARKILAR:
+		anahtarlar[str(sk["seri"])] = true
+		dogrula(Kayit.VARSAYILAN.has(sk["seri"]) and int(Kayit.VARSAYILAN[sk["seri"]]) == 0, "şarkının seri rekoru anahtarı var (%s)" % sk["ad"])
+	dogrula(anahtarlar.size() == Ritim.SARKILAR.size(), "her şarkının seri anahtarı ayrı")
+
+	# Kusursuz oyuncu: seri = tam vuruş sayısı, eşikler kutlanır.
+	var oyun := await _ritim_oyunu(0, 5, true)
+	var s: Array = await _ritim_oyna(oyun, 0.0, 60 * 30)
+	var en_uzun: int = oyun._ritim_en_uzun
+	var beklenen_kutlama := 0
+	for e in Ritim.SERI_ESIKLERI:
+		if en_uzun >= int(e):
+			beklenen_kutlama += 1
+	dogrula(s[0] and en_uzun == int(s[2]) and en_uzun >= 10, "kusursuz koşuda seri = tam vuruş sayısı (%d / %s)" % [en_uzun, str(s)])
+	dogrula(oyun._seri_kutlama_sayisi == beklenen_kutlama, "her eşik bir kez kutlandı (%d / %d)" % [oyun._seri_kutlama_sayisi, beklenen_kutlama])
+
+	# Damga: görünür, metni doğru; yeni kutlama eski zamanlayıcıdan etkilenmez.
+	oyun._seri_kutla(10)
+	var damga: Damga = oyun._damga_seri
+	dogrula(damga.visible and damga.yazi.text == "SERİ ×10!", "seri damgası görünüyor ('%s')" % damga.yazi.text)
+	await create_timer(0.8).timeout
+	oyun._seri_kutla(25)
+	await create_timer(0.6).timeout
+	dogrula(damga.visible and damga.yazi.text == "SERİ ×25!", "eski zamanlayıcı yeni damgayı gizlemedi")
+	await create_timer(0.8).timeout
+	dogrula(not damga.visible, "damga 1,2 sn sonra kayboldu")
+
+	# Seri kırılınca: sıfırlanır, uzun seride "Seri bitti ×N" yazısı.
+	oyun._ritim_seri = 12
+	oyun._seri_kirildi()
+	var bitti_yazisi := false
+	for c in oyun.efektler.get_children():
+		if c is Label and (c as Label).text == "Seri bitti ×12":
+			bitti_yazisi = true
+	dogrula(oyun._ritim_seri == 0 and bitti_yazisi, "kırılan uzun seri sıfırlanır ve 'Seri bitti ×12' yazar")
+	oyun._ritim_seri = 3
+	var once: int = oyun.efektler.get_child_count()
+	oyun._seri_kirildi()
+	dogrula(oyun.efektler.get_child_count() == once, "kısa seri sessizce sıfırlanır")
+
+	# Koşu sonu: rekor kaydı ve sonuç satırı.
+	oyun.oyuncu.ol("cukur")
+	await _kareler(3)
+	var d := Kayit.yukle()
+	dogrula(int(oyun.son_sonuc.get("ritim_seri", -1)) == en_uzun and int(d["seri_ritim"]) == en_uzun, "en uzun seri sonuca ve kayda yazıldı (%d)" % int(d["seri_ritim"]))
+	dogrula(bool(oyun.son_sonuc.get("ritim_seri_rekor", false)) and oyun.son_altin.text.contains("Seri ×%d ★" % en_uzun),
+		"sonuç satırında yeni seri rekoru ('%s')" % oyun.son_altin.text)
+	dogrula(int(d["seri_ritim2"]) == 0 and int(d["seri_ritim3"]) == 0, "öteki şarkıların seri rekoru değişmedi")
+	# Widest results line (3-digit values everywhere) still fits the 640x360 screen.
+	oyun.altin = 999
+	oyun.istatistik["ritim"] = 999
+	oyun.son_sonuc["ritim_seri"] = 999
+	oyun.son_sonuc["ritim_sapma"] = -149.0
+	oyun.son_sonuc["ritim_sapma_sayi"] = 9
+	oyun._son_paneli_goster()
+	await process_frame
+	await process_frame
+	var ekran: Rect2 = oyun.get_viewport().get_visible_rect()
+	dogrula(ekran.encloses(oyun.son_paneli.get_global_rect()), "en geniş sonuç satırıyla panel ekrana sığıyor (%s)" % str(oyun.son_paneli.get_global_rect()))
+	oyun.queue_free()
+	await process_frame
+
+	# Daha kısa ikinci koşu: rekor korunur, yıldız yok.
+	var o2 := await _ritim_oyunu(0, 5, true)
+	await _ritim_oyna(o2, 0.0, 60 * 9)
+	var kisa: int = o2._ritim_en_uzun
+	o2.oyuncu.ol("cukur")
+	await _kareler(3)
+	dogrula(kisa < en_uzun and int(Kayit.yukle()["seri_ritim"]) == en_uzun and not bool(o2.son_sonuc.get("ritim_seri_rekor", true)),
+		"kısa seri rekoru ezmez (%d < %d)" % [kisa, en_uzun])
+	dogrula(kisa <= 1 or (o2.son_altin.text.contains("Seri ×%d" % kisa) and not o2.son_altin.text.contains("★")), "rekorsuz seride yıldız yok ('%s')" % o2.son_altin.text)
+	o2.queue_free()
+	await process_frame
+
+	# Normal (ritimsiz) koşu sonuç satırında seri yok.
+	var normal: Node2D = (load(OYUN) as PackedScene).instantiate()
+	normal.kayit_yap = false
+	normal.olum_tekrari_acik = false
+	normal.tohum = 2
+	root.add_child(normal)
+	await _kareler(5)
+	normal.oyuncu.ol("cukur")
+	await _kareler(3)
+	dogrula(not normal.son_altin.text.contains("Seri"), "normal koşuda seri satırı yok")
+	normal.queue_free()
+	await process_frame
+
+	# İngilizce metinler.
+	Ceviri.zorla = "en"
+	Ceviri.dil_uygula()
+	var en_damga := TranslationServer.translate("SERİ ×%d!") % 50
+	var en_bitti := TranslationServer.translate("Seri bitti ×%d") % 30
+	var en_satir := TranslationServer.translate("   Seri ×%d") % 12
+	Ceviri.zorla = "tr"
+	Ceviri.dil_uygula()
+	dogrula(en_damga == "STREAK ×50!" and en_bitti == "Streak over ×30" and en_satir == "   Streak ×12",
+		"seri metinleri İngilizce (%s / %s / %s)" % [en_damga, en_bitti, en_satir])
+	_kayit_temizle()
+
+
 ## `desenler` verilirse ritim ölçüleri AĞACA GİRMEDEN önce kilitlenir. Sonradan
 ## atamak yetmiyordu: `_ready` ilk parçaları hemen üretiyor, yani koşunun ilk
 ## ölçüleri rastgele kalıyor ve orada gelen bir ölçüde ölüm, sınanan desene
@@ -1735,6 +1850,124 @@ func _ritim_oyna(oyun: Node2D, gecikme: float, kare_sayisi: int, taban := NAN) -
 			o.zipla_bas()
 			birak = 1 if tavan else 24
 	return [o.canli, olay_sayisi, int(oyun.istatistik["ritim"]), oyun.mesafe()]
+
+# ------------------------------------------------------------------ ritim pratiği (ölüm yok, geri sarma)
+## Rhythm practice: a death rewinds to a spot the player ran through alive >= 1 s
+## earlier, perfect play survives from there, nothing is saved, the daily rhythm
+## ignores the flag, and the menu check box drives the session-only flag.
+func _test_ritim_pratik() -> void:
+	print("[ritim pratiği]")
+	_kayit_temizle()
+	# Ritim.pratik_konumu: pure function over the player's history.
+	var g: Array = []
+	for i in 120:
+		g.append([Vector2(1000.0 + i * 5.0, Ayarlar.ZEMIN_Y), &"kos" if i % 10 < 7 else &"zipla", 0])
+	var olum_x := 1000.0 + 119 * 5.0
+	var yedek := Vector2(100.0, Ayarlar.ZEMIN_Y)
+	var p1 := Ritim.pratik_konumu(g, olum_x, 300.0, yedek)
+	dogrula(is_equal_approx(p1.x, 1280.0), "pratik: ≥ 300 px gerideki son yerde koşma karesi seçilir (%.0f)" % p1.x)
+	var kisa := g.slice(100)
+	dogrula(Ritim.pratik_konumu(kisa, olum_x, 300.0, yedek) == yedek, "pratik: geçmiş kısaysa önceki doğuş noktası")
+	var p3 := Ritim.pratik_konumu(kisa, olum_x, 300.0, Vector2(5000.0, Ayarlar.ZEMIN_Y))
+	dogrula(is_equal_approx(p3.x, 1500.0), "pratik: son çare geçmişin en eski koşma karesi (%.0f)" % p3.x)
+
+	# Off by default: a rhythm death ends the run as before.
+	Ritim.pratik_secili = false
+	var normal := await _ritim_oyunu(0, 5, false)
+	dogrula(not normal.ritim_pratik, "pratik varsayılan kapalı")
+	normal.oyuncu.ol("cukur")
+	await _kareler(2)
+	dogrula(normal.bitti, "pratik kapalıyken ölüm koşuyu bitirir")
+	normal.queue_free()
+	await process_frame
+
+	# Practice run: perfect play, then no input until a hazard kills the player.
+	Ritim.pratik_secili = true
+	var oyun := await _ritim_oyunu(0, 5, true)
+	dogrula(oyun.ritim_pratik and oyun.rekor_etiketi.text.contains("PRATİK"), "pratik koşusu açık, üst etiket PRATİK ('%s')" % oyun.rekor_etiketi.text)
+	var s1: Array = await _ritim_oyna(oyun, 0.0, 60 * 12)
+	dogrula(s1[0] and oyun._pratik_tekrar == 0, "pratikte kusursuz oyuncu geri sarılmaz")
+	var olumler: Array = []
+	oyun.oyuncu.oldu.connect(func() -> void: olumler.append(oyun.oyuncu.global_position.x))
+	for i in 60 * 8:
+		await physics_frame
+		if oyun._pratik_tekrar > 0:
+			break
+	await physics_frame
+	var yeni_x: float = oyun.oyuncu.global_position.x
+	var zemin_var := false
+	for pc in oyun.parcalar:
+		if yeni_x >= pc.position.x and yeni_x <= pc.position.x + pc.uzunluk:
+			zemin_var = true
+	dogrula(oyun._pratik_tekrar == 1 and not oyun.bitti and oyun.oyuncu.canli and not oyun.son_paneli.visible,
+		"pratikte ölüm koşuyu bitirmez, geri sarar (tekrar %d)" % oyun._pratik_tekrar)
+	dogrula(not olumler.is_empty() and float(olumler[0]) - yeni_x >= Ritim.HIZ * Ritim.PRATIK_GERI_SN - Ritim.HIZ / 30.0 and zemin_var,
+		"geri sarma en az 1 sn geriye (ölçüm bir kare sonra), kurulu zemine (%s → %.0f)" % [str(olumler), yeni_x])
+	dogrula(oyun.rekor_etiketi.text.contains("1"), "üst etiket tekrar sayısını gösteriyor ('%s')" % oyun.rekor_etiketi.text)
+	var s2: Array = await _ritim_oyna(oyun, 0.0, 60 * 10)
+	dogrula(s2[0] and oyun._pratik_tekrar == 1 and int(s2[2]) > int(s1[2]),
+		"geri sarıldıktan sonra kusursuz oyuncu yaşar, tam vuruşlar yeniden sayılır (%s)" % str(s2))
+	var d := Kayit.yukle()
+	dogrula(int(d["kosu_sayisi"]) == 0 and int(d["rekor_ritim"]) == 0 and (d["olumler_ritim"] as Array).is_empty() and (d["basarimlar"] as Array).is_empty(),
+		"pratik hiçbir şey kaydetmez (koşu, rekor, ölüm, başarım)")
+	oyun.queue_free()
+	await process_frame
+
+	# Robustness: forced deaths at arbitrary moments in the other two songs.
+	for sarki in [1, 2]:
+		var o := await _ritim_oyunu(sarki, 7 + sarki, false)
+		await _ritim_oyna(o, 0.0, 60 * 14)
+		var hepsi := true
+		for n in 3:
+			o.oyuncu.ol("cukur")
+			await _kareler(2)
+			var sn: Array = await _ritim_oyna(o, 0.0, 60 * 6)
+			hepsi = hepsi and sn[0] and not o.bitti
+		dogrula(hepsi and o._pratik_tekrar == 3, "şarkı %d: üç zorla ölümden sonra da kusursuz oyuncu yaşar (tekrar %d)" % [sarki, o._pratik_tekrar])
+		o.queue_free()
+		await process_frame
+
+	# Daily rhythm ignores the flag.
+	var gunluk: Node2D = (load(OYUN) as PackedScene).instantiate()
+	gunluk.ritim = true
+	gunluk.ritim_gunluk = true
+	gunluk.kayit_yap = false
+	gunluk.olum_tekrari_acik = false
+	root.add_child(gunluk)
+	await process_frame
+	dogrula(not gunluk.ritim_pratik, "günün ritminde pratik kapalı")
+	gunluk.queue_free()
+	await process_frame
+	Ritim.pratik_secili = false
+
+	# Menu: check box right under the tick-sound box, drives the flag, panel fits, EN text.
+	var menu: Control = (load("res://scenes/menu.tscn") as PackedScene).instantiate()
+	root.add_child(menu)
+	await process_frame
+	var kutu := menu.find_child("PratikKutu", true, false) as CheckButton
+	var ipucu := menu.get_node("%IpucuSesiKutu") as CheckButton
+	dogrula(kutu != null and kutu.get_index() == ipucu.get_index() + 1 and not kutu.button_pressed,
+		"menü: pratik kutusu tık sesi kutusunun altında, kapalı")
+	if kutu != null:
+		kutu.button_pressed = true
+		dogrula(Ritim.pratik_secili, "menü: kutu pratiği açar")
+		kutu.button_pressed = false
+		dogrula(not Ritim.pratik_secili, "menü: kutu pratiği kapatır")
+	menu._panel_ac(menu.get_node("%RitimPaneli"), false)
+	await process_frame
+	var panel := menu.get_node("%RitimPaneli") as Control
+	dogrula(panel.get_viewport().get_visible_rect().encloses(panel.get_global_rect()), "menü: ritim paneli ekrana sığıyor (%s)" % str(panel.get_global_rect()))
+	menu.queue_free()
+	await process_frame
+	var menu_betik: GDScript = load("res://scripts/menu.gd")
+	var sabit: Dictionary = menu_betik.get_script_constant_map()
+	var eksik := PackedStringArray()
+	for k in [sabit["PRATIK_METNI"], sabit["PRATIK_IPUCU"], "PRATİK · kayıt yok · tekrar %d", "Pratik · tekrar %d"]:
+		if not Ceviri.EN.has(str(k)):
+			eksik.append(str(k))
+	dogrula(eksik.is_empty(), "pratik metinleri İngilizce tabloda (%s)" % "; ".join(eksik))
+	_kayit_temizle()
+
 
 # ------------------------------------------------------------------ yenileme: tema, dil, menü, duraklat, oyun sonu, öğretme
 func _metin_dosyalari(klasor: String = "res://") -> Array[String]:

@@ -16,12 +16,16 @@ const ADIM := HIZ * VURUS_SN     ## ilk şarkının vuruş aralığı (px)
 ## 128,6 px) diken ×1,5: iki dikenli ölçüler (ikili, arka_vurus) ×2,25 — daha sık çift zıplama, daha az tavan.
 const SARKILAR := [
 	{"ad": "Gece Koşusu", "muzik": "muzik_oyun", "bpm": 150.0, "rekor": "rekor_ritim", "olumler": "olumler_ritim",
-		"agirlik": {}, "aciklama": "150 BPM · dengeli"},
+		"seri": "seri_ritim", "agirlik": {}, "aciklama": "150 BPM · dengeli"},
 	{"ad": "Çatı Neşesi", "muzik": "muzik_ritim2", "bpm": 22050.0 * 15.0 / 2584.0, "rekor": "rekor_ritim2", "olumler": "olumler_ritim2",
-		"agirlik": {"kisa": 2.2, "cukur": 0.7}, "aciklama": "128 BPM · daha çok alçak tavan"},
+		"seri": "seri_ritim2", "agirlik": {"kisa": 2.2, "cukur": 0.7}, "aciklama": "128 BPM · daha çok alçak tavan"},
 	{"ad": "Fırtına Hattı", "muzik": "muzik_ritim3", "bpm": 22050.0 * 15.0 / 2363.0, "rekor": "rekor_ritim3", "olumler": "olumler_ritim3",
-		"agirlik": {"diken": 1.5, "kisa": 0.6, "cukur": 0.8}, "aciklama": "140 BPM · sık ikili diken", "tema": 4},
+		"seri": "seri_ritim3", "agirlik": {"diken": 1.5, "kisa": 0.6, "cukur": 0.8}, "aciklama": "140 BPM · sık ikili diken", "tema": 4},
 ]
+## Perfect-hit streak milestones (osu!/Bit.Trip Runner-style combo feedback): reaching one
+## flashes a HUD stamp and plays a rising chime; a streak of at least the first milestone
+## that breaks says so. The longest streak per song is a record ("seri" key above).
+const SERI_ESIKLERI := [10, 25, 50, 100]
 const GECIKME_ARALIK := Vector2i(-150, 300)   ## oyuncu ses gecikmesi ayarı (ms)
 const ONERI_ESIK_MS := 25.0                    ## ortalama sapma bundan büyükse ayar önerilir
 const ONERI_EN_AZ := 6                         ## öneri için en az değerlendirilen zıplama
@@ -36,6 +40,35 @@ const ONIZLEME_SN := 2.0         ## v1.6: menüde şarkı önizleme süresi
 static var secili := false
 static var sarki := 0
 static var gunluk_secili := false
+## Practice (Geometry Dash practice mode / Rhythm Doctor-style no-fail): a death
+## rewinds to a safe beat instead of ending the run, and nothing is recorded.
+## Session-only on purpose (menu check box): a forgotten practice flag must
+## never silently eat the next real run's record. Ignored in the daily rhythm.
+static var pratik_secili := false
+
+
+const PRATIK_GERI_SN := 1.0      ## practice rewinds at least this much running time before the death
+
+
+## Practice respawn spot, taken from the player's own recent history (Oyuncu.gecmis:
+## [position, animation, frame] per physics frame): the latest frame spent running on
+## the ground ("kos") at least `geri_px` before the death. The player stood there alive
+## a moment ago, so the spot is safe by construction, whatever the hazard type, and
+## `geri_px` (one second of running) leaves time to react to what killed them.
+## When the history does not reach back that far (a death right after a rewind clears
+## it), the previous respawn spot `yedek` is reused: it was chosen with the same margin.
+## Last resort: the oldest grounded frame before the death.
+static func pratik_konumu(gecmis: Array, olum_x: float, geri_px: float, yedek: Vector2) -> Vector2:
+	for i in range(gecmis.size() - 1, -1, -1):
+		var k: Array = gecmis[i]
+		if str(k[1]) == "kos" and (k[0] as Vector2).x <= olum_x - geri_px:
+			return k[0]
+	if yedek.x < olum_x:
+		return yedek
+	for k in gecmis:
+		if str(k[1]) == "kos" and (k[0] as Vector2).x < olum_x:
+			return (k as Array)[0]
+	return yedek
 
 
 # ------------------------------------------------------------------ v0.8: günün ritmi
