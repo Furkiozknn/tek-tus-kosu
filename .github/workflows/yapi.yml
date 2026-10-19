@@ -152,8 +152,12 @@ jobs:
           name: tek-tus-kosu-web
           path: web
 
-      # enablement: true -- depoda Pages hic acilmamissa bu adim aciyor,
-      # yani ayarlara elle girmek gerekmiyor.
+      # enablement: true, Pages'i KENDISI ACAMAZ. actions/configure-pages
+      # bunun icin GITHUB_TOKEN disinda bir jeton ister (PAT: repo kapsami
+      # ya da Pages yazma izni); burada varsayilan GITHUB_TOKEN kullaniliyor.
+      # Pages kapaliysa bu adim hata verip isi dusurur (tek kosu boyle
+      # 8 sn'de dustu). Pages'i bir kez elle ac: Settings > Pages > Source:
+      # "GitHub Actions". Acikken bu ayar zararsiz, sadece kontrol eder.
       - uses: actions/configure-pages@v5
         with:
           enablement: true
